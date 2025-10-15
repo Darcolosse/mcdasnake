@@ -1,16 +1,32 @@
+import { GameManager } from '../GameManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 
-export class Display{
+export interface DisplayManagerProps {
+  canvas : HTMLCanvasElement,
+  boxSize : number,
+}
+
+export class DisplayManager{
+
+    private gameManager: GameManager;
 
     private entities : Map<number, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
     private canvas! : HTMLCanvasElement; // canvas ou est affiché le jeu
     private ctx : CanvasRenderingContext2D | null = null; // pinceau permettant d'afficher le jeu
     private boxSize : number = 0; // taille en pixel des cases
     private modifiedboxes : Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
+
+    constructor(gameManager: GameManager) {
+        this.gameManager = gameManager
+    }
     
-    constructor(canvas : HTMLCanvasElement, boxSize : number){
+    public initialize({ canvas, boxSize } : DisplayManagerProps) {
         this.boxSize = boxSize;
         this.setCanvas(canvas);
+    }
+    
+    public destroy() {
+
     }
 
     // ============================ Set ============================ \\

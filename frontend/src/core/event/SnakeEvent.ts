@@ -1,3 +1,5 @@
+import { EventManager } from "./EventManager";
+
 export class SnakeEvent{
 
     public static UP: number = 0;
@@ -16,11 +18,10 @@ export class SnakeEvent{
     private threshold: number = 100; // nombre de pixel à parcourir avec son doigt pour tourner
     private start : number[] = []; // point [x,y] ou le doigt est posé
 
-    private mediator : object; // classe permettant d'interagir avec le serveur
-
+    private eventManager : EventManager; // classe permettant d'interagir avec le serveur
     
-    constructor(mediator : object){
-        this.mediator = mediator;
+    constructor(eventManager: EventManager){
+        this.eventManager = eventManager
         this.listen();
     }
 
@@ -60,6 +61,7 @@ export class SnakeEvent{
      */
     public changeDirection(direction : number) : void {
         // TODO (call this.mediator)
+        this.eventManager.raiseEvent("todo")
     }
 
     // ============================ Evenement Clavier ============================ \\
