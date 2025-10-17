@@ -2,7 +2,6 @@ import { DisplayManager, type EntityServer } from "./display/DisplayManager"
 import { EventManager } from "./event/EventManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
 import { GameUpdateRequestDTO } from "./network/dto/requests/GameUpdateRequest";
-import type { GameUpdateResponseDTO } from "./network/dto/responses/GameUpdateResponse";
 import { NetworkManager } from "./network/NetworkManager";
 
 export class GameManager {
