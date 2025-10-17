@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { GameManager } from '../core/GameManager';
+import { ref, onMounted } from 'vue'
+import { GameManager } from '../core/GameManager'
 
-const gameManager: GameManager = new GameManager();
+const gameManager = new GameManager()
+const canvasRef = ref<HTMLCanvasElement | null>(null)
 
 onMounted(() => {
-  gameManager.start()
+  gameManager.start(canvasRef.value)
 })
 </script>
 
 <template>
-  <canvas id="game" class="w-screen h-screen">
-  </canvas>
+  <canvas ref="canvasRef" id="game" class="w-screen h-screen"></canvas>
 </template>
 
-<style scoped>
-</style>
