@@ -1,4 +1,4 @@
-import { DisplayManager, type EntityServer } from "./display/DisplayManager"
+import { DisplayManager, type EntityServer, type EntityType } from "./display/DisplayManager"
 import { EventManager } from "./event/EventManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
 import { GameUpdateRequestDTO } from "./network/dto/requests/GameUpdateRequest";
@@ -36,8 +36,8 @@ export class GameManager {
     this.displayManager.initialize(canvas as HTMLCanvasElement);
     this.displayManager.setboxSize(20);
     this.displayManager.setEntities([
-      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]]},
-      {"id": 2, "boxes":[[3,6]]},
+      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]], "type": "SNAKE" as EntityType},
+      {"id": 2, "boxes":[[3,6]], "type": "APPLE" as EntityType},
     ] as EntityServer[]);
     this.displayManager.startLoop();
   }

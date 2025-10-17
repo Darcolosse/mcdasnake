@@ -1,11 +1,15 @@
 import { GameManager } from '../GameManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
+import { SnakeDisplayed } from './SnakeDisplayed.ts';
+
+export type EntityType = "SNAKE" | "APPLE" | "ENTITY";
 
 // interface utilisé pour les entités données par le serveur
 export interface EntityServer {
   id: number;
   boxes: [[number,number]];
+  type: EntityType
 }
 
 export class DisplayManager {
@@ -19,18 +23,25 @@ export class DisplayManager {
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
 
-    constructor(gameManager: GameManager) {
-        this.gameManager = gameManager
-    }
-    
-    public initialize({ canvas, boxSize } : DisplayManagerProps) {
-        this.boxSize = boxSize;
-        this.setCanvas(canvas);
-    }
-    
-    public destroy() {
+  constructor(gameManager: GameManager) {
+    this.gameManager = gameManager
+    this.loop = this.loop.bind(this); // bind obligatoire
+  }
 
-    }
+  public initialize(canvas: HTMLCanvasElement) {
+    console.log("bonjour alexis");
+
+    this.setCanvas(canvas);
+    this.synchronizeCanvasToCSS();
+
+    window.addEventListener('resize', this.handleResize.bind(this));
+    window.addEventListener('orientationchange', this.handleResize.bind(this));
+  }
+
+  public destroy() {
+    this.canvas = null;
+    this.ctx = null;
+  }
 
   // ============================ Set ============================ \\
 
@@ -61,15 +72,22 @@ export class DisplayManager {
     enities.forEach(entity => {
       const entityBoxes = entity.boxes;
       const entityID = entity.id;
+      const entityType = entity.type;
 
-      if (entityID && entityBoxes) {
-        const entityObject = new EntityDisplayed(
-          this,
-          entityBoxes,
-          200,
-          new Design("green"),
-          0
-        );
+
+
+      if (entityID && entityBoxes && entityType) {
+        let entityObject: EntityDisplayed;
+        switch (entityType) {
+          case ("SNAKE" as EntityType):
+            entityObject = new SnakeDisplayed(this, entityBoxes, 3000, new Design("green"), 0);
+            break;
+
+        
+          default:
+            entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("green"), 0);
+            break;
+        }
         this.setEntity(entityID, entityObject);
       }
     });
@@ -80,8 +98,9 @@ export class DisplayManager {
    * @param entity objet représentant l'entité
    */
   public setEntity(id: number, entity: EntityDisplayed): void {
-    if (this.entities[id]) {
-      this.entities[id].clear();
+    const oldEntity = this.entities.get(id) as EntityDisplayed;
+    if (oldEntity) {
+      oldEntity.clear();
     }
     this.entities.set(id,entity);
   }
@@ -93,7 +112,7 @@ export class DisplayManager {
    */
   public getCtx(): CanvasRenderingContext2D {
     if (!this.ctx) {
-      throw new Error("Contexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.");
+      throw new Error("ContsetEntitiesexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.");
     }
     return this.ctx
   }
@@ -105,23 +124,34 @@ export class DisplayManager {
     return this.boxSize;
   }
 
-    // ============================ Methodes publiques de case modifié ============================ \\
-    
-    /**
-     * Vérifie si une case à été effacé pendant l'animation
-     * @param coordinate Coordonnée de la case à vérifier
-     * @returns si la case à été effacé ou non
-     */
-    public existeModifiedBox(coordinate : number[]): boolean{
-        return this.modifiedboxes.has(coordinate.join("_"));
+  // ============================ Methodes publiques ============================ \\
+
+  /**
+   * Vérifie si une case à été effacé pendant l'animation
+   * @param coordinate Coordonnée de la case à vérifier
+   * @returns si la case à été effacé ou non
+   */
+  public existeModifiedBox(coordinate: number[]): boolean {
+    return this.modifiedboxes.has(coordinate.join("_"));
+  }
+
+  public startLoop() : void{
+    if (!this.inLoop){
+      this.inLoop = true;
+      this.loop();
     }
+  }
+
+  public stopLoop() : void{
+    this.inLoop = false;
+  }
 
   // ============================ Méthodes d'affichage ============================ \\
 
   /**
    * Efface une case de la grille de jeu
    */
-  public clearBox(coordinate: number[]): void {
+  public clearBox(coordinate: [number, number]): void {
     if (!this.existeModifiedBox(coordinate)) {
       this.getCtx().clearRect(
         coordinate[0] * this.getBoxSize(),
@@ -133,45 +163,85 @@ export class DisplayManager {
     }
   }
 
-    /**
-     * Update entièrement la grille de jeu
-     */
-    public show() : void{
-        this.getCtx().clearRect(0, 0, this.canvas.width, this.canvas.height);
-        for (const entity of this.entities.values()) {
-            entity.setFullAnimation(true);
-            entity.animate();
-        };
+  /**
+   * Update entièrement la grille de jeu
+   */
+  public show(): void {
+    if (this.canvas !== null) {
+      this.getCtx().clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.entities.forEach((entity : EntityDisplayed, id : number) => {
+        entity.setFullAnimation(true);
+        entity.animate(Date.now());
+      });
+    }
+  }
+
+  /**
+   * Update les partie qui ont changé sur la grille de jeu
+   */
+  public animate(): void {
+    this.clearModifiedboxes();
+    this.entities.forEach((entity : EntityDisplayed) => {
+      entity.clearChange(Date.now());
+    });
+    this.entities.forEach((entity : EntityDisplayed) => {
+      entity.animate();
+    });
+    this.clearModifiedboxes();
+  };
+
+  // ============================ Methodes privées de case modifié ============================ \\
+
+  /**
+   * Signal qu'une case à été effacé
+   * @param coordinate coordonnée de la case effacée
+   */
+  private addModifiedbox(coordinate: number[]): void {
+    this.modifiedboxes.add(coordinate.join(","));
+  }
+
+  /**
+   * reset l'attribut modifiedboxes, pour indiquer qu'ancune case n'a été effacé
+   */
+  private clearModifiedboxes(): void {
+    this.modifiedboxes = new Set();
+  }
+  /**
+   * La boucle de jeu
+   */
+  private loop() {
+    this.animate();
+    if (this.inLoop){
+      setTimeout(this.loop, 1000 / 10);
+    }
+  }
+
+  // ============================ CSS ============================ \\
+
+  private resizeTimeout: number | null = null;
+  
+  private handleResize() {
+    if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+    this.resizeTimeout = window.setTimeout(() => {
+      this.synchronizeCanvasToCSS();
+    }, 200); 
+  }
+  
+  private synchronizeCanvasToCSS() {
+    if(!this.canvas || !this.ctx) {
+      this.gameManager.raiseError("Tried synchronize canvas' scale to css realtime scale on a non initialized canvas.")
+      return
     }
 
-    /**
-     * Update les partie qui ont changé sur la grille de jeu
-     */
-    public animate() : void{
-        this.clearModifiedboxes();
-        for (const entity of this.entities.values()) {
-            entity.clearChange();
-        };
-        for (const entity of this.entities.values()) {
-            entity.animate(Date.now());
-        };
-        this.clearModifiedboxes();
-    };
+    console.log(this.canvas.width)
+    console.log(this.canvas.height)
+    const realtimeRect = this.canvas.getBoundingClientRect()
+    const ratio = window.devicePixelRatio || 1
+    console.log(this.canvas.width)
+    console.log(this.canvas.height)
 
-    // ============================ Methodes privées de case modifié ============================ \\
+    this.canvas.width = realtimeRect.width * ratio
+    this.canvas.height = realtimeRect.height * ratio;
+  }
 
-    /**
-     * Signal qu'une case à été effacé
-     * @param coordinate coordonnée de la case effacée
-     */
-    private addModifiedbox(coordinate : number[]) : void{
-        this.modifiedboxes.add(coordinate.join(","));
-    }
-
-    /**
-     * reset l'attribut modifiedboxes, pour indiquer qu'ancune case n'a été effacé
-     */
-    private clearModifiedboxes() : void{
-        this.modifiedboxes = new Set();
-    }
 }
