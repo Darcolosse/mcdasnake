@@ -26,21 +26,21 @@ export class GameManager {
         this.eventManager.startListening()
         this.networkManager.emit(new GameUpdateRequestDTO())
       })
-      //this.test(canvas);
+      this.test(canvas);
     } else {
       this.raiseError("Canvas element not found. Couldn't start the game.")
     }
   }
 
-  // public test(canvas : HTMLCanvasElement){
-  //   this.displayManager.initialize(canvas as HTMLCanvasElement);
-  //   this.displayManager.setboxSize(20);
-  //   this.displayManager.setEntities([
-  //     {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]]},
-  //     {"id": 2, "boxes":[[3,6]]},
-  //   ] as EntityServer[]);
-  //   this.displayManager.startLoop();
-  // }
+  public test(canvas : HTMLCanvasElement){
+    this.displayManager.initialize(canvas as HTMLCanvasElement);
+    this.displayManager.setboxSize(20);
+    this.displayManager.setEntities([
+      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]]},
+      {"id": 2, "boxes":[[3,6]]},
+    ] as EntityServer[]);
+    this.displayManager.startLoop();
+  }
 
   public close() {
     this.eventManager.stopListening()

@@ -19,20 +19,18 @@ export class DisplayManager {
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
 
-  constructor(gameManager: GameManager) {
-    this.gameManager = gameManager
-    this.loop = this.loop.bind(this); // bind obligatoire
-  }
+    constructor(gameManager: GameManager) {
+        this.gameManager = gameManager
+    }
+    
+    public initialize({ canvas, boxSize } : DisplayManagerProps) {
+        this.boxSize = boxSize;
+        this.setCanvas(canvas);
+    }
+    
+    public destroy() {
 
-  public initialize(canvas: HTMLCanvasElement) {
-    this.setCanvas(canvas);
-    console.log("bonjour alexis");
-  }
-
-  public destroy() {
-    this.canvas = null;
-    this.ctx = null;
-  }
+    }
 
   // ============================ Set ============================ \\
 
@@ -107,35 +105,16 @@ export class DisplayManager {
     return this.boxSize;
   }
 
-  // ============================ Methodes publiques ============================ \\
-
-  /**
-   * Vérifie si une case à été effacé pendant l'animation
-   * @param coordinate Coordonnée de la case à vérifier
-   * @returns si la case à été effacé ou non
-   */
-  public existeModifiedBox(coordinate: number[]): boolean {
-    return this.modifiedboxes.has(coordinate.join(","));
-  }
-
-  /**
-   * Signal qu'une case à été effacé
-   * @param coordinate coordonnée de la case effacée
-   */
-  public addModifiedbox(coordinate: number[]): void {
-    this.modifiedboxes.add(coordinate.join(","));
-  }
-
-  public startLoop() : void{
-    if (!this.inLoop){
-      this.inLoop = true;
-      this.loop();
+    // ============================ Methodes publiques de case modifié ============================ \\
+    
+    /**
+     * Vérifie si une case à été effacé pendant l'animation
+     * @param coordinate Coordonnée de la case à vérifier
+     * @returns si la case à été effacé ou non
+     */
+    public existeModifiedBox(coordinate : number[]): boolean{
+        return this.modifiedboxes.has(coordinate.join("_"));
     }
-  }
-
-  public stopLoop() : void{
-    this.inLoop = false;
-  }
 
   // ============================ Méthodes d'affichage ============================ \\
 
@@ -154,51 +133,45 @@ export class DisplayManager {
     }
   }
 
-  /**
-   * Update entièrement la grille de jeu
-   */
-  public show(): void {
-    if (this.canvas !== null) {
-      this.getCtx().clearRect(0, 0, this.canvas.width, this.canvas.height);
-      const moment = Date.now()
-      this.entities.forEach((entity : EntityDisplayed, id : number) => {
-        entity.setFullAnimation(true);
-        entity.animate(moment);
-      });
+    /**
+     * Update entièrement la grille de jeu
+     */
+    public show() : void{
+        this.getCtx().clearRect(0, 0, this.canvas.width, this.canvas.height);
+        for (const entity of this.entities.values()) {
+            entity.setFullAnimation(true);
+            entity.animate();
+        };
     }
-  }
 
-  /**
-   * Update les partie qui ont changé sur la grille de jeu
-   */
-  public animate(): void {
-    this.clearModifiedboxes();
+    /**
+     * Update les partie qui ont changé sur la grille de jeu
+     */
+    public animate() : void{
+        this.clearModifiedboxes();
+        for (const entity of this.entities.values()) {
+            entity.clearChange();
+        };
+        for (const entity of this.entities.values()) {
+            entity.animate(Date.now());
+        };
+        this.clearModifiedboxes();
+    };
 
-    const moment = Date.now()
-    this.entities.forEach((entity : EntityDisplayed) => {
-      entity.clearChange(moment);
-    });
-    this.entities.forEach((entity : EntityDisplayed) => {
-      entity.animate();
-    });
-    this.clearModifiedboxes();
-  };
+    // ============================ Methodes privées de case modifié ============================ \\
 
-  // ============================ Methodes privées ============================ \\
-
-  /**
-   * reset l'attribut modifiedboxes, pour indiquer qu'ancune case n'a été effacé
-   */
-  private clearModifiedboxes(): void {
-    this.modifiedboxes = new Set();
-  }
-  /**
-   * La boucle de jeu
-   */
-  private loop() {
-    this.animate();
-    if (this.inLoop){
-      requestAnimationFrame(this.loop);
+    /**
+     * Signal qu'une case à été effacé
+     * @param coordinate coordonnée de la case effacée
+     */
+    private addModifiedbox(coordinate : number[]) : void{
+        this.modifiedboxes.add(coordinate.join(","));
     }
-  }
+
+    /**
+     * reset l'attribut modifiedboxes, pour indiquer qu'ancune case n'a été effacé
+     */
+    private clearModifiedboxes() : void{
+        this.modifiedboxes = new Set();
+    }
 }
