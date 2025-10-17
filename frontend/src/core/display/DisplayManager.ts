@@ -1,11 +1,15 @@
 import { GameManager } from '../GameManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
+import { SnakeDisplayed } from './SnakeDisplayed.ts';
+
+export type EntityType = "SNAKE" | "APPLE" | "ENTITY";
 
 // interface utilisé pour les entités données par le serveur
 export interface EntityServer {
   id: number;
   boxes: [[number,number]];
+  type: EntityType
 }
 
 export class DisplayManager {
@@ -68,15 +72,22 @@ export class DisplayManager {
     enities.forEach(entity => {
       const entityBoxes = entity.boxes;
       const entityID = entity.id;
+      const entityType = entity.type;
 
-      if (entityID && entityBoxes) {
-        const entityObject = new EntityDisplayed(
-          this,
-          entityBoxes,
-          200,
-          new Design("green"),
-          0
-        );
+
+
+      if (entityID && entityBoxes && entityType) {
+        let entityObject: EntityDisplayed;
+        switch (entityType) {
+          case ("SNAKE" as EntityType):
+            entityObject = new SnakeDisplayed(this, entityBoxes, 3000, new Design("green"), 0);
+            break;
+
+        
+          default:
+            entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("green"), 0);
+            break;
+        }
         this.setEntity(entityID, entityObject);
       }
     });
@@ -87,8 +98,9 @@ export class DisplayManager {
    * @param entity objet représentant l'entité
    */
   public setEntity(id: number, entity: EntityDisplayed): void {
-    if (this.entities[id]) {
-      this.entities[id].clear();
+    const oldEntity = this.entities.get(id) as EntityDisplayed;
+    if (oldEntity) {
+      oldEntity.clear();
     }
     this.entities.set(id,entity);
   }
@@ -100,7 +112,7 @@ export class DisplayManager {
    */
   public getCtx(): CanvasRenderingContext2D {
     if (!this.ctx) {
-      throw new Error("Contexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.");
+      throw new Error("ContsetEntitiesexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.");
     }
     return this.ctx
   }
@@ -139,7 +151,7 @@ export class DisplayManager {
   /**
    * Efface une case de la grille de jeu
    */
-  public clearBox(coordinate: number[]): void {
+  public clearBox(coordinate: [number, number]): void {
     if (!this.existeModifiedBox(coordinate)) {
       this.getCtx().clearRect(
         coordinate[0] * this.getBoxSize(),
@@ -169,10 +181,11 @@ export class DisplayManager {
    */
   public animate(): void {
     this.clearModifiedboxes();
-    //console.log(this.entities.size);
     this.entities.forEach((entity : EntityDisplayed) => {
-      entity.animate(Date.now());
-      //console.log("yo",entity);
+      entity.clearChange(Date.now());
+    });
+    this.entities.forEach((entity : EntityDisplayed) => {
+      entity.animate();
     });
     this.clearModifiedboxes();
   };
@@ -199,7 +212,7 @@ export class DisplayManager {
   private loop() {
     this.animate();
     if (this.inLoop){
-      requestAnimationFrame(this.loop);
+      setTimeout(this.loop, 1000 / 10);
     }
   }
 
