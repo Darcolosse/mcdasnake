@@ -44,7 +44,8 @@ export class EntityDisplayed{
     /**
      * Fait disparaitre les cases de l'entité qui ont changé.
      */
-    public clearChange(): void{
+    public clearChange(time = this.animationTime as number): void{
+        this.animationTime = (this.animationTime + (time - this.lastAnimation)) % this.speedAnimation;
         this.boxes.forEach(box => {
             this.display.clearBox(box);
         });
@@ -54,7 +55,7 @@ export class EntityDisplayed{
      * Affiche les cases qui ont changées
      * @param {integer} time
      */
-    public animate(time : number): void{
+    public animate(time = this.animationTime as number): void{
         const ctx = this.display.getCtx();
         const boxSize = this.display.getBoxSize();
         ctx.fillStyle = this.design.getColor();

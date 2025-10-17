@@ -115,7 +115,15 @@ export class DisplayManager {
    * @returns si la case à été effacé ou non
    */
   public existeModifiedBox(coordinate: number[]): boolean {
-    return this.modifiedboxes.has(coordinate.join("_"));
+    return this.modifiedboxes.has(coordinate.join(","));
+  }
+
+  /**
+   * Signal qu'une case à été effacé
+   * @param coordinate coordonnée de la case effacée
+   */
+  public addModifiedbox(coordinate: number[]): void {
+    this.modifiedboxes.add(coordinate.join(","));
   }
 
   public startLoop() : void{
@@ -152,9 +160,10 @@ export class DisplayManager {
   public show(): void {
     if (this.canvas !== null) {
       this.getCtx().clearRect(0, 0, this.canvas.width, this.canvas.height);
+      const moment = Date.now()
       this.entities.forEach((entity : EntityDisplayed, id : number) => {
         entity.setFullAnimation(true);
-        entity.animate(Date.now());
+        entity.animate(moment);
       });
     }
   }
@@ -164,23 +173,18 @@ export class DisplayManager {
    */
   public animate(): void {
     this.clearModifiedboxes();
-    console.log(this.entities.size);
+
+    const moment = Date.now()
     this.entities.forEach((entity : EntityDisplayed) => {
-      entity.animate(Date.now());
-      console.log("yo",entity);
+      entity.clearChange(moment);
+    });
+    this.entities.forEach((entity : EntityDisplayed) => {
+      entity.animate();
     });
     this.clearModifiedboxes();
   };
 
-  // ============================ Methodes privées de case modifié ============================ \\
-
-  /**
-   * Signal qu'une case à été effacé
-   * @param coordinate coordonnée de la case effacée
-   */
-  private addModifiedbox(coordinate: number[]): void {
-    this.modifiedboxes.add(coordinate.join(","));
-  }
+  // ============================ Methodes privées ============================ \\
 
   /**
    * reset l'attribut modifiedboxes, pour indiquer qu'ancune case n'a été effacé
