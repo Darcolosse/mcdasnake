@@ -25,8 +25,13 @@ export class DisplayManager {
   }
 
   public initialize(canvas: HTMLCanvasElement) {
-    this.setCanvas(canvas);
     console.log("bonjour alexis");
+
+    this.setCanvas(canvas);
+    this.synchronizeCanvasToCSS();
+
+    window.addEventListener('resize', this.handleResize.bind(this));
+    window.addEventListener('orientationchange', this.handleResize.bind(this));
   }
 
   public destroy() {
@@ -164,10 +169,10 @@ export class DisplayManager {
    */
   public animate(): void {
     this.clearModifiedboxes();
-    console.log(this.entities.size);
+    //console.log(this.entities.size);
     this.entities.forEach((entity : EntityDisplayed) => {
       entity.animate(Date.now());
-      console.log("yo",entity);
+      //console.log("yo",entity);
     });
     this.clearModifiedboxes();
   };
@@ -197,4 +202,33 @@ export class DisplayManager {
       requestAnimationFrame(this.loop);
     }
   }
+
+  // ============================ CSS ============================ \\
+
+  private resizeTimeout: number | null = null;
+  
+  private handleResize() {
+    if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+    this.resizeTimeout = window.setTimeout(() => {
+      this.synchronizeCanvasToCSS();
+    }, 200); 
+  }
+  
+  private synchronizeCanvasToCSS() {
+    if(!this.canvas || !this.ctx) {
+      this.gameManager.raiseError("Tried synchronize canvas' scale to css realtime scale on a non initialized canvas.")
+      return
+    }
+
+    console.log(this.canvas.width)
+    console.log(this.canvas.height)
+    const realtimeRect = this.canvas.getBoundingClientRect()
+    const ratio = window.devicePixelRatio || 1
+    console.log(this.canvas.width)
+    console.log(this.canvas.height)
+
+    this.canvas.width = realtimeRect.width * ratio
+    this.canvas.height = realtimeRect.height * ratio;
+  }
+
 }
