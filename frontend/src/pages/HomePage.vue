@@ -22,7 +22,7 @@ import { playRoute } from '../router/routes';
         <span class="text-content-brand-secondary">McDa</span>
         <span class="text-content-brand-primary">Snake</span>
       </h1>
-      <img class="w-1/6" src="../../public/icon.webp" />
+      <img class="w-1/6" src="/icon.webp" />
       <input 
         ref="username"
         type="text"

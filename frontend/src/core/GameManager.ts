@@ -20,12 +20,14 @@ export class GameManager {
 
   public start(canvas : HTMLCanvasElement | null) {
     if(canvas) {
+      this.displayManager.initialize(canvas as HTMLCanvasElement)
+
       this.networkManager.connect().then(() => {
-        this.displayManager.initialize(canvas as HTMLCanvasElement)
         this.eventManager.startListening()
         this.networkManager.emit(new GameUpdateRequestDTO())
       })
-      this.test(canvas);
+
+      this.displayManager.showConnection()
     } else {
       this.raiseError("Canvas element not found. Couldn't start the game.")
     }

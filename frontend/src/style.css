@@ -1,31 +1,5 @@
 @import "tailwindcss";
 
-@layer utilities {
-  /* Portrait variant: height > width */
-  @variants portrait {
-    @media (max-aspect-ratio: 1/1) {
-      .portrait\:w-full {
-        width: 100%;
-      }
-      .portrait\:h-auto {
-        height: auto;
-      }
-    }
-  }
-
-  /* Landscape variant: width >= height */
-  @variants landscape {
-    @media (min-aspect-ratio: 1/1) {
-      .landscape\:h-full {
-        height: 100%;
-      }
-      .landscape\:w-auto {
-        width: auto;
-      }
-    }
-  }
-}
-
 @theme {
   /* Base palette */
   --color-dark-300: rgb(50, 38, 53);
