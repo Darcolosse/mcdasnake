@@ -2,15 +2,7 @@ import { DisplayManager } from './DisplayManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
-
-export type EntityType = "SNAKE" | "APPLE" | "ENTITY";
-
-// interface utilisé pour les entités données par le serveur
-export interface EntityServer {
-  id: number;
-  boxes: [[number,number]];
-  type: EntityType
-}
+import type { EntityServer, EntityType } from '../network/dto/responses/EntityServer.ts';
 
 export class DisplayGame {
 
