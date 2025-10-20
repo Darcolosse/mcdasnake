@@ -157,6 +157,7 @@ export class DisplayManager {
     const ratio = window.devicePixelRatio || 1
     this.scaleToRealtimePixels(this.background, ratio)
     this.scaleToRealtimePixels(this.canvas, ratio)
+    this.gridHelper.reevaluate()
     this.displayGame.resize()
     this.displayGrid.resize()
   }
