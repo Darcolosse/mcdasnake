@@ -29,7 +29,7 @@ onMounted(() => {
             <span class="text-content-brand-primary">Snake</span>
           </h1>
       </div>
-      <div class=" w-full h-full rounded-3xl overflow-hidden">
+      <div class="relative w-full h-full rounded-3xl overflow-hidden">
         <!-- Background canvas -->
         <canvas
           ref="bgRef"

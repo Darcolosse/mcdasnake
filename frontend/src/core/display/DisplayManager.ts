@@ -3,10 +3,13 @@ import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateR
 import { DisplayConnect } from './DisplayConnect.ts'
 import { DisplayGame } from './DisplayGame.ts'
 import { DisplayGrid } from './DisplayGrid.ts'
+import { GridHelper } from './GridHelper.ts'
 
 export class DisplayManager {
 
   private gameManager: GameManager
+  private gridHelper: GridHelper
+
   private displayConnect : DisplayConnect
   private displayGame : DisplayGame
   private displayGrid : DisplayGrid
@@ -19,6 +22,7 @@ export class DisplayManager {
 
   constructor(gameManager: GameManager) {
     this.gameManager = gameManager
+    this.gridHelper = new GridHelper(this)
     this.displayConnect = new DisplayConnect(this)
     this.displayGame = new DisplayGame(this)
     this.displayGrid = new DisplayGrid(this)
@@ -51,7 +55,7 @@ export class DisplayManager {
   }
 
   public refreshGame(dto: GameUpdateResponseDTO) {
-    this.displayGrid.setSize(dto.boxSize, dto.boxSize)
+    this.gridHelper.setSize(dto.boxSize, dto.boxSize)
     this.displayGame.refresh(dto)
   }
 
@@ -71,7 +75,7 @@ export class DisplayManager {
   }
 
   public showConnection() {
-    this.displayGrid.setSize(2, 2)
+    this.gridHelper.setSize(2, 2)
     this.displayGrid.show()
     this.displayConnect.show()
   }
@@ -97,11 +101,15 @@ export class DisplayManager {
   }
 
   // ============================ Get ============================ \\
+  
+  public getGridHelper(): GridHelper {
+    return this.gridHelper
+  }
 
-  public getCanvas(): HTMLCanvasElement | undefined {
+  public getCanvas(): HTMLCanvasElement {
     if (!this.canvas) {
       this.gameManager.raiseError("Tried getting a canvas from DisplayManager without the canvas initialized.")
-      return undefined
+      throw new Error("Tried getting a canvas from DisplayManager without the canvas initialized.")
     }
     return this.canvas
   }
@@ -114,10 +122,10 @@ export class DisplayManager {
     return this.ctx
   }
 
-  public getBackground(): HTMLCanvasElement | undefined {
+  public getBackground(): HTMLCanvasElement {
     if (!this.background) {
       this.gameManager.raiseError("Tried getting a background canvas from DisplayManager without the background canvas initialized.")
-      return undefined
+      throw new Error("Tried getting a background canvas from DisplayManager without the background canvas initialized.")
     }
     return this.background
   }
@@ -142,16 +150,22 @@ export class DisplayManager {
   }
   
   private synchronizeCanvasToCSS() {
-    if(!this.canvas || !this.ctx) {
+    if(!this.background || !this.bgCtx || !this.canvas || !this.ctx) {
       this.gameManager.raiseError("Tried synchronize canvas' scale to css realtime scale on a non initialized canvas.")
       return
     }
-    const realtimeRect = this.canvas.getBoundingClientRect()
     const ratio = window.devicePixelRatio || 1
-    this.canvas.width = realtimeRect.width * ratio
-    this.canvas.height = realtimeRect.height * ratio
+    this.scaleToRealtimePixels(this.background, ratio)
+    this.scaleToRealtimePixels(this.canvas, ratio)
+    this.gridHelper.reevaluate()
     this.displayGame.resize()
     this.displayGrid.resize()
+  }
+
+  private scaleToRealtimePixels(canvas: HTMLCanvasElement, ratio: number) {
+    const realtimeRect = canvas.getBoundingClientRect()
+    canvas.width = realtimeRect.width * ratio
+    canvas.height = realtimeRect.height * ratio
   }
 
 }

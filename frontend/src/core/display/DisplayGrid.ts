@@ -4,8 +4,6 @@ import type { DisplayManager } from "./DisplayManager"
 export class DisplayGrid {
 
   private readonly displayManager: DisplayManager
-  private width: number = 0
-  private height: number = 0
 
   constructor(displayManager: DisplayManager) {
     this.displayManager = displayManager
@@ -22,13 +20,6 @@ export class DisplayGrid {
     this.show()
   }
 
-  // ============================ Set ============================ \\
-
-  public setSize(width: number, height: number) {
-    this.width = width
-    this.height = height
-  }
-
   // ========================== Private ========================== \\
 
   private drawCases() {
@@ -37,16 +28,15 @@ export class DisplayGrid {
 
     if(!canvas || !ctx) return
 
-    for(let i = 0; i<this.height; i++) {
-      for(let j = 0; j<this.width; j++) {
-        const drawnWidth = Math.ceil(canvas.width/this.width)
-        const drawnHeight = Math.ceil(canvas.width/this.width)
-        ctx.fillStyle = (i+j) % 2 == 0 ? Colors.DARKLIME : Colors.LIME
+    const helper = this.displayManager.getGridHelper()
+    for(let y = 0; y<helper.getRows(); y++) {
+      for(let x = 0; x<helper.getCols(); x++) {
+        ctx.fillStyle = (x+y) % 2 == 0 ? Colors.DARKLIME : Colors.LIME
         ctx.fillRect(
-          j * drawnWidth,
-          i * drawnHeight,
-          drawnWidth,
-          drawnHeight
+          x * helper.getCasePixelWidth(),
+          y * helper.getCasePixelHeight(),
+          helper.getCasePixelWidth(),
+          helper.getCasePixelHeight()
         )
       }
     }
