@@ -10,31 +10,11 @@ export class DisplayConnect {
   }
 
   public show() {
-    this.drawCases()
+    this.displayManager.clearGameCanvas()
     this.drawText()
   }
 
   // ========================== Private ========================== \\
-
-  private drawCases() {
-    const canvas = this.displayManager.getCanvas()
-    const ctx = this.displayManager.getCtx()
-
-    if(!canvas || !ctx) return
-
-    const cases = [ { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 1 }, ]
-
-    cases.map((coords: { x: number, y: number }, index: number) => {
-      console.log(coords)
-      ctx.fillStyle = index % 2 == 0 ? Colors.DARKLIME : Colors.LIME
-      ctx.fillRect(
-        coords.x * canvas.width/2,
-        coords.y * canvas.height/2,
-        Math.ceil(canvas.width/2),
-        Math.ceil(canvas.height/2),
-      )
-    })
-  }
 
   private drawText() {
     const canvas = this.displayManager.getCanvas()
