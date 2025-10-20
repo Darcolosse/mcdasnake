@@ -9,9 +9,6 @@ import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateR
 export class DisplayGame {
 
   private displayManager: DisplayManager;
-  private gridWidth : number = 0;
-  private gridHeight : number = 0;
-  private boxSize : [number, number] = [0,0];
   private entities: Map<number, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
@@ -34,7 +31,11 @@ export class DisplayGame {
    * @returns Renvoie la taille en pixel d'une case de jeu
    */
   public getBoxSize(): [number, number] {
-    return this.boxSize;
+    const helper = this.displayManager.getGridHelper();
+    return [
+      helper.getCasePixelWidth(),
+      helper.getCasePixelHeight()
+    ];
   }
 
   // ============================ Methodes publiques ============================ \\
@@ -60,25 +61,10 @@ export class DisplayGame {
   }
 
   public resize(){
-    // TODO
-    const canvas = this.displayManager.getCanvas();
-    if (canvas){
-      const drawnWidth = Math.ceil(canvas.width/this.gridWidth);
-      const drawnHeight = Math.ceil(canvas.height/this.gridHeight);
-      this.boxSize = [drawnWidth, drawnHeight];
-      this.show();
-    }
+    this.show();
   }
 
   public refresh(dto : GameUpdateResponseDTO){
-    this.boxSize = [dto.boxSize, dto.boxSize];
-
-    const canvas = this.displayManager.getCanvas();
-    if (canvas){
-      this.gridWidth = canvas.width / this.boxSize[0];
-      this.gridHeight = canvas.height / this.boxSize[1];
-    }
-    
     this.setEntities(dto.entities);
   }
 
