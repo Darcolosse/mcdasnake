@@ -1,4 +1,5 @@
-import { DisplayManager } from './DisplayManager.ts';
+import { DisplayGame } from './DisplayGame.ts';
+import { Design } from './Design.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 
 type BoxSide = "TOP" | "RIGHT" | "BOTTOM" | "LEFT" | "UNKNOW";
@@ -14,7 +15,7 @@ export class SnakeDisplayed extends EntityDisplayed{
 
     protected boxesInfo: Map<string, BoxInfo> = new Map();
 
-    constructor(display : DisplayManager, boxes : [number,number][], speedAnimation : number, design : Design, animationTime=0){
+    constructor(display : DisplayGame, boxes : [number,number][], speedAnimation : number, design : Design, animationTime=0){
         super(display, boxes, speedAnimation, design, animationTime);
         for(let i=0; i<this.boxes.length; i++){
             const current = this.boxes[i];

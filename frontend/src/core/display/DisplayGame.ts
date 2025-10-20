@@ -83,16 +83,6 @@ export class DisplayGame {
 
   public refresh(dto : GameUpdateResponseDTO){
       this.setEntities(dto.entities);
-      entities.forEach(entity => {
-        
-      });
-      {
-        "boxSize": 20,
-        "entities": [
-                      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]], "type": "SNAKE"},
-                      {"id": 2, "boxes":[[3,6]], "type": "APPLE"},
-                    ] 
-      }
   }
 
   // ============================ Requete DTO ============================ \\
