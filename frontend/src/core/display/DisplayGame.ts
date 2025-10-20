@@ -2,24 +2,32 @@ import { DisplayManager } from './DisplayManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
+import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
 
 export type EntityType = "SNAKE" | "APPLE" | "ENTITY";
-
-// interface utilisé pour les entités données par le serveur
-export interface EntityServer {
-  id: number;
-  boxes: [[number,number]];
-  type: EntityType
-}
 
 export class DisplayGame {
 
   private displayManager: DisplayManager;
 
   private entities: Map<number, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
-  private boxSize: number = 0; // taille en pixel des cases
+  private grid: gridDisplay;
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
+
+  // private test = {
+  //   "entity": {
+  //     "id": id as number,
+  //     "type": type as EntityType,
+  //     "boxes": boxes as [number, number][],
+  //     "animationDuration" : duration as number,
+  //     "design" : design as Design,
+  //   }
+
+  //   "???":{
+
+  //   }
+  // }
 
   constructor(displayManager: DisplayManager) {
     this.displayManager = displayManager;
@@ -28,53 +36,8 @@ export class DisplayGame {
 
   // ============================ Set ============================ \\
 
-  /**
-   * Change la taille des cases et update l'affichage
-   * @param boxSize nouvelle taille de case en pixel
-   */
-  public setboxSize(boxSize: number): void {
-    this.boxSize = boxSize;
-  }
-
-  /**
-   * Update les entités affichées
-   * @param enities // objets entité données par le serveur
-   */
-  public setEntities(enities: EntityServer[]): void {
-    enities.forEach(entity => {
-      const entityBoxes = entity.boxes;
-      const entityID = entity.id;
-      const entityType = entity.type;
-
-
-
-      if (entityID && entityBoxes && entityType) {
-        let entityObject: EntityDisplayed;
-        switch (entityType) {
-          case ("SNAKE" as EntityType):
-            entityObject = new SnakeDisplayed(this, entityBoxes, 1000, new Design("green"), 0);
-            break;
-
-        
-          default:
-            entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("green"), 0);
-            break;
-        }
-        this.setEntity(entityID, entityObject);
-      }
-    });
-  }
-
-  /**
-   * @param id identifié de l'entité à ajouter / ou  à modifier
-   * @param entity objet représentant l'entité
-   */
-  public setEntity(id: number, entity: EntityDisplayed): void {
-    const oldEntity = this.entities.get(id) as EntityDisplayed;
-    if (oldEntity) {
-      oldEntity.clear();
-    }
-    this.entities.set(id,entity);
+  public setGrid(grid: gridDisplay){
+    this.grid = grid;
   }
 
   // ============================ Get ============================ \\
@@ -90,7 +53,7 @@ export class DisplayGame {
    * @returns Renvoie la taille en pixel d'une case de jeu
    */
   public getBoxSize(): number {
-    return this.boxSize;
+    return this.grid.getBoxSize();
   }
 
   // ============================ Methodes publiques ============================ \\
@@ -113,6 +76,59 @@ export class DisplayGame {
 
   public stopLoop() : void{
     this.inLoop = false;
+  }
+
+  public resize(){
+    this.show();
+  }
+
+  public refresh(dto : GameUpdateResponseDTO){
+    
+  }
+
+  // ============================ Requete DTO ============================ \\
+
+  /**
+   * Update les entités affichées
+   * @param enities // objets entité données par le serveur
+   */
+  private setEntities(enities: EntityServer[]): void {
+    enities.forEach(entity => {
+      const entityBoxes = entity.boxes;
+      const entityID = entity.id;
+      const entityType = entity.type;
+
+
+
+      if (entityID && entityBoxes && entityType) {
+        let entityObject: EntityDisplayed;
+        switch (entityType) {
+          case ("SNAKE" as EntityType):
+            entityObject = new SnakeDisplayed(this, entityBoxes, 1000, new Design("green"), 0);
+            break;
+
+        
+          default:
+            entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("red"), 0);
+            break;
+        }
+        this.setEntity(entityID, entityObject);
+      }
+    });
+  }
+
+  
+
+  /**
+   * @param id identifié de l'entité à ajouter / ou  à modifier
+   * @param entity objet représentant l'entité
+   */
+  private setEntity(id: number, entity: EntityDisplayed): void {
+    const oldEntity = this.entities.get(id) as EntityDisplayed;
+    if (oldEntity) {
+      oldEntity.clear();
+    }
+    this.entities.set(id,entity);
   }
 
   // ============================ Méthodes d'affichage ============================ \\
