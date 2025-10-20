@@ -1,4 +1,4 @@
-import { DisplayManager } from './DisplayManager.ts';
+import { DisplayGame } from './DisplayGame.ts';
 import { Design } from './Design.ts';
 
 export class EntityDisplayed{
@@ -7,11 +7,11 @@ export class EntityDisplayed{
     protected animationTime : number; // temps depuis le début de l'animation (en ms)
     protected lastAnimation : number; // instant du dernier affichage (en ms)
     protected boxes : [number, number][]; // liste des cases occupées par l'entitées
-    protected display : DisplayManager; // objet qui contient le canvas, et la taille des cases
+    protected display : DisplayGame; // objet qui contient le canvas, et la taille des cases
     protected design : Design; // objet qui contient le design de l'entité
     protected fullAnimation : boolean = false; // indique si l'entité doit être entièrement affiché ou si on n'affiche que se qui change
 
-    constructor(display : DisplayManager, boxes : [number,number][], speedAnimation : number, design : Design, animationTime=0){
+    constructor(display : DisplayGame, boxes : [number,number][], speedAnimation : number, design : Design, animationTime=0){
         this.display = display;
         this.boxes = boxes;
         this.speedAnimation = speedAnimation;

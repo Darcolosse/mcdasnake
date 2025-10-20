@@ -72,7 +72,6 @@ export class SnakeDisplayed extends EntityDisplayed{
 
 
     private nextStep() : [number, number][]{
-        console.log(this.boxesInfo);
         const snakeSize = this.boxes.length;
         const boxChange: [number, number][] = [];
         
