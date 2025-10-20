@@ -1,7 +1,8 @@
-import { DisplayManager, type EntityServer, type EntityType } from "./display/DisplayManager"
+import { DisplayManager } from "./display/DisplayManager"
 import { EventManager } from "./event/EventManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
 import { GameUpdateRequestDTO } from "./network/dto/requests/GameUpdateRequest";
+import { GameUpdateResponseDTO } from "./network/dto/responses/GameUpdateResponse";
 import { NetworkManager } from "./network/NetworkManager";
 
 export class GameManager {
@@ -21,27 +22,26 @@ export class GameManager {
   public start(canvas : HTMLCanvasElement | null) {
     if(canvas) {
       this.displayManager.initialize(canvas as HTMLCanvasElement)
-
+      this.displayManager.showConnection()
       this.networkManager.connect().then(() => {
         this.eventManager.startListening()
         this.networkManager.emit(new GameUpdateRequestDTO())
       })
-
-      this.displayManager.showConnection()
-      //this.test();
     } else {
       this.raiseError("Canvas element not found. Couldn't start the game.")
     }
   }
 
   public test(){
-    this.displayManager.displayGame.setboxSize(20);
-    this.displayManager.displayGame.setEntities([
-      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]], "type": "SNAKE" as EntityType},
-      {"id": 2, "boxes":[[3,6]], "type": "APPLE" as EntityType},
-    ] as EntityServer[]);
-    this.displayManager.showGame();
-    this.displayManager.displayGame.startLoop();
+    this.handleServerEvent(new GameUpdateResponseDTO(
+      {
+        "boxSize": 20,
+        "entities": [
+                      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]], "type": "SNAKE"},
+                      {"id": 2, "boxes":[[3,6]], "type": "APPLE"},
+                    ] 
+      }
+    ))
   }
 
   public close() {
@@ -59,7 +59,8 @@ export class GameManager {
   public handleServerEvent(eventDTO: DTO) {
     switch(eventDTO.type) {
       case DTOType.GameUpdate :
-        //this.displayManager.refresh(eventDTO as GameUpdateResponseDTO)
+        this.displayManager.refreshGame(eventDTO as GameUpdateResponseDTO)
+        this.displayManager.showGame()
         break;
     }
     

@@ -1,54 +1,50 @@
-import { GameManager } from '../GameManager.ts';
-import { DisplayConnect } from './DisplayConnect.ts';
-import { DisplayGame } from './DisplayGame.ts';
-
-export type EntityType = "SNAKE" | "APPLE" | "ENTITY";
-
-// interface utilisé pour les entités données par le serveur
-export interface EntityServer {
-  id: number;
-  boxes: [[number,number]];
-  type: EntityType
-}
+import { GameManager } from '../GameManager.ts'
+import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts'
+import { DisplayConnect } from './DisplayConnect.ts'
+import { DisplayGame } from './DisplayGame.ts'
 
 export class DisplayManager {
 
-  private gameManager: GameManager;
-  private displayConnect : DisplayConnect;
-  public displayGame : DisplayGame;
+  private gameManager: GameManager
+  private displayConnect : DisplayConnect
+  private displayGame : DisplayGame
 
-  private canvas!: HTMLCanvasElement | null; // canvas ou est affiché le jeu
-  private ctx: CanvasRenderingContext2D | null = null; // pinceau permettant d'afficher le jeu
+  private canvas!: HTMLCanvasElement | null // canvas ou est affiché le jeu
+  private ctx: CanvasRenderingContext2D | null = null // pinceau permettant d'afficher le jeu
 
   constructor(gameManager: GameManager) {
-    this.gameManager = gameManager;
-    this.displayConnect = new DisplayConnect(this);
-    this.displayGame = new DisplayGame(this);
+    this.gameManager = gameManager
+    this.displayConnect = new DisplayConnect(this)
+    this.displayGame = new DisplayGame(this)
   }
 
+  // ======================== Life Cycle ========================= \\
+
   public initialize(canvas: HTMLCanvasElement) {
-    console.log("bonjour alexis");
+    this.setCanvas(canvas)
+    this.synchronizeCanvasToCSS()
+    window.addEventListener('resize', this.handleResize.bind(this))
+    window.addEventListener('orientationchange', this.handleResize.bind(this))
+  }
 
-    this.setCanvas(canvas);
-    this.synchronizeCanvasToCSS();
-
-    window.addEventListener('resize', this.handleResize.bind(this));
-    window.addEventListener('orientationchange', this.handleResize.bind(this));
+  public refreshGame(dto: GameUpdateResponseDTO) {
+    this.displayGame.refresh(dto)
   }
 
   public destroy() {
-    this.canvas = null;
-    this.ctx = null;
+    this.canvas = null
+    this.ctx = null
   }
 
   // =========================== Show ============================ \\
 
   public showGame() {
-    this.displayGame.show();
+    this.displayGame.show()
+    this.displayGame.startLoop()
   }
 
   public showConnection() {
-    this.displayConnect.show();
+    this.displayConnect.show()
   }
 
   // ============================ Set ============================ \\
@@ -58,8 +54,8 @@ export class DisplayManager {
    * @param canvas le nouveau canvas
    */
   public setCanvas(canvas: HTMLCanvasElement): void {
-    this.canvas = canvas;
-    this.ctx = this.canvas.getContext("2d");
+    this.canvas = canvas
+    this.ctx = this.canvas.getContext("2d")
   }
 
   // ============================ Get ============================ \\
@@ -69,7 +65,7 @@ export class DisplayManager {
    */
   public getCanvas(): HTMLCanvasElement | undefined {
     if (!this.canvas) {
-      this.gameManager.raiseError("Tried getting a canvas from DisplayManager without the canvas initialized.");
+      this.gameManager.raiseError("Tried getting a canvas from DisplayManager without the canvas initialized.")
       return undefined
     }
     return this.canvas
@@ -80,21 +76,21 @@ export class DisplayManager {
    */
   public getCtx(): CanvasRenderingContext2D {
     if (!this.ctx) {
-      this.gameManager.raiseError("ContsetEntitiesexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.");
-      throw new Error("ContsetEntitiesexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.");
+      this.gameManager.raiseError("ContsetEntitiesexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.")
+      throw new Error("ContsetEntitiesexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.")
     }
     return this.ctx
   }
 
   // ============================ CSS ============================ \\
 
-  private resizeTimeout: number | null = null;
+  private resizeTimeout: number | null = null
   
   private handleResize() {
-    if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+    if (this.resizeTimeout) clearTimeout(this.resizeTimeout)
     this.resizeTimeout = window.setTimeout(() => {
-      this.synchronizeCanvasToCSS();
-    }, 200); 
+      this.synchronizeCanvasToCSS()
+    }, 200)
   }
   
   private synchronizeCanvasToCSS() {
@@ -102,16 +98,11 @@ export class DisplayManager {
       this.gameManager.raiseError("Tried synchronize canvas' scale to css realtime scale on a non initialized canvas.")
       return
     }
-
-    console.log(this.canvas.width)
-    console.log(this.canvas.height)
     const realtimeRect = this.canvas.getBoundingClientRect()
     const ratio = window.devicePixelRatio || 1
-    console.log(this.canvas.width)
-    console.log(this.canvas.height)
-
     this.canvas.width = realtimeRect.width * ratio
-    this.canvas.height = realtimeRect.height * ratio;
+    this.canvas.height = realtimeRect.height * ratio
+    this.displayGame.resize();
   }
 
 }

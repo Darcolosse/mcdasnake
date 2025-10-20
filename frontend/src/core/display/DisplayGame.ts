@@ -2,9 +2,8 @@ import { DisplayManager } from './DisplayManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
+import type { EntityServer, EntityType } from '../network/dto/responses/EntityServer.ts';
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
-
-export type EntityType = "SNAKE" | "APPLE" | "ENTITY";
 
 export class DisplayGame {
 
@@ -83,7 +82,17 @@ export class DisplayGame {
   }
 
   public refresh(dto : GameUpdateResponseDTO){
-    
+      this.setEntities(dto.entities);
+      entities.forEach(entity => {
+        
+      });
+      {
+        "boxSize": 20,
+        "entities": [
+                      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]], "type": "SNAKE"},
+                      {"id": 2, "boxes":[[3,6]], "type": "APPLE"},
+                    ] 
+      }
   }
 
   // ============================ Requete DTO ============================ \\
@@ -109,7 +118,7 @@ export class DisplayGame {
 
         
           default:
-            entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("red"), 0);
+            entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("black"), 0);
             break;
         }
         this.setEntity(entityID, entityObject);
