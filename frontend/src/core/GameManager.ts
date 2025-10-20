@@ -27,7 +27,7 @@ export class GameManager {
         this.eventManager.startListening()
         this.networkManager.emit(new GameUpdateRequestDTO())
       })
-      //this.test();
+      this.test();
     } else {
       this.raiseError("Canvas elements not found. Couldn't start the game.")
     }

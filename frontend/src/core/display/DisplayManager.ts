@@ -142,16 +142,21 @@ export class DisplayManager {
   }
   
   private synchronizeCanvasToCSS() {
-    if(!this.canvas || !this.ctx) {
+    if(!this.background || !this.bgCtx || !this.canvas || !this.ctx) {
       this.gameManager.raiseError("Tried synchronize canvas' scale to css realtime scale on a non initialized canvas.")
       return
     }
-    const realtimeRect = this.canvas.getBoundingClientRect()
     const ratio = window.devicePixelRatio || 1
-    this.canvas.width = realtimeRect.width * ratio
-    this.canvas.height = realtimeRect.height * ratio
+    this.scaleToRealtimePixels(this.background, ratio)
+    this.scaleToRealtimePixels(this.canvas, ratio)
     this.displayGame.resize()
     this.displayGrid.resize()
+  }
+
+  private scaleToRealtimePixels(canvas: HTMLCanvasElement, ratio: number) {
+    const realtimeRect = canvas.getBoundingClientRect()
+    canvas.width = realtimeRect.width * ratio
+    canvas.height = realtimeRect.height * ratio
   }
 
 }
