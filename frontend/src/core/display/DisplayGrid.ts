@@ -18,6 +18,10 @@ export class DisplayGrid {
     this.drawCases()
   }
 
+  public resize() {
+    this.show()
+  }
+
   // ============================ Set ============================ \\
 
   public setSize(width: number, height: number) {
@@ -37,7 +41,7 @@ export class DisplayGrid {
       for(let j = 0; j<this.width; j++) {
         const drawnWidth = Math.ceil(canvas.width/this.width)
         const drawnHeight = Math.ceil(canvas.width/this.width)
-        ctx.fillStyle = i+j % 2 == 0 ? Colors.DARKLIME : Colors.LIME
+        ctx.fillStyle = (i+j) % 2 == 0 ? Colors.DARKLIME : Colors.LIME
         ctx.fillRect(
           j * drawnWidth,
           i * drawnHeight,

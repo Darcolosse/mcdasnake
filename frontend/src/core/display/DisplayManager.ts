@@ -150,7 +150,8 @@ export class DisplayManager {
     const ratio = window.devicePixelRatio || 1
     this.canvas.width = realtimeRect.width * ratio
     this.canvas.height = realtimeRect.height * ratio
-    this.displayGame.resize();
+    this.displayGame.resize()
+    this.displayGrid.resize()
   }
 
 }
