@@ -118,10 +118,10 @@ export class SnakeDisplayed extends EntityDisplayed{
 
     // ============================ Animate ============================ \\
 
-    private animateBox(ctx: CanvasRenderingContext2D, boxSize: number, box : [number, number]){
+    private animateBox(ctx: CanvasRenderingContext2D, boxSize: [number, number], box : [number, number]){
         const boxInfo = this.getBoxInfo(box);
         if (!boxInfo){
-            ctx.fillRect(box[0]*boxSize, box[1]*boxSize, boxSize, boxSize);
+            ctx.fillRect(box[0]*boxSize[0], box[1]*boxSize[1], boxSize[0], boxSize[1]);
             return;
         }
         // calcul de la direction
@@ -145,19 +145,19 @@ export class SnakeDisplayed extends EntityDisplayed{
         // dessin
         switch (direction) {
             case "LEFT":
-                ctx.fillRect(box[0]*boxSize, box[1]*boxSize, boxSize*rapport, boxSize);
+                ctx.fillRect(box[0]*boxSize[0], box[1]*boxSize[1], boxSize[0]*rapport, boxSize[1]);
                 break;
             case "TOP":
-                ctx.fillRect(box[0]*boxSize, box[1]*boxSize, boxSize, boxSize*rapport);
+                ctx.fillRect(box[0]*boxSize[0], box[1]*boxSize[1], boxSize[0], boxSize[1]*rapport);
                 break;
             case "RIGHT":
-                ctx.fillRect((box[0]+rapport)*boxSize, box[1]*boxSize, boxSize, boxSize);
+                ctx.fillRect((box[0]+rapport)*boxSize[0], box[1]*boxSize[1], boxSize[0], boxSize[1]);
                 break;
             case "BOTTOM":
-                ctx.fillRect(box[0]*boxSize, (box[1]+rapport)*boxSize, boxSize, boxSize);
+                ctx.fillRect(box[0]*boxSize[0], (box[1]+rapport)*boxSize[1], boxSize[0], boxSize[1]);
                 break;
             default:
-                ctx.fillRect(box[0]*boxSize, box[1]*boxSize, boxSize, boxSize);
+                ctx.fillRect(box[0]*boxSize[0], box[1]*boxSize[1], boxSize[0], boxSize[1]);
                 break;
         }
     }

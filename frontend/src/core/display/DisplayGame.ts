@@ -2,6 +2,7 @@ import { DisplayManager } from './DisplayManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
+import { SnakeDisplayed2 } from './SnakeDisplayed2.ts';
 import type { EntityServer, EntityType } from '../network/dto/responses/EntityServer.ts';
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
 
@@ -10,7 +11,7 @@ export class DisplayGame {
   private displayManager: DisplayManager;
   private gridWidth : number = 0;
   private gridHeight : number = 0;
-  private boxSize : [number, number] = 0;
+  private boxSize : [number, number] = [0,0];
   private entities: Map<number, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
@@ -32,7 +33,7 @@ export class DisplayGame {
   /**
    * @returns Renvoie la taille en pixel d'une case de jeu
    */
-  public getBoxSize(): number {
+  public getBoxSize(): [number, number] {
     return this.boxSize;
   }
 
@@ -62,20 +63,20 @@ export class DisplayGame {
     // TODO
     const canvas = this.displayManager.getCanvas();
     if (canvas){
-      const drawnWidth = Math.ceil(canvas.width/this.width);
-      const drawnHeight = Math.ceil(canvas.width/this.width);
-      this.boxSize = drawnWidth;
+      const drawnWidth = Math.ceil(canvas.width/this.gridWidth);
+      const drawnHeight = Math.ceil(canvas.height/this.gridHeight);
+      this.boxSize = [drawnWidth, drawnHeight];
       this.show();
     }
   }
 
   public refresh(dto : GameUpdateResponseDTO){
-    this.boxSize = dto.boxSize;
+    this.boxSize = [dto.boxSize, dto.boxSize];
 
     const canvas = this.displayManager.getCanvas();
     if (canvas){
-      this.gridWidth = canvas.width / this.boxSize;
-      this.gridHeight = canvas.height / this.boxSize;
+      this.gridWidth = canvas.width / this.boxSize[0];
+      this.gridHeight = canvas.height / this.boxSize[1];
     }
     
     this.setEntities(dto.entities);
@@ -99,7 +100,7 @@ export class DisplayGame {
         let entityObject: EntityDisplayed;
         switch (entityType) {
           case ("SNAKE" as EntityType):
-            entityObject = new SnakeDisplayed(this, entityBoxes, 1000, new Design("green"), 0);
+            entityObject = new SnakeDisplayed2(this, entityBoxes, 1000, new Design("green"), 0);
             break;
 
         
@@ -134,10 +135,10 @@ export class DisplayGame {
   public clearBox(coordinate: [number, number]): void {
     if (!this.existeModifiedBox(coordinate)) {
       this.getCtx().clearRect(
-        coordinate[0] * this.getBoxSize(),
-        coordinate[1] * this.getBoxSize(),
-        this.getBoxSize(),
-        this.getBoxSize()
+        coordinate[0] * this.getBoxSize()[0],
+        coordinate[1] * this.getBoxSize()[1],
+        this.getBoxSize()[0],
+        this.getBoxSize()[1]
       );
       this.addModifiedbox(coordinate);
     }

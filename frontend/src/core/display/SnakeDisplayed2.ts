@@ -19,6 +19,36 @@ export class SnakeDisplayed2 extends EntityDisplayed{
     }
 
     public animate(time: number = this.lastAnimation): void{
+        this.updateModel(time);
+
+        const ctx = this.display.getCtx();
+        const boxSize = this.display.getBoxSize();
+
+        if (ctx && this.boxes.length > 0){
+            ctx.lineWidth = boxSize[0] * 0.8;
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+            ctx.strokeStyle = this.design.getColor();
+
+
+            ctx.beginPath();
+            const startBox = this.boxes[0];
+            if (!startBox){
+                return;
+            }
+            const startPoint = this.getMiddlePoint(startBox);
+
+            ctx.moveTo(startPoint[0], startPoint[1]);
+
+            for (let i = 1; i < this.boxes.length; i++) {
+                const currentBox = this.boxes[i];
+                if (currentBox){
+                    const currentPoint = this.getMiddlePoint(currentBox);
+                    ctx.lineTo(currentPoint[0], currentPoint[1]);
+                }
+            }
+            ctx.stroke();
+        }
     }
 
     // ============================ Change Model ============================ \\
@@ -43,40 +73,21 @@ export class SnakeDisplayed2 extends EntityDisplayed{
         const snakeSize = this.boxes.length;
         const boxChange: [number, number][] = [];
         
-        if (snakeSize > 0){
+        if (snakeSize > 1){
             // add head
             const oldHead = this.boxes[snakeSize-1];
-            if (oldHead){
-                const oldHeadInfo = this.getBoxInfo(oldHead);
-                if (oldHeadInfo){
-                    const vector = SnakeDisplayed.sideToVector(oldHeadInfo.lastSide);
-                    const newHead: [number, number] = [oldHead[0]+vector[0], oldHead[1]+vector[1]];
-                    this.boxes.push(newHead);
-                    this.initBoxInfo(newHead);
-                } else{
-                    throw("Erreur la tete n'a pas de direction. il faut la recalculer");
-                }
-                
+            const oldHead2 = this.boxes[snakeSize-2];
+            if (oldHead && oldHead2){
+                    const newHead: [number, number] = [
+                        oldHead[0] + (oldHead[0] - oldHead2[0]),
+                        oldHead[1] + (oldHead[1] - oldHead2[1]),
+                    ];
+                    this.boxes.push(newHead);             
             }
             // remove queue
             const oldTail = this.boxes.shift();
             if (oldTail){
-                this.removeBoxInfo(oldTail);
                 boxChange.push(oldTail);
-            }
-            // Change l'ancienne tete en body
-            if (snakeSize > 1 && oldHead){
-                const newType = this.calculTypeBoxInfo(snakeSize-2);
-                this.setAttributBoxInfo(oldHead, "type", newType);
-                boxChange.push(oldHead);
-            }
-            // change la nouvelle queue en queue
-            if (snakeSize > 2){
-                const newTail = this.boxes[0];
-                if (newTail){
-                    const newType = this.calculTypeBoxInfo(0);
-                    this.setAttributBoxInfo(newTail, "type", newType);
-                }
             }
         }
         //return changement
@@ -89,6 +100,14 @@ export class SnakeDisplayed2 extends EntityDisplayed{
 
 
     // ============================ Methode utile ============================ \\
+
+    private getMiddlePoint(box : [number, number]) : [number, number]{
+        const boxSize = this.display.getBoxSize();
+        return [
+                (box[0]+0.5) * boxSize[0],
+                (box[1]+0.5) * boxSize[1],
+            ];
+    }
 
     // private static vectorToSide (vector: [number, number]): BoxSide {
     //     const dirs: Record<string, BoxSide> = {

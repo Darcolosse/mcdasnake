@@ -62,10 +62,10 @@ export class EntityDisplayed{
         this.animationTime = (this.animationTime + (time - this.lastAnimation)) % this.speedAnimation;
         this.boxes.forEach(box => {
             ctx.fillRect(
-                box[0]*boxSize,
-                box[1]*boxSize,
-                boxSize,
-                boxSize
+                box[0]*boxSize[0],
+                box[1]*boxSize[1],
+                boxSize[0],
+                boxSize[1]
             );
         });
         this.setFullAnimation(false);
