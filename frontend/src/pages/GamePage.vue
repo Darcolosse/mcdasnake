@@ -6,12 +6,13 @@ import { router } from '../router/router'
 import { homeRoute } from '../router/routes'
 
 const gameManager = new GameManager()
-const canvasRef = ref<HTMLCanvasElement | null>(null)
+const gameRef = ref<HTMLCanvasElement | null>(null)
+const bgRef = ref<HTMLCanvasElement | null>(null)
 
 onMounted(() => {
   const username = getCookie(CookieType.Username)
   if(username) {
-    gameManager.start(canvasRef.value)
+    gameManager.start(bgRef.value, gameRef.value)
   } else {
     router.push(homeRoute.path)
   }
@@ -29,10 +30,18 @@ onMounted(() => {
           </h1>
       </div>
       <div class=" w-full h-full rounded-3xl overflow-hidden">
+        <!-- Background canvas -->
         <canvas
-          ref="canvasRef"
+          ref="bgRef"
+          id="background"
+          class="absolute inset-0 w-full h-full block z-10">
+        </canvas>
+
+        <!-- Foreground / main canvas -->
+        <canvas
+          ref="gameRef"
           id="game"
-          class="w-full h-full block">
+          class="absolute inset-0 w-full h-full block z-50">
         </canvas>
       </div>
     </div>

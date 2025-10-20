@@ -19,16 +19,16 @@ export class GameManager {
 
   // ====================== Vertical layer ======================= \\
 
-  public start(canvas : HTMLCanvasElement | null) {
-    if(canvas) {
-      this.displayManager.initialize(canvas as HTMLCanvasElement)
+  public start(background : HTMLCanvasElement | null, canvas : HTMLCanvasElement | null) {
+    if(background && canvas) {
+      this.displayManager.initialize(background as HTMLCanvasElement, canvas as HTMLCanvasElement)
       this.displayManager.showConnection()
       this.networkManager.connect().then(() => {
         this.eventManager.startListening()
         this.networkManager.emit(new GameUpdateRequestDTO())
       })
     } else {
-      this.raiseError("Canvas element not found. Couldn't start the game.")
+      this.raiseError("Canvas elements not found. Couldn't start the game.")
     }
   }
 
