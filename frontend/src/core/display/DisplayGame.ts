@@ -8,35 +8,16 @@ import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateR
 export class DisplayGame {
 
   private displayManager: DisplayManager;
-
+  private gridWidth : number = 0;
+  private gridHeight : number = 0;
+  private boxSize : [number, number] = 0;
   private entities: Map<number, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
-  private grid: gridDisplay;
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
-
-  // private test = {
-  //   "entity": {
-  //     "id": id as number,
-  //     "type": type as EntityType,
-  //     "boxes": boxes as [number, number][],
-  //     "animationDuration" : duration as number,
-  //     "design" : design as Design,
-  //   }
-
-  //   "???":{
-
-  //   }
-  // }
 
   constructor(displayManager: DisplayManager) {
     this.displayManager = displayManager;
     this.loop = this.loop.bind(this);
-  }
-
-  // ============================ Set ============================ \\
-
-  public setGrid(grid: gridDisplay){
-    this.grid = grid;
   }
 
   // ============================ Get ============================ \\
@@ -52,7 +33,7 @@ export class DisplayGame {
    * @returns Renvoie la taille en pixel d'une case de jeu
    */
   public getBoxSize(): number {
-    return this.grid.getBoxSize();
+    return this.boxSize;
   }
 
   // ============================ Methodes publiques ============================ \\
@@ -78,11 +59,26 @@ export class DisplayGame {
   }
 
   public resize(){
-    this.show();
+    // TODO
+    const canvas = this.displayManager.getCanvas();
+    if (canvas){
+      const drawnWidth = Math.ceil(canvas.width/this.width);
+      const drawnHeight = Math.ceil(canvas.width/this.width);
+      this.boxSize = drawnWidth;
+      this.show();
+    }
   }
 
   public refresh(dto : GameUpdateResponseDTO){
-      this.setEntities(dto.entities);
+    this.boxSize = dto.boxSize;
+
+    const canvas = this.displayManager.getCanvas();
+    if (canvas){
+      this.gridWidth = canvas.width / this.boxSize;
+      this.gridHeight = canvas.height / this.boxSize;
+    }
+    
+    this.setEntities(dto.entities);
   }
 
   // ============================ Requete DTO ============================ \\

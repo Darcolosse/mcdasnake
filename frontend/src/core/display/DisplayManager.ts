@@ -151,7 +151,6 @@ export class DisplayManager {
     this.canvas.width = realtimeRect.width * ratio
     this.canvas.height = realtimeRect.height * ratio
     this.displayGame.resize();
-    this.di
   }
 
 }
