@@ -1,4 +1,5 @@
 import type { GameManager } from "../GameManager";
+import type { TurnRequestDTO } from "../network/dto/requests/TurnRequest";
 import { SnakeEvent } from "./SnakeEvent";
 
 export class EventManager {
@@ -23,7 +24,7 @@ export class EventManager {
   
   // ===================== Management layer ====================== \\
 
-  public raiseEvent(todo: string) {
-    this.gameManager.handleClientEvent()
+  public raiseEvent(event: TurnRequestDTO) {
+    this.gameManager.handleClientEvent(event)
   }
 }
