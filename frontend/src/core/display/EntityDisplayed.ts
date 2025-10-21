@@ -45,7 +45,7 @@ export class EntityDisplayed{
      * Fait disparaitre les cases de l'entité qui ont changé.
      */
     public clearChange(time = this.animationTime as number): void{
-        this.animationTime = (this.animationTime + (time - this.lastAnimation)) % this.speedAnimation;
+        this.updateAnimationTime(time);
         this.boxes.forEach(box => {
             this.display.clearBox(box);
         });
@@ -56,10 +56,10 @@ export class EntityDisplayed{
      * @param {integer} time
      */
     public animate(time = this.animationTime as number): void{
+        this.updateAnimationTime(time);
         const ctx = this.display.getCtx();
         const boxSize = this.display.getBoxSize();
         ctx.fillStyle = this.design.getColor();
-        this.animationTime = (this.animationTime + (time - this.lastAnimation)) % this.speedAnimation;
         this.boxes.forEach(box => {
             ctx.fillRect(
                 box[0]*boxSize[0],
@@ -69,5 +69,12 @@ export class EntityDisplayed{
             );
         });
         this.setFullAnimation(false);
+    }
+
+    protected updateAnimationTime(time = this.animationTime as number) : number{
+        const nbStep = Math.floor((this.animationTime + (time - this.lastAnimation)) / this.speedAnimation);
+        this.animationTime = ((this.animationTime + (time - this.lastAnimation))) % this.speedAnimation;
+        this.lastAnimation = time;
+        return nbStep;
     }
 }

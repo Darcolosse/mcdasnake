@@ -57,9 +57,7 @@ export class SnakeDisplayed extends EntityDisplayed{
     // ============================ Change Model ============================ \\
 
     private updateModel(time: number) : [number, number][]{
-        const nbStep = Math.floor((this.animationTime + (time - this.lastAnimation)) / this.speedAnimation);
-        this.animationTime = ((this.animationTime + (time - this.lastAnimation))) % this.speedAnimation;
-        this.lastAnimation = time;
+        const nbStep = this.updateAnimationTime(time);
         let boxChange: [number, number][] = [];
         for (let i=0; i<nbStep; i++){
             boxChange.push(...this.nextStep());

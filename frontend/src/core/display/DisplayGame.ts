@@ -3,8 +3,12 @@ import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
 import { SnakeDisplayed2 } from './SnakeDisplayed2.ts';
-import type { EntityServer, EntityType } from '../network/dto/responses/EntityServer.ts';
+import type { EntityServer } from '../network/dto/responses/EntityServer.ts';
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
+import { AppleDisplayed } from './AppleDisplayed.ts';
+import { SpriteManager } from './SpriteManager.ts';
+
+export type SpriteName = "APPLE" | "HEAD";
 
 export class DisplayGame {
 
@@ -12,9 +16,11 @@ export class DisplayGame {
   private entities: Map<number, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
+  private spriteManager: SpriteManager;
 
   constructor(displayManager: DisplayManager) {
     this.displayManager = displayManager;
+    this.spriteManager = new SpriteManager();
     this.loop = this.loop.bind(this);
   }
 
@@ -36,6 +42,10 @@ export class DisplayGame {
       helper.getCasePixelWidth(),
       helper.getCasePixelHeight()
     ];
+  }
+
+  public getSprite(sprite: SpriteName) : HTMLImageElement | undefined{
+    return this.spriteManager.get(sprite);
   }
 
   // ============================ Methodes publiques ============================ \\
@@ -85,11 +95,13 @@ export class DisplayGame {
       if (entityID && entityBoxes && entityType) {
         let entityObject: EntityDisplayed;
         switch (entityType) {
-          case ("SNAKE" as EntityType):
+          case ("SNAKE"):
             entityObject = new SnakeDisplayed2(this, entityBoxes, 1000, new Design("green"), 0);
             break;
+          case ("APPLE"):
+            entityObject = new AppleDisplayed(this, entityBoxes, 1000, new Design("red"), 0);
+            break;
 
-        
           default:
             entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("black"), 0);
             break;
@@ -179,7 +191,8 @@ export class DisplayGame {
    * La boucle de jeu
    */
   private loop() {
-    this.animate();
+    //this.animate();
+    this.show();
     if (this.inLoop){
       setTimeout(this.loop, 1000 / 30);
     }
