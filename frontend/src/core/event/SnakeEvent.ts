@@ -3,6 +3,10 @@ import { Direction, TurnRequestDTO } from "../network/dto/requests/TurnRequest"
 
 export class SnakeEvent {
 
+  private eventManager : EventManager;
+
+  private lastDirection: Direction | null;
+
   private static KEY_TO_DIRECTION: Record<string,Direction> = {
     "ArrowUp" : Direction.UP,
     "ArrowRight" : Direction.RIGHT,
@@ -19,8 +23,6 @@ export class SnakeEvent {
 
   private threshold: number = 100;
   private start : [number, number] = [0, 0];
-
-  private eventManager : EventManager;
   
   constructor(eventManager: EventManager){
       this.eventManager = eventManager
@@ -52,7 +54,10 @@ export class SnakeEvent {
   // ============================ Call Mediator ============================ \\
 
   public changeDirection(direction : Direction | undefined) : void {
-    if(direction) this.eventManager.raiseEvent(new TurnRequestDTO(direction))
+    if(direction && direction != this.lastDirection) {
+      this.lastDirection = direction
+      this.eventManager.raiseEvent(new TurnRequestDTO(direction))
+    } 
   }
 
   // ============================ Evenement Clavier ============================ \\
