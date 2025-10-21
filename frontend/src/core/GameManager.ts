@@ -53,8 +53,8 @@ export class GameManager {
   
   // ===================== Management layer ====================== \\
 
-  public handleClientEvent() {
-
+  public handleClientEvent(eventDTO: DTO) {
+    console.log(eventDTO)
   }
 
   public handleServerEvent(eventDTO: DTO) {
