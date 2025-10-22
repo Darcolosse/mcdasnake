@@ -15,8 +15,8 @@ export class SnakeDisplayed extends EntityDisplayed{
 
     protected boxesInfo: Map<string, BoxInfo> = new Map();
 
-    constructor(display : DisplayGame, boxes : [number,number][], speedAnimation : number, design : Design, animationTime=0){
-        super(display, boxes, speedAnimation, design, animationTime);
+    constructor(display : DisplayGame, boxes : [number,number][], speedAnimation : number, design : Design, zindex: number, animationTime=0){
+        super(display, boxes, speedAnimation, design, zindex, animationTime);
         for(let i=0; i<this.boxes.length; i++){
             const current = this.boxes[i];
             if (current !== undefined){

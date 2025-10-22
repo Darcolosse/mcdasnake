@@ -1,12 +1,6 @@
 import { EntityDisplayed } from './EntityDisplayed.ts';
-import { DisplayGame } from './DisplayGame.ts';
-import { Design } from './Design.ts';
 
 export class AppleDisplayed extends EntityDisplayed{
-
-    constructor(display : DisplayGame, boxes : [number,number][], speedAnimation : number, design : Design, animationTime=0){
-            super(display, boxes, speedAnimation, design, animationTime);
-        }
     
         // ============================ Override ============================ \\
 

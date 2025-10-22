@@ -12,8 +12,10 @@ export class SpriteManager {
     constructor() {
         const sprites : Record<SpriteName, string> = {
             "APPLE": SpriteManager.SPRITE_FOLDER + "apple.png",
-            "HEAD": SpriteManager.SPRITE_FOLDER + "head.png",
-            // other sprites ...
+            //"HEAD": SpriteManager.SPRITE_FOLDER + "head.png",
+            //"HEAD": SpriteManager.SPRITE_FOLDER + "head2.jpg",
+            "HEAD": SpriteManager.SPRITE_FOLDER + "head3.svg",
+            "SCALE": SpriteManager.SPRITE_FOLDER + "scale2.jpg",
         };
         this.totalToLoad = Object.keys(sprites).length;
         this.loadAllSprites(sprites);

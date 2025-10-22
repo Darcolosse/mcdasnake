@@ -1,13 +1,6 @@
-import { DisplayGame } from './DisplayGame.ts';
-import { Design } from './Design.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 
 export class SnakeDisplayed2 extends EntityDisplayed {
-
-
-  constructor(display: DisplayGame, boxes: [number, number][], speedAnimation: number, design: Design, animationTime = 0) {
-    super(display, boxes, speedAnimation, design, animationTime);
-  }
 
   // ============================ Override ============================ \\
 
@@ -21,28 +14,43 @@ export class SnakeDisplayed2 extends EntityDisplayed {
   public animate(time: number = this.lastAnimation): void {
     this.updateModel(time);
 
-    const ctx = this.display.getCtx();
-    const boxSize = this.display.getBoxSize();
-
-    // dessin du trait point par point
     if (this.boxes.length >= 2) {
-      this.drawBody();
+      this.drawBody("black", 0.9);
+      this.drawBody(this.design.getColor(), 0.8);
       this.drawHead();
     }
   }
 
-  private drawBody() {
+  private drawBody(color: string, size : number) {
     const ctx = this.display.getCtx();
     const boxSize = this.display.getBoxSize();
+    const startPoint = this.getMovedPoint(0);
+    const endPoint = this.getMovedPoint(this.boxes.length - 1);
 
     if (ctx) {
-      ctx.lineWidth = boxSize[0] * 0.8;
+      ctx.lineWidth = boxSize[0] * size;
       ctx.lineJoin = "round";
       ctx.lineCap = "round";
-      ctx.strokeStyle = this.design.getColor();
-    
+      ctx.strokeStyle = color;
+
+      // texture
+      // const scale = this.display.getSprite("SCALE");
+      // if (scale){
+      //   const pattern = ctx.createPattern(scale, 'repeat');
+      //   if (pattern){
+      //     ctx.strokeStyle = pattern;
+      //   }
+      // }
+
+      // dégradé
+      // if (startPoint && endPoint){
+      //   const grad = ctx.createLinearGradient(startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
+      //   grad.addColorStop(0, this.design.getColor());
+      //   grad.addColorStop(1, "lime"); 
+      //   ctx.strokeStyle = grad;
+      // }
+
       ctx.beginPath();
-      const startPoint = this.getMovedPoint(0);
       if (startPoint) {
         ctx.moveTo(startPoint[0], startPoint[1]);
       }
@@ -53,9 +61,8 @@ export class SnakeDisplayed2 extends EntityDisplayed {
           ctx.lineTo(currentPoint[0], currentPoint[1]);
         }
       }
-      const lastPoint = this.getMovedPoint(this.boxes.length - 1);
-      if (lastPoint) {
-        ctx.lineTo(lastPoint[0], lastPoint[1]);
+      if (endPoint) {
+        ctx.lineTo(endPoint[0], endPoint[1]);
       }
       ctx.stroke();
     }
@@ -65,10 +72,9 @@ export class SnakeDisplayed2 extends EntityDisplayed {
     const ctx = this.display.getCtx();
     const boxSize = this.display.getBoxSize();
     const head = this.display.getSprite("HEAD");
-    const headSize = 1.6;
+    const headSize = 1;
     const lastPoint = this.getMovedPoint(this.boxes.length-1, false, headSize);
-    const direction = this.vectorToRadian(this.getDirection(this.boxes.length-1)) - (Math.PI/2);
-    console.log(direction);
+    const direction = this.vectorToRadian(this.getDirection(this.boxes.length-1));// - (Math.PI/2);
     if (head && lastPoint) {
       this.drawRotatedImage(ctx, head, lastPoint, [boxSize[0]*headSize,boxSize[1]*headSize], direction);
     }

@@ -8,12 +8,13 @@ import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateR
 import { AppleDisplayed } from './AppleDisplayed.ts';
 import { SpriteManager } from './SpriteManager.ts';
 
-export type SpriteName = "APPLE" | "HEAD";
+export type SpriteName = "APPLE" | "HEAD" | "SCALE";
 
 export class DisplayGame {
 
   private displayManager: DisplayManager;
   private entities: Map<number, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
+  private zindex: EntityDisplayed[] = [];
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
   private spriteManager: SpriteManager;
@@ -96,14 +97,14 @@ export class DisplayGame {
         let entityObject: EntityDisplayed;
         switch (entityType) {
           case ("SNAKE"):
-            entityObject = new SnakeDisplayed2(this, entityBoxes, 1000, new Design("green"), 0);
+            entityObject = new SnakeDisplayed2(this, entityBoxes, 500, new Design("green"), 1, 0);
             break;
           case ("APPLE"):
-            entityObject = new AppleDisplayed(this, entityBoxes, 1000, new Design("red"), 0);
+            entityObject = new AppleDisplayed(this, entityBoxes, 1000, new Design("red"), 0, 0);
             break;
 
           default:
-            entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("black"), 0);
+            entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("black"), -1, 0);
             break;
         }
         this.setEntity(entityID, entityObject);
@@ -111,7 +112,14 @@ export class DisplayGame {
     });
   }
 
-  
+  public removeEntity(id: number){
+    const oldEntity = this.entities.get(id);
+    if (oldEntity) {
+      this.entities.delete(id);
+      const index = this.zindex.indexOf(oldEntity);
+      if (index !== -1) this.zindex.splice(index, 1);
+    }
+  }
 
   /**
    * @param id identifié de l'entité à ajouter / ou  à modifier
@@ -123,6 +131,14 @@ export class DisplayGame {
       oldEntity.clear();
     }
     this.entities.set(id,entity);
+    this.updateZindex(entity);
+  }
+
+  private updateZindex(entity: EntityDisplayed){
+    if (this.zindex.indexOf(entity) === -1){
+      this.zindex.push(entity)
+    }
+    this.zindex.sort((a, b) => a.getZindex() - b.getZindex());
   }
 
   // ============================ Méthodes d'affichage ============================ \\
@@ -150,10 +166,10 @@ export class DisplayGame {
 
     if (canvas) {
       this.getCtx().clearRect(0, 0, canvas.width, canvas.height);
-      this.entities.forEach((entity : EntityDisplayed, id : number) => {
+      for (const entity of this.zindex) {
         entity.setFullAnimation(true);
         entity.animate(Date.now());
-      });
+      }
     }
   }
 
@@ -162,12 +178,12 @@ export class DisplayGame {
    */
   public animate(): void {
     this.clearModifiedboxes();
-    this.entities.forEach((entity : EntityDisplayed) => {
+    for (const entity of this.zindex) {
       entity.clearChange(Date.now());
-    });
-    this.entities.forEach((entity : EntityDisplayed) => {
+    }
+    for (const entity of this.zindex) {
       entity.animate();
-    });
+    }
     this.clearModifiedboxes();
   };
 
@@ -187,6 +203,9 @@ export class DisplayGame {
   private clearModifiedboxes(): void {
     this.modifiedboxes = new Set();
   }
+
+  // ============================ other private methodes ============================ \\
+
   /**
    * La boucle de jeu
    */

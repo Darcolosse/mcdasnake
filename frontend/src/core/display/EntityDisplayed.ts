@@ -9,15 +9,24 @@ export class EntityDisplayed{
     protected boxes : [number, number][]; // liste des cases occupées par l'entitées
     protected display : DisplayGame; // objet qui contient le canvas, et la taille des cases
     protected design : Design; // objet qui contient le design de l'entité
+    protected zindex : number; // plan sur laquel l'entité doit être dessiné
     protected fullAnimation : boolean = false; // indique si l'entité doit être entièrement affiché ou si on n'affiche que se qui change
 
-    constructor(display : DisplayGame, boxes : [number,number][], speedAnimation : number, design : Design, animationTime=0){
+    constructor(
+        display : DisplayGame,
+        boxes : [number,number][],
+        speedAnimation : number,
+        design : Design,
+        zindex : number,
+        animationTime=0,
+    ){
         this.display = display;
         this.boxes = boxes;
         this.speedAnimation = speedAnimation;
         this.animationTime = animationTime;
         this.lastAnimation = Date.now();
         this.design = design;
+        this.zindex = zindex;
         this.setFullAnimation(true);
     }
 
@@ -28,6 +37,12 @@ export class EntityDisplayed{
      */
     public setFullAnimation(value : boolean): void {
         this.fullAnimation = value;
+    }
+
+    // ============================ Get ============================ \\
+
+    public getZindex(): number {
+        return this.zindex;
     }
 
     // ============================ Methode d'affichage ============================ \\
