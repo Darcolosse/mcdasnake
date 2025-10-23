@@ -68,7 +68,10 @@ export class GameManager {
   }
 
   public raiseError(errorMessage: string, error: any = null) {
-    console.error(errorMessage, error)
+    console.error('[FATAL]', errorMessage, error)
+    // /!\ /!\ /!\
+    window.location.reload()
+    // /!\ /!\ /!\
   }
 
 }

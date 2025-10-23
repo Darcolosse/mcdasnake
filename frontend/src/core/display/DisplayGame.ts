@@ -7,6 +7,7 @@ import type { EntityServer } from '../network/dto/responses/EntityServer.ts';
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
 import { AppleDisplayed } from './AppleDisplayed.ts';
 import { SpriteManager } from './SpriteManager.ts';
+import { Colors } from './colors.ts';
 
 export type SpriteName = "APPLE" | "HEAD" | "SCALE";
 
@@ -97,7 +98,7 @@ export class DisplayGame {
         let entityObject: EntityDisplayed;
         switch (entityType) {
           case ("SNAKE"):
-            entityObject = new SnakeDisplayed2(this, entityBoxes, 500, new Design("green"), 1, 0);
+            entityObject = new SnakeDisplayed2(this, entityBoxes, 500, new Design(Colors.LIME), 1, 0);
             break;
           case ("APPLE"):
             entityObject = new AppleDisplayed(this, entityBoxes, 1000, new Design("red"), 0, 0);
@@ -213,7 +214,7 @@ export class DisplayGame {
     //this.animate();
     this.show();
     if (this.inLoop){
-      setTimeout(this.loop, 1000 / 30);
+      setTimeout(this.loop, 1000 / 60);
     }
   }
 }

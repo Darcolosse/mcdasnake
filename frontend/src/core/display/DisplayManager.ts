@@ -39,19 +39,11 @@ export class DisplayManager {
   }
 
   public clearBackgroundCanvas(){
-    if (!this.bgCtx || !this.background) {
-      this.gameManager.raiseError("Tried clearing the background canvas from DisplayManager without the canvas initialized.")
-      return 
-    }
-    this.bgCtx.clearRect(0, 0, this.background.width, this.background.height)
+    this.clearCanvas(this.background, this.bgCtx)
   }
 
   public clearGameCanvas(){
-    if (!this.ctx || !this.canvas) {
-      this.gameManager.raiseError("Tried clearing a canvas from DisplayManager without the canvas initialized.")
-      return 
-    }
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.clearCanvas(this.canvas, this.ctx)
   }
 
   public refreshGame(dto: GameUpdateResponseDTO) {
@@ -60,10 +52,7 @@ export class DisplayManager {
   }
 
   public destroy() {
-    this.background = null
-    this.bgCtx = null
-    this.canvas = null
-    this.ctx = null
+    this.background = this.bgCtx = this.canvas = this.ctx = null
   }
 
   // =========================== Show ============================ \\
@@ -82,19 +71,11 @@ export class DisplayManager {
 
   // ============================ Set ============================ \\
 
-  /**
-   * Change le canvas utilisé pour le jeu et update l'affichage
-   * @param canvas le nouveau canvas
-   */
   public setBackground(background: HTMLCanvasElement): void {
     this.background = background
     this.bgCtx = this.background.getContext("2d")
   }
 
-  /**
-   * Change le canvas utilisé pour le jeu et update l'affichage
-   * @param canvas le nouveau canvas
-   */
   public setCanvas(canvas: HTMLCanvasElement): void {
     this.canvas = canvas
     this.ctx = this.canvas.getContext("2d")
@@ -107,35 +88,23 @@ export class DisplayManager {
   }
 
   public getCanvas(): HTMLCanvasElement {
-    if (!this.canvas) {
-      this.gameManager.raiseError("Tried getting a canvas from DisplayManager without the canvas initialized.")
-      throw new Error("Tried getting a canvas from DisplayManager without the canvas initialized.")
-    }
-    return this.canvas
+    this.raiseErrorOnCond(!this.canvas, "Tried getting a canvas from DisplayManager without the canvas initialized.")
+    return this.canvas as HTMLCanvasElement
   }
 
   public getCtx(): CanvasRenderingContext2D {
-    if (!this.ctx) {
-      this.gameManager.raiseError("Tried getting the background context without it being initialized first.")
-      throw new Error("Tried getting the background context without it being initialized first.")
-    }
-    return this.ctx
+    this.raiseErrorOnCond(!this.ctx, "Tried getting the background context without it being initialized first.")
+    return this.ctx as CanvasRenderingContext2D
   }
 
   public getBackground(): HTMLCanvasElement {
-    if (!this.background) {
-      this.gameManager.raiseError("Tried getting a background canvas from DisplayManager without the background canvas initialized.")
-      throw new Error("Tried getting a background canvas from DisplayManager without the background canvas initialized.")
-    }
-    return this.background
+    this.raiseErrorOnCond(!this.background, "Tried getting a background canvas from DisplayManager without the background canvas initialized.")
+    return this.background as HTMLCanvasElement
   }
 
   public getBgCtx(): CanvasRenderingContext2D {
-    if (!this.bgCtx) {
-      this.gameManager.raiseError("Tried getting the background context without it being initialized first.")
-      throw new Error("Tried getting the background context without it being initialized first.")
-    }
-    return this.bgCtx
+    this.raiseErrorOnCond(!this.bgCtx, "Tried getting the background context without it being initialized first.")
+    return this.bgCtx as CanvasRenderingContext2D
   }
 
   // ============================ CSS ============================ \\
@@ -166,6 +135,22 @@ export class DisplayManager {
     const realtimeRect = canvas.getBoundingClientRect()
     canvas.width = realtimeRect.width * ratio
     canvas.height = realtimeRect.height * ratio
+  }
+
+  // ========================== Private =========================== \\
+  
+  private raiseErrorOnCond(condition: boolean, errorMessage: string) {
+    if (condition) {
+      this.gameManager.raiseError(errorMessage)
+    }
+  }
+  
+  private clearCanvas(canvas: HTMLCanvasElement | null, context: CanvasRenderingContext2D | null) {
+    if (!canvas || !context) {
+      this.gameManager.raiseError("Tried clearing the background canvas from DisplayManager without the canvas initialized.")
+      return 
+    }
+    context.clearRect(0, 0, canvas.width, canvas.height)
   }
 
 }
