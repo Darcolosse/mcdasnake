@@ -1,136 +1,114 @@
 import { EventManager } from "./EventManager";
+import { Direction, TurnRequestDTO } from "../network/dto/requests/TurnRequest"
 
-export class SnakeEvent{
+export class SnakeEvent {
 
-    public static UP: number = 0;
-    public static RIGHT: number = 1;
-    public static DOWN: number = 2;
-    public static LEFT: number = 3;
+  private eventManager : EventManager;
 
-    public static INPUT_KEY: Record<string,number> = {
-        "ArrowUp" : SnakeEvent.UP,
-        "ArrowRight" : SnakeEvent.RIGHT,
-        "ArrowDown" : SnakeEvent.DOWN,
-        "ArrowLeft" : SnakeEvent.LEFT,
-    };
+  private lastDirection: Direction | null;
 
-    private keyPressed: boolean[] = [false, false, false, false]; // indique si les flèches du clavier sont pressées ou non
-    private threshold: number = 100; // nombre de pixel à parcourir avec son doigt pour tourner
-    private start : number[] = []; // point [x,y] ou le doigt est posé
+  private static KEY_TO_DIRECTION: Record<string,Direction> = {
+    "ArrowUp" : Direction.UP,
+    "ArrowRight" : Direction.RIGHT,
+    "ArrowDown" : Direction.DOWN,
+    "ArrowLeft" : Direction.LEFT,
+  }
 
-    private eventManager : EventManager; // classe permettant d'interagir avec le serveur
-    
-    constructor(eventManager: EventManager){
-        this.eventManager = eventManager
-        this.listen();
+  private static INPUT_KEY: Record<string,boolean> = {
+    "ArrowUp" : false,
+    "ArrowRight" : false,
+    "ArrowDown" : false,
+    "ArrowLeft" : false,
+  };
+
+  private threshold: number = 100;
+  private start : [number, number] = [0, 0];
+  
+  constructor(eventManager: EventManager){
+      this.eventManager = eventManager
+      this.listen();
+  }
+
+  // ============================ Pullic methods ============================ \\
+
+  public listen() : void {
+    // keyboard
+    document.addEventListener('keydown', this.eventInput.bind(this));
+    document.addEventListener('keyup', this.eventOutput.bind(this));
+
+    // mobile
+    document.addEventListener('touchstart', this.eventTouchstart.bind(this));
+    document.addEventListener('touchmove', this.eventTouchmove.bind(this), { passive: false });
+  }
+
+  public stopListening() : void {
+    // keyboard
+    document.removeEventListener('keydown', this.eventInput);
+    document.removeEventListener('keyup', this.eventOutput);
+
+    // mobile
+    document.removeEventListener('touchstart', this.eventTouchstart);
+    document.removeEventListener('touchmove', this.eventTouchmove);
+  }
+
+  // ============================ Call Mediator ============================ \\
+
+  public changeDirection(direction : Direction | undefined) : void {
+    if(direction && direction != this.lastDirection) {
+      this.lastDirection = direction
+      this.eventManager.raiseEvent(new TurnRequestDTO(direction))
+    } 
+  }
+
+  // ============================ Evenement Clavier ============================ \\
+
+  private eventInput(e : KeyboardEvent) : void {
+    const isAlreadyPressed = SnakeEvent.INPUT_KEY[e.key];
+    if (isAlreadyPressed !== undefined && !isAlreadyPressed){
+      this.changeDirection(SnakeEvent.KEY_TO_DIRECTION[e.key]);
+      SnakeEvent.INPUT_KEY[e.key] = true;
     }
+  }
 
-    // ============================ Methodes publique ============================ \\
-
-    /**
-     * Ajoute des ecouteur d'évènement sur la page nécessaire au jeu
-     */
-    public listen() : void {
-        // clavier
-        document.addEventListener('keydown', this.eventInput.bind(this));
-        document.addEventListener('keyup', this.eventOutput.bind(this));
-
-        // mobile
-        document.addEventListener('touchstart', this.eventTouchstart.bind(this));
-        document.addEventListener('touchmove', this.eventTouchmove.bind(this), { passive: false });
+  private eventOutput(e : KeyboardEvent) : void {
+    const isAlreadyPressed = SnakeEvent.INPUT_KEY[e.key];
+    if (isAlreadyPressed !== undefined && isAlreadyPressed){
+      SnakeEvent.INPUT_KEY[e.key] = false;
     }
+  }
 
-    /**
-     * Retire les écouteur d'évènement de la page nécessaire au jeu
-     */
-    public stopListening() : void {
-        // clavier
-        document.removeEventListener('keydown', this.eventInput);
-        document.removeEventListener('keyup', this.eventOutput);
-
-        // mobile
-        document.removeEventListener('touchstart', this.eventTouchstart);
-        document.removeEventListener('touchmove', this.eventTouchmove);
+  // ============================ Events on Mobile ============================ \\
+  
+  private eventTouchstart(e : TouchEvent) : void {
+    const touch = e.changedTouches[0]
+    if(touch) {
+      this.start = [
+        touch.pageX,
+        touch.pageY,
+      ];
     }
+  }
 
-    // ============================ Call Mediator ============================ \\
-
-    /**
-     * Demmande au médiateur un changement de direction
-     * @param direction la direction dans laquelle tourner
-     */
-    public changeDirection(direction : number) : void {
-        // TODO (call this.mediator)
-        this.eventManager.raiseEvent("todo")
+  private eventTouchmove(e : TouchEvent) : void {
+    e.preventDefault();
+    const eTouch = e.changedTouches[0]
+    if(eTouch && eTouch.pageX && eTouch.pageY) {
+      const touch: [number, number] = [
+        eTouch.pageX,
+        eTouch.pageY,
+      ];
+      const dist: [number, number] = [
+        touch[0] - this.start[0],
+        touch[1] - this.start[1]
+      ];
+      const notify = (direction: Direction) => {
+        this.changeDirection(direction);
+        this.start = touch;
+      }
+      if (dist[0] > this.threshold) notify(Direction.RIGHT)
+      if (-dist[0] > this.threshold) notify(Direction.LEFT)
+      if (dist[1] > this.threshold) notify(Direction.DOWN)
+      if (-dist[1] > this.threshold) notify(Direction.UP)
     }
-
-    // ============================ Evenement Clavier ============================ \\
-
-    /**
-     * lorsqu'une touche est enfoncé
-     * @param e 
-     */
-    private eventInput(e : KeyboardEvent) : void {
-        const direction = SnakeEvent.INPUT_KEY[e.key];
-        if (direction !== undefined && !this.keyPressed[direction]){
-            this.changeDirection(direction);
-            this.keyPressed[direction] = true;
-        }
-    }
-
-    /**
-     * lorsqu'une touche est relaché
-     * @param e 
-     */
-    private eventOutput(e : KeyboardEvent) : void {
-        const direction = SnakeEvent.INPUT_KEY[e.key];
-        if (direction !== undefined){
-            this.keyPressed[direction] = false;
-        }
-    }
-
-    // ============================ Evenement Mobile ============================ \\
-    
-    /**
-     * Lorsqu'un doigt est posé sur l'écran
-     * @param e 
-     */
-    private eventTouchstart(e : TouchEvent) : void {
-        this.start = [
-            e.changedTouches[0].pageX,
-            e.changedTouches[0].pageY,
-        ];
-    }
-
-    /**
-     * Lorsqu'un doigt glisse sur l'écran
-     * @param e 
-     */
-    private eventTouchmove(e : TouchEvent) : void {
-        e.preventDefault();
-        const touch = [
-            e.changedTouches[0].pageX,
-            e.changedTouches[0].pageY,
-        ];
-        const dist = [
-            touch[0] - this.start[0],
-            touch[1] - this.start[1]
-        ];
-        if (dist[0] > this.threshold){
-            this.changeDirection(SnakeEvent.RIGHT);
-            this.start = touch;
-        }
-        if (-dist[0] > this.threshold){
-            this.changeDirection(SnakeEvent.LEFT);
-            this.start = touch;
-        }
-        if (dist[1] > this.threshold){
-            this.changeDirection(SnakeEvent.DOWN);
-            this.start = touch;
-        }
-        if (-dist[1] > this.threshold){
-            this.changeDirection(SnakeEvent.UP);
-            this.start = touch;
-        }
-    }
+  }
 }

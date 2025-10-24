@@ -4,4 +4,5 @@ export interface DTO {
 
 export const DTOType = {
   GameUpdate: 'GameUpdate',
+  Turn: 'SnakeTurn',
 }

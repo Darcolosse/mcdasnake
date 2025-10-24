@@ -1,8 +1,8 @@
-import { DisplayManager, type EntityServer } from "./display/DisplayManager"
+import { DisplayManager } from "./display/DisplayManager"
 import { EventManager } from "./event/EventManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
 import { GameUpdateRequestDTO } from "./network/dto/requests/GameUpdateRequest";
-import type { GameUpdateResponseDTO } from "./network/dto/responses/GameUpdateResponse";
+import { GameUpdateResponseDTO } from "./network/dto/responses/GameUpdateResponse";
 import { NetworkManager } from "./network/NetworkManager";
 
 export class GameManager {
@@ -19,27 +19,30 @@ export class GameManager {
 
   // ====================== Vertical layer ======================= \\
 
-  public start(canvas : HTMLCanvasElement | null) {
-    if(canvas) {
+  public start(background : HTMLCanvasElement | null, canvas : HTMLCanvasElement | null) {
+    if(background && canvas) {
+      this.displayManager.initialize(background as HTMLCanvasElement, canvas as HTMLCanvasElement)
+      this.displayManager.showConnection()
       this.networkManager.connect().then(() => {
-        this.displayManager.initialize(canvas as HTMLCanvasElement)
         this.eventManager.startListening()
         this.networkManager.emit(new GameUpdateRequestDTO())
       })
-      this.test(canvas);
+      this.test();
     } else {
-      this.raiseError("Canvas element not found. Couldn't start the game.")
+      this.raiseError("Canvas elements not found. Couldn't start the game.")
     }
   }
 
-  public test(canvas : HTMLCanvasElement){
-    this.displayManager.initialize(canvas as HTMLCanvasElement);
-    this.displayManager.setboxSize(20);
-    this.displayManager.setEntities([
-      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]]},
-      {"id": 2, "boxes":[[3,6]]},
-    ] as EntityServer[]);
-    this.displayManager.startLoop();
+  public test(){
+    this.handleServerEvent(new GameUpdateResponseDTO(
+      {
+        "boxSize": 20,
+        "entities": [
+                      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]], "type": "SNAKE"},
+                      {"id": 2, "boxes":[[3,6]], "type": "APPLE"},
+                    ] 
+      }
+    ))
   }
 
   public close() {
@@ -50,21 +53,25 @@ export class GameManager {
   
   // ===================== Management layer ====================== \\
 
-  public handleClientEvent() {
-
+  public handleClientEvent(eventDTO: DTO) {
+    console.log(eventDTO)
   }
 
   public handleServerEvent(eventDTO: DTO) {
     switch(eventDTO.type) {
       case DTOType.GameUpdate :
-        //this.displayManager.refresh(eventDTO as GameUpdateResponseDTO)
+        this.displayManager.refreshGame(eventDTO as GameUpdateResponseDTO)
+        this.displayManager.showGame()
         break;
     }
     
   }
 
   public raiseError(errorMessage: string, error: any = null) {
-    console.error(errorMessage, error)
+    console.error('[FATAL]', errorMessage, error)
+    // /!\ /!\ /!\
+    window.location.reload()
+    // /!\ /!\ /!\
   }
 
 }

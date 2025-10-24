@@ -1,234 +1,156 @@
-import { GameManager } from '../GameManager.ts';
-import { EntityDisplayed } from './EntityDisplayed.ts';
-import { Design } from './Design.ts';
-
-// interface utilisé pour les entités données par le serveur
-export interface EntityServer {
-  id: number;
-  boxes: [[number,number]];
-}
+import { GameManager } from '../GameManager.ts'
+import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts'
+import { DisplayConnect } from './DisplayConnect.ts'
+import { DisplayGame } from './DisplayGame.ts'
+import { DisplayGrid } from './DisplayGrid.ts'
+import { GridHelper } from './GridHelper.ts'
 
 export class DisplayManager {
 
-  private gameManager: GameManager;
+  private gameManager: GameManager
+  private gridHelper: GridHelper
 
-  private entities: Map<number, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
-  private canvas!: HTMLCanvasElement | null; // canvas ou est affiché le jeu
-  private ctx: CanvasRenderingContext2D | null = null; // pinceau permettant d'afficher le jeu
-  private boxSize: number = 0; // taille en pixel des cases
-  private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
-  private inLoop: boolean = false;
+  private displayConnect : DisplayConnect
+  private displayGame : DisplayGame
+  private displayGrid : DisplayGrid
+
+  private background!: HTMLCanvasElement | null // canvas ou est affiché le jeu
+  private bgCtx: CanvasRenderingContext2D | null = null // pinceau permettant d'afficher le jeu
+
+  private canvas!: HTMLCanvasElement | null // canvas ou est affiché le jeu
+  private ctx: CanvasRenderingContext2D | null = null // pinceau permettant d'afficher le jeu
 
   constructor(gameManager: GameManager) {
     this.gameManager = gameManager
-    this.loop = this.loop.bind(this); // bind obligatoire
+    this.gridHelper = new GridHelper(this)
+    this.displayConnect = new DisplayConnect(this)
+    this.displayGame = new DisplayGame(this)
+    this.displayGrid = new DisplayGrid(this)
   }
 
-  public initialize(canvas: HTMLCanvasElement) {
-    console.log("bonjour alexis");
+  // ======================== Life Cycle ========================= \\
 
-    this.setCanvas(canvas);
-    this.synchronizeCanvasToCSS();
+  public initialize(background: HTMLCanvasElement, canvas: HTMLCanvasElement) {
+    this.setBackground(background)
+    this.setCanvas(canvas)
+    this.synchronizeCanvasToCSS()
+    window.addEventListener('resize', this.handleResize.bind(this))
+    window.addEventListener('orientationchange', this.handleResize.bind(this))
+  }
 
-    window.addEventListener('resize', this.handleResize.bind(this));
-    window.addEventListener('orientationchange', this.handleResize.bind(this));
+  public clearBackgroundCanvas(){
+    this.clearCanvas(this.background, this.bgCtx)
+  }
+
+  public clearGameCanvas(){
+    this.clearCanvas(this.canvas, this.ctx)
+  }
+
+  public refreshGame(dto: GameUpdateResponseDTO) {
+    this.gridHelper.setSize(dto.boxSize, dto.boxSize)
+    this.displayGame.refresh(dto)
   }
 
   public destroy() {
-    this.canvas = null;
-    this.ctx = null;
+    this.background = this.bgCtx = this.canvas = this.ctx = null
+  }
+
+  // =========================== Show ============================ \\
+
+  public showGame() {
+    this.displayGrid.show()
+    this.displayGame.show()
+    this.displayGame.startLoop()
+  }
+
+  public showConnection() {
+    this.gridHelper.setSize(2, 2)
+    this.displayGrid.show()
+    this.displayConnect.show()
   }
 
   // ============================ Set ============================ \\
 
-  /**
-   * Change le canvas utilisé pour le jeu et update l'affichage
-   * @param canvas le nouveau canvas
-   */
+  public setBackground(background: HTMLCanvasElement): void {
+    this.background = background
+    this.bgCtx = this.background.getContext("2d")
+  }
+
   public setCanvas(canvas: HTMLCanvasElement): void {
-    this.canvas = canvas;
-    this.ctx = this.canvas.getContext("2d");
-  }
-
-  /**
-   * Change la taille des cases et update l'affichage
-   * @param boxSize nouvelle taille de case en pixel
-   */
-  public setboxSize(boxSize: number): void {
-    this.boxSize = boxSize;
-  }
-
-
-
-  /**
-   * Update les entités affichées
-   * @param enities // objets entité données par le serveur
-   */
-  public setEntities(enities: EntityServer[]): void {
-    enities.forEach(entity => {
-      const entityBoxes = entity.boxes;
-      const entityID = entity.id;
-
-      if (entityID && entityBoxes) {
-        const entityObject = new EntityDisplayed(
-          this,
-          entityBoxes,
-          200,
-          new Design("green"),
-          0
-        );
-        this.setEntity(entityID, entityObject);
-      }
-    });
-  }
-
-  /**
-   * @param id identifié de l'entité à ajouter / ou  à modifier
-   * @param entity objet représentant l'entité
-   */
-  public setEntity(id: number, entity: EntityDisplayed): void {
-    if (this.entities[id]) {
-      this.entities[id].clear();
-    }
-    this.entities.set(id,entity);
+    this.canvas = canvas
+    this.ctx = this.canvas.getContext("2d")
   }
 
   // ============================ Get ============================ \\
+  
+  public getGridHelper(): GridHelper {
+    return this.gridHelper
+  }
 
-  /**
-   * @returns renvoie le pinceau permettant d'afficher des éléments sur la grille
-   */
+  public getCanvas(): HTMLCanvasElement {
+    this.raiseErrorOnCond(!this.canvas, "Tried getting a canvas from DisplayManager without the canvas initialized.")
+    return this.canvas as HTMLCanvasElement
+  }
+
   public getCtx(): CanvasRenderingContext2D {
-    if (!this.ctx) {
-      throw new Error("Contexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.");
-    }
-    return this.ctx
+    this.raiseErrorOnCond(!this.ctx, "Tried getting the background context without it being initialized first.")
+    return this.ctx as CanvasRenderingContext2D
   }
 
-  /**
-   * @returns Renvoie la taille en pixel d'une case de jeu
-   */
-  public getBoxSize(): number {
-    return this.boxSize;
+  public getBackground(): HTMLCanvasElement {
+    this.raiseErrorOnCond(!this.background, "Tried getting a background canvas from DisplayManager without the background canvas initialized.")
+    return this.background as HTMLCanvasElement
   }
 
-  // ============================ Methodes publiques ============================ \\
-
-  /**
-   * Vérifie si une case à été effacé pendant l'animation
-   * @param coordinate Coordonnée de la case à vérifier
-   * @returns si la case à été effacé ou non
-   */
-  public existeModifiedBox(coordinate: number[]): boolean {
-    return this.modifiedboxes.has(coordinate.join("_"));
-  }
-
-  public startLoop() : void{
-    if (!this.inLoop){
-      this.inLoop = true;
-      this.loop();
-    }
-  }
-
-  public stopLoop() : void{
-    this.inLoop = false;
-  }
-
-  // ============================ Méthodes d'affichage ============================ \\
-
-  /**
-   * Efface une case de la grille de jeu
-   */
-  public clearBox(coordinate: number[]): void {
-    if (!this.existeModifiedBox(coordinate)) {
-      this.getCtx().clearRect(
-        coordinate[0] * this.getBoxSize(),
-        coordinate[1] * this.getBoxSize(),
-        this.getBoxSize(),
-        this.getBoxSize()
-      );
-      this.addModifiedbox(coordinate);
-    }
-  }
-
-  /**
-   * Update entièrement la grille de jeu
-   */
-  public show(): void {
-    if (this.canvas !== null) {
-      this.getCtx().clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.entities.forEach((entity : EntityDisplayed, id : number) => {
-        entity.setFullAnimation(true);
-        entity.animate(Date.now());
-      });
-    }
-  }
-
-  /**
-   * Update les partie qui ont changé sur la grille de jeu
-   */
-  public animate(): void {
-    this.clearModifiedboxes();
-    //console.log(this.entities.size);
-    this.entities.forEach((entity : EntityDisplayed) => {
-      entity.animate(Date.now());
-      //console.log("yo",entity);
-    });
-    this.clearModifiedboxes();
-  };
-
-  // ============================ Methodes privées de case modifié ============================ \\
-
-  /**
-   * Signal qu'une case à été effacé
-   * @param coordinate coordonnée de la case effacée
-   */
-  private addModifiedbox(coordinate: number[]): void {
-    this.modifiedboxes.add(coordinate.join(","));
-  }
-
-  /**
-   * reset l'attribut modifiedboxes, pour indiquer qu'ancune case n'a été effacé
-   */
-  private clearModifiedboxes(): void {
-    this.modifiedboxes = new Set();
-  }
-  /**
-   * La boucle de jeu
-   */
-  private loop() {
-    this.animate();
-    if (this.inLoop){
-      requestAnimationFrame(this.loop);
-    }
+  public getBgCtx(): CanvasRenderingContext2D {
+    this.raiseErrorOnCond(!this.bgCtx, "Tried getting the background context without it being initialized first.")
+    return this.bgCtx as CanvasRenderingContext2D
   }
 
   // ============================ CSS ============================ \\
 
-  private resizeTimeout: number | null = null;
+  private resizeTimeout: number | null = null
   
   private handleResize() {
-    if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+    if (this.resizeTimeout) clearTimeout(this.resizeTimeout)
     this.resizeTimeout = window.setTimeout(() => {
-      this.synchronizeCanvasToCSS();
-    }, 200); 
+      this.synchronizeCanvasToCSS()
+    }, 200)
   }
   
   private synchronizeCanvasToCSS() {
-    if(!this.canvas || !this.ctx) {
+    if(!this.background || !this.bgCtx || !this.canvas || !this.ctx) {
       this.gameManager.raiseError("Tried synchronize canvas' scale to css realtime scale on a non initialized canvas.")
       return
     }
-
-    console.log(this.canvas.width)
-    console.log(this.canvas.height)
-    const realtimeRect = this.canvas.getBoundingClientRect()
     const ratio = window.devicePixelRatio || 1
-    console.log(this.canvas.width)
-    console.log(this.canvas.height)
+    this.scaleToRealtimePixels(this.background, ratio)
+    this.scaleToRealtimePixels(this.canvas, ratio)
+    this.gridHelper.reevaluate()
+    this.displayGame.resize()
+    this.displayGrid.resize()
+  }
 
-    this.canvas.width = realtimeRect.width * ratio
-    this.canvas.height = realtimeRect.height * ratio;
+  private scaleToRealtimePixels(canvas: HTMLCanvasElement, ratio: number) {
+    const realtimeRect = canvas.getBoundingClientRect()
+    canvas.width = realtimeRect.width * ratio
+    canvas.height = realtimeRect.height * ratio
+  }
+
+  // ========================== Private =========================== \\
+  
+  private raiseErrorOnCond(condition: boolean, errorMessage: string) {
+    if (condition) {
+      this.gameManager.raiseError(errorMessage)
+    }
+  }
+  
+  private clearCanvas(canvas: HTMLCanvasElement | null, context: CanvasRenderingContext2D | null) {
+    if (!canvas || !context) {
+      this.gameManager.raiseError("Tried clearing the background canvas from DisplayManager without the canvas initialized.")
+      return 
+    }
+    context.clearRect(0, 0, canvas.width, canvas.height)
   }
 
 }

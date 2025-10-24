@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+@theme {
+  /* Base palette */
+  --color-dark-300: rgb(50, 38, 53);
+  --color-dark-200: rgb(65, 53, 68);
+  --color-dark-100: rgb(75, 63, 78);
+
+  --color-pig-300: rgb(255, 100, 120);
+  --color-pig-200: rgb(255, 120, 130);
+  --color-pig-100: rgb(255, 128, 135);
+
+  --color-sand-300: rgb(255, 200, 80);
+  --color-sand-200: rgb(255, 210, 90);
+  --color-sand-100: rgb(255, 220, 100);
+
+  --color-lime-300: rgb(150, 190, 75);
+  --color-lime-200: rgb(162, 202, 80);
+  --color-lime-100: rgb(175, 215, 85);
+
+  /* Semantic tokens — reference palette */
+  --color-content-neutral-primary: var(--color-dark-300);
+  --color-content-neutral-secondary: var(--color-dark-200);
+  --color-content-neutral-tertiary: var(--color-dark-100);
+
+  --color-content-inverse-primary: var(--color-lime-300);
+  --color-content-inverse-secondary: var(--color-sand-300);
+  --color-content-inverse-tertiary: var(--color-pig-300);
+
+  --color-content-brand-primary: var(--color-lime-100);
+  --color-content-brand-secondary: var(--color-sand-100);
+  --color-content-brand-tertiary: var(--color-pig-100);
+
+  --color-background-neutral-primary: var(--color-lime-300);
+  --color-background-neutral-secondary: var(--color-sand-300);
+  --color-background-neutral-tertiary: var(--color-pig-300);
+
+  --color-background-inverse-primary: var(--color-dark-100);
+  --color-background-inverse-secondary: var(--color-dark-200);
+  --color-background-inverse-tertiary: var(--color-dark-300);
+
+  --color-background-brand-primary: var(--color-lime-100);
+  --color-background-brand-secondary: var(--color-sand-100);
+  --color-background-brand-tertiary: var(--color-pig-100);
+}
