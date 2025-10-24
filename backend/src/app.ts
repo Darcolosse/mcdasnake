@@ -6,13 +6,13 @@ import { GameManager } from '@game/GameManager';
 const portAPI: number = 5000;
 const port: number = 5001;
 
-const gameManager: GameManager = new GameManager(port);
+new GameManager(port);
 
 
 const app = express();
 
 
-app.get('/health', async (req, res) => {
+app.get('/health', async (_req, res) => {
   res.send('Service is healthy');
 });
 

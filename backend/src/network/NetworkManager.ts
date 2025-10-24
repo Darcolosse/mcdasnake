@@ -44,6 +44,7 @@ export class NetworkManager {
 
 	private register(ws: WebSocket) {
 		ws.on('message', (message: string) => {
+			console.log(`Received message: ${message}`);
 			try {
 				const json = JSON.parse(message);
 				switch(json.type) {
@@ -62,16 +63,18 @@ export class NetworkManager {
 						break;
 				}
 			} catch (error) {
-				this.gameManager.raiseError("Couldn't read received event :", error)
+				//this.gameManager.raiseError("Couldn't read received event :", error)
 			}
 		});
 	}
 
 	private closeConnection(ws: WebSocket, snakeId: string) {
-		console.log(`Client disconnected: ${snakeId}`);
-		this.clients.delete(snakeId);
-		ws.close();
-		this.gameManager.handleClientEvent(new GameRemovePlayerDTO(), snakeId);
+		ws.on('close', () => {
+			console.log(`Client disconnected: ${snakeId}`);
+			this.clients.delete(snakeId);
+			ws.close();
+			this.gameManager.handleClientEvent(new GameRemovePlayerDTO(), snakeId);
+		});
 	}
 
 	public broadcast(data: DTO) {

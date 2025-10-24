@@ -2,7 +2,6 @@ import { Entity } from "@/Entity";
 import { Snake } from "@/Snake";
 import { Apple } from "@/Apple";
 import { Direction } from "@/Direction";
-import e from "express";
 
 export class Game {
 	private height: number;
