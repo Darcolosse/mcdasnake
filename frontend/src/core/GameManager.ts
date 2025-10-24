@@ -14,7 +14,7 @@ export class GameManager {
   constructor () {
     this.displayManager = new DisplayManager(this)
     this.eventManager = new EventManager(this)
-    this.networkManager = new NetworkManager(this, "")
+    this.networkManager = new NetworkManager(this, "ws://127.0.0.1:5001")
   }
 
   // ====================== Vertical layer ======================= \\
@@ -70,7 +70,7 @@ export class GameManager {
   public raiseError(errorMessage: string, error: any = null) {
     console.error('[FATAL]', errorMessage, error)
     // /!\ /!\ /!\
-    window.location.reload()
+    //window.location.reload()
     // /!\ /!\ /!\
   }
 
