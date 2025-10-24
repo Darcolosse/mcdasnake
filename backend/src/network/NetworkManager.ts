@@ -56,7 +56,7 @@ export class NetworkManager {
 							this.gameManager.handleClientEvent(new GameAddPlayerDTO(json), clientId);
 						});
 						break;
-					case DTOType.GameUpdateSnakeDirection:
+					case DTOType.SnakeTurn:
 						this.executeOnFound(ws, (clientId: string) => {
 							this.gameManager.handleClientEvent(new GameUpdateSnakeDirectionDTO(json), clientId);
 						});

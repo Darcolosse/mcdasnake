@@ -1,12 +1,13 @@
 import { Direction } from "@/Direction";
 import { Entity } from "@/Entity"
+import { GameRefreshResponseDTO } from "./network/dto/responses/GameRefreshResponseDTO";
 
 export class Snake implements Entity {
 	public readonly id: string;
 	public readonly cases: [number, number][];
 	public readonly name: string;
 	public direction: Direction;
-	public grow: boolean;
+	public newDirection: Direction;
 	public dead: boolean;
 
 
@@ -15,16 +16,15 @@ export class Snake implements Entity {
 		this.name = name;
 		this.cases = cases;
 		this.direction = direction;
-		this.grow = false;
+		this.newDirection = direction;
 		this.dead = false;
 	}
 
-	public move() {
-		const head = this.cases[this.cases.length - 1];
-		if (!this.grow) {
-			this.cases.shift() // Delete the queue
-		} else {
-			this.grow = false;
+	public move(entities: Map<string, Entity>, gameRefresh: GameRefreshResponseDTO) {
+		let head = this.getHead();
+		if (this.newDirection !== this.direction) {
+			this.direction = this.newDirection;
+			gameRefresh.entities.snakes.push(this);
 		}
 		// Add head
 		switch (this.direction) {
@@ -45,9 +45,22 @@ export class Snake implements Entity {
 					this.cases.push([head[0] + i, head[1]]);
 				}
 		}
+
+		// Remove tail
+		head = this.getHead();
+		for (const [_id, entity] of entities) {
+			if (head === entity.cases[0]) {
+				this.cases.shift(); // Delete tail
+				break;
+			}
+		}
 	}
 
 	public setDirection(direction: Direction) {
 		this.direction = direction;
+	}
+
+	public getHead(): [number, number] {
+		return this.cases[this.cases.length - 1];
 	}
 }

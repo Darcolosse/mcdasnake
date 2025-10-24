@@ -6,5 +6,7 @@ export const DTOType = {
   GameUpdate: 'GameUpdate',
   GameAddPlayer: 'GameAddPlayer',
   GameRemovePlayer: 'GameRemovePlayer',
-  GameUpdateSnakeDirection: 'GameUpdateSnakeDirection',
+  SnakeTurn: 'SnakeTurn',
+  GameRefreshResponse: 'GameRefreshResponse',
+  GameUpdateResponse: 'GameUpdateResponse',
 }
