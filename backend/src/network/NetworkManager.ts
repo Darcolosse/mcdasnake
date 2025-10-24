@@ -2,7 +2,7 @@ import { WebSocketServer } from "ws";
 import { GameManager } from "@game/GameManager";
 import { DTOType, type DTO } from "@network/dto/DTO";
 
-import { GameUpdateRequestDTO } from "@network/dto/requests/GameUpdateRequest";
+import { GameUpdateDTO } from "@/network/dto/requests/GameUpdateDTO";
 import { GameAddPlayerDTO } from "@network/dto/requests/GameAddPlayerDTO";
 import { GameUpdateSnakeDirectionDTO } from "@network/dto/requests/GameUpdateSnakeDirectionDTO";
 
@@ -40,6 +40,7 @@ export class NetworkManager {
 	public emit(id: string, message: DTO) {
 		const jsonMessage = JSON.stringify(message);
 		this.clients.get(id)?.send(jsonMessage);
+		console.log(`Sent message to ${id}: ${jsonMessage}`);
 	}
 
 	private register(ws: WebSocket) {
@@ -49,7 +50,9 @@ export class NetworkManager {
 				const json = JSON.parse(message);
 				switch(json.type) {
 					case DTOType.GameUpdate:
-						this.gameManager.handleClientEvent(new GameUpdateRequestDTO());
+						this.executeOnFound(ws, (clientId: string) => {
+							this.gameManager.handleClientEvent(new GameUpdateDTO(), clientId);
+						});
 						break;
 					case DTOType.GameAddPlayer:
 						this.executeOnFound(ws, (clientId: string) => {

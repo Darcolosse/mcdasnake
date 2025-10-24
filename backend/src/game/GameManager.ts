@@ -27,6 +27,7 @@ export class GameManager {
 				break;
 			case DTOType.GameUpdateResponse:
 				this.networkManager.emit(id, eventDTO);
+				console.log("Sent game update response to", id);
 				break;
 			default:
 				console.log("Unhandled event type:", eventDTO.type);
@@ -37,12 +38,12 @@ export class GameManager {
 		switch (eventDTO.type) {
 			case DTOType.GameUpdate:
 				//récup info
-				this.game.getState();
+				this.game.getState(id);
 				break;
 			case DTOType.GameAddPlayer:
 				const coord = this.game.getCoordinates();
 				this.game.addSnake(id, eventDTO.playerName, [[Game.random(0, coord[0] + 10), Game.random(0, coord[1] - 10)]], Direction.DOWN);
-				this.game.getState();
+				this.game.getState(id);
 				break;
 			case DTOType.SnakeTurn:
 				this.game.updateDirection(id, eventDTO.direction);
@@ -51,7 +52,7 @@ export class GameManager {
 				this.game.removeSnake(id);
 				break;
 			case DTOType.GameUpdateResponse:
-				this.game.getState();
+				this.game.getState(id);
 				break;
 			default:
 				console.log("Unhandled event type:", eventDTO.type);

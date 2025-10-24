@@ -3,7 +3,7 @@ import { DTOType, type DTO } from "../DTO";
 import { Apple } from "@/Apple";
 
 export class GameUpdateResponseDTO implements DTO {
-  type = DTOType.GameUpdate
+  type = DTOType.GameUpdateResponse;
 
   public gridSize: [number, number];
   public speed: number;

@@ -32,6 +32,7 @@ export class Game {
 	public updateGame() {
 		// Recuperer les evenements leves par les clients depuis la dernier boucle
     	const events = this.gameManager.popBuffer();	
+		events;
 		// Creation de la DTO a broadcast
 		const gameRefresh: GameRefreshResponseDTO = new GameRefreshResponseDTO();
 
