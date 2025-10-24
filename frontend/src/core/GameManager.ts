@@ -54,7 +54,8 @@ export class GameManager {
   // ===================== Management layer ====================== \\
 
   public handleClientEvent(eventDTO: DTO) {
-    console.log(eventDTO)
+    console.log(eventDTO);
+    this.networkManager.emit(eventDTO);
   }
 
   public handleServerEvent(eventDTO: DTO) {

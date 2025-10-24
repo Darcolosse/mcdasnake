@@ -3,22 +3,25 @@ import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
 import { SnakeDisplayed2 } from './SnakeDisplayed2.ts';
-import type { EntityServer } from '../network/dto/responses/EntityServer.ts';
+import type { EntitiesRefresh, EntitiesUpdate, EntityServer } from '../network/dto/responses/EntityServer.ts';
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
 import { AppleDisplayed } from './AppleDisplayed.ts';
 import { SpriteManager } from './SpriteManager.ts';
 import { Colors } from './colors.ts';
+import type { GameRefreshDTO } from '../network/dto/responses/GameRefresh.ts';
 
 export type SpriteName = "APPLE" | "HEAD" | "SCALE";
+type EntityType = "SNAKE" | "APPLE" | "ENTITY";
 
 export class DisplayGame {
 
   private displayManager: DisplayManager;
-  private entities: Map<number, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
+  private entities: Map<string, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
   private zindex: EntityDisplayed[] = [];
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
   private spriteManager: SpriteManager;
+  private gameSpeed : number = 500;
 
   constructor(displayManager: DisplayManager) {
     this.displayManager = displayManager;
@@ -76,8 +79,20 @@ export class DisplayGame {
     this.show();
   }
 
-  public refresh(dto : GameUpdateResponseDTO){
-    this.setEntities(dto.entities);
+  public refresh(dto : GameUpdateResponseDTO | GameRefreshDTO){
+    const snakes = dto.entities.snakes;
+    const apples = dto.entities.apples;
+
+    if ("speed" in dto){
+      this.gameSpeed = dto.speed;
+    }
+    
+    this.setEntities("SNAKE", snakes);
+    this.setEntities("APPLE", apples);
+    if ("removed" in dto.entities){
+      this.removeEntities(dto.entities.removed);
+    }
+    
   }
 
   // ============================ Requete DTO ============================ \\
@@ -86,19 +101,18 @@ export class DisplayGame {
    * Update les entités affichées
    * @param enities // objets entité données par le serveur
    */
-  private setEntities(enities: EntityServer[]): void {
-    enities.forEach(entity => {
+  private setEntities(entityType: EntityType, entites: EntityServer[], speed: number | undefined =undefined): void {
+
+    entites.forEach(entity => {
       const entityBoxes = entity.boxes;
       const entityID = entity.id;
-      const entityType = entity.type;
+      //const entityName = entity.name;
 
-
-
-      if (entityID && entityBoxes && entityType) {
+      if (entityID && entityBoxes) {
         let entityObject: EntityDisplayed;
         switch (entityType) {
           case ("SNAKE"):
-            entityObject = new SnakeDisplayed2(this, entityBoxes, 500, new Design(Colors.LIME), 1, 0);
+            entityObject = new SnakeDisplayed2(this, entityBoxes, this.gameSpeed, new Design(Colors.LIME), 1, 0);
             break;
           case ("APPLE"):
             entityObject = new AppleDisplayed(this, entityBoxes, 1000, new Design("red"), 0, 0);
@@ -113,7 +127,13 @@ export class DisplayGame {
     });
   }
 
-  public removeEntity(id: number){
+  private removeEntities(ids: string[]){
+    ids.forEach(id => {
+      this.removeEntity(id);
+    });
+  }
+
+  private removeEntity(id: string){
     const oldEntity = this.entities.get(id);
     if (oldEntity) {
       this.entities.delete(id);
@@ -126,7 +146,7 @@ export class DisplayGame {
    * @param id identifié de l'entité à ajouter / ou  à modifier
    * @param entity objet représentant l'entité
    */
-  private setEntity(id: number, entity: EntityDisplayed): void {
+  private setEntity(id: string, entity: EntityDisplayed): void {
     const oldEntity = this.entities.get(id) as EntityDisplayed;
     if (oldEntity) {
       oldEntity.clear();
