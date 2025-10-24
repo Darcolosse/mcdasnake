@@ -2,6 +2,9 @@ import { Entity } from "@/Entity";
 import { Snake } from "@/Snake";
 import { Apple } from "@/Apple";
 import { Direction } from "@/Direction";
+import { GameRefreshResponseDTO } from "@/network/dto/responses/GameRefreshResponseDTO";
+import { GameManager } from "@game/GameManager";
+import { GameUpdateResponseDTO } from "@/network/dto/responses/GameUpdateResponseDTO";
 
 export class Game {
 	private height: number;
@@ -14,7 +17,10 @@ export class Game {
 
 	private tickRate: number;
 
-	constructor(width: number = 800, height: number = 800, tickRate: number = 60) {
+	private gameManager: GameManager;
+
+	constructor(gameManager: GameManager, width: number = 800, height: number = 800, tickRate: number = 200) {
+		this.gameManager = gameManager;
 		this.width = width;
 		this.height = height;
 		this.snakes = new Map<string, Snake>();
@@ -24,41 +30,85 @@ export class Game {
 	}
 
 	public updateGame() {
-		this.moveSnakes();
-		this.checkCollisions();
+		// Recuperer les evenements leves par les clients depuis la dernier boucle
+    	const events = this.gameManager.popBuffer();	
+		// Creation de la DTO a broadcast
+		const gameRefresh: GameRefreshResponseDTO = new GameRefreshResponseDTO();
+
+		//Voir pour ajouter des Pommes
+
+		// Déplacer les têtes et éventuellement garder les queues
+		this.moveSnakes(gameRefresh);
+
+		// Pour chaque snake, tester la position de la tête et traiter les incoherences
+		this.checkCollisions(gameRefresh);
+
+		// Broadcast 
+		if(!gameRefresh.isEmpty()) {
+			this.gameManager.handleGameEvent(gameRefresh);
+		}
 		setTimeout(this.updateGame, 1000 / this.tickRate);
 	}
 
-	public getState() {
-		return this.map;
+	public getState(id: string = '') {
+		this.gameManager.handleGameEvent(
+			new GameUpdateResponseDTO(
+				Array.from(this.snakes.values()),
+				Array.from(this.apples.values()), 
+				[this.width, this.height], 
+				this.tickRate
+			), id);
 	}
 
-	public moveSnakes() {
+	public moveSnakes(gameRefresh: GameRefreshResponseDTO) {
 		this.snakes.forEach(snake => {
-			snake.move();
+			snake.move(this.apples, gameRefresh);
 		});
 	}
 
-	private checkCollisions() {
+	private checkCollisions(gameRefresh: GameRefreshResponseDTO) {
 		this.snakes.forEach(snake => {
-			for (const [coord, entity] of this.map) {
-				if (this.map.has(coord)) {
-					if (entity instanceof Snake) {
-						snake.dead = true;
-					} else if (entity instanceof Apple) {
-						snake.grow = true;
-						this.apples.delete(entity.id);
-						this.map.delete(coord);
-					} else {
-						this.map.set(coord, snake);
+			this.check(snake, gameRefresh);
+		});
+		this.apples.forEach(apple => {
+			this.check(apple, gameRefresh);
+		});
+	}
+
+	private check(entity: Entity, gameRefresh: GameRefreshResponseDTO) {
+		entity.cases.forEach(coord => {
+			if (this.map.has(coord)) {
+				let other_entity = this.map.get(coord);
+				if (other_entity instanceof Apple) {
+					this.apples.delete(other_entity.id);
+					this.map.delete(coord);
+					gameRefresh.entities.removed.push(other_entity.id);
+				} else if (other_entity instanceof Snake) {
+					if (other_entity.getHead() == coord && entity.getHead() == coord) {
+						// Head-on collision
+						entity.dead = true;
+						other_entity.dead = true;
+						gameRefresh.entities.removed.push(entity.id);
+						gameRefresh.entities.removed.push(other_entity.id);
+					} else if (other_entity.getHead() == coord && entity.getHead() != coord) {
+						// body collision
+						other_entity.dead = true;
+						gameRefresh.entities.removed.push(other_entity.id);
+					} else if (other_entity.getHead() != coord && entity.getHead() == coord) {
+						// body collision
+						entity.dead = true;
+						gameRefresh.entities.removed.push(entity.id);
 					}
 				}
+			} else {
+				this.map.set(coord, entity);
 			}
 		});
 	}
 
 	public updateDirection(snakeId: string, direction: Direction) {
 		this.snakes.get(snakeId)?.setDirection(direction);
+
 	}
 
 	public addSnake(snakeId: string, name: string, coordinates: [[number, number]], direction: Direction) {
