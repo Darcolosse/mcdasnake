@@ -38,5 +38,5 @@ function EntitiesLoader(entities: any) : EntityServer[]{
 }
 
 function EntityLoader(entity: any): EntityServer {
-  return { id: entity.id, boxes: entity.boxes, name: entity.name } as EntityServer
+  return { id: entity.id, boxes: entity.cases, name: entity.name } as EntityServer
 } 

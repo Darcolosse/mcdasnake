@@ -3,7 +3,7 @@ import { Snake } from "@/Snake";
 import { Apple } from "@/Apple";
 import { Direction } from "@/Direction";
 import { GameRefreshResponseDTO } from "@/network/dto/responses/GameRefreshResponseDTO";
-import { GameManager } from "@game/GameManager";
+import { GameManager, TrucMoche } from "@game/GameManager";
 import { GameUpdateResponseDTO } from "@/network/dto/responses/GameUpdateResponseDTO";
 
 export class Game {
@@ -30,11 +30,12 @@ export class Game {
 	}
 
 	public updateGame() {
-		// Recuperer les evenements leves par les clients depuis la dernier boucle
-    	const events = this.gameManager.popBuffer();	
-		events;
-		// Creation de la DTO a broadcast
+    const events: TrucMoche[] = this.gameManager.popBuffer();	
 		const gameRefresh: GameRefreshResponseDTO = new GameRefreshResponseDTO();
+
+    events.map((event) => {
+      this.updateDirection(event.id, event.dto.direction)
+    })
 
 		//Voir pour ajouter des Pommes
 
@@ -47,18 +48,19 @@ export class Game {
 		// Broadcast 
 		if(!gameRefresh.isEmpty()) {
 			this.gameManager.handleGameEvent(gameRefresh);
+      console.log("refresh not empty")
 		}
-		setTimeout(this.updateGame, 1000 / this.tickRate);
+
+		setTimeout(this.updateGame.bind(this), this.tickRate);
 	}
 
-	public getState(id: string = '') {
-		this.gameManager.handleGameEvent(
-			new GameUpdateResponseDTO(
-				Array.from(this.snakes.values()),
-				Array.from(this.apples.values()), 
-				[this.width, this.height], 
-				this.tickRate
-			), id);
+	public getState(): GameUpdateResponseDTO {
+    return new GameUpdateResponseDTO(
+      Array.from(this.snakes.values()),
+      Array.from(this.apples.values()), 
+      [this.width, this.height], 
+      this.tickRate
+    )
 	}
 
 	public moveSnakes(gameRefresh: GameRefreshResponseDTO) {

@@ -6,7 +6,8 @@ import { GameManager } from '@game/GameManager';
 const portAPI: number = 5000;
 const port: number = 5001;
 
-new GameManager(port);
+const gameManager = new GameManager(port);
+gameManager.start();
 
 
 const app = express();

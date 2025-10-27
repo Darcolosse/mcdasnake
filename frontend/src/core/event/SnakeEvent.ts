@@ -1,11 +1,11 @@
+import { Direction, GameUpdateSnakeDirectionDTO } from "../network/dto/requests/GameUpdateSnakeDirectionDTO";
 import { EventManager } from "./EventManager";
-import { Direction, TurnRequestDTO } from "../network/dto/requests/TurnRequest"
 
 export class SnakeEvent {
 
   private eventManager : EventManager;
 
-  private lastDirection: Direction | null;
+  private lastDirection: Direction| null;
 
   private static KEY_TO_DIRECTION: Record<string,Direction> = {
     "ArrowUp" : Direction.UP,
@@ -25,8 +25,8 @@ export class SnakeEvent {
   private start : [number, number] = [0, 0];
   
   constructor(eventManager: EventManager){
-      this.eventManager = eventManager
-      this.listen();
+    this.eventManager = eventManager
+    this.lastDirection = null
   }
 
   // ============================ Pullic methods ============================ \\
@@ -56,7 +56,7 @@ export class SnakeEvent {
   public changeDirection(direction : Direction | undefined) : void {
     if(direction && direction != this.lastDirection) {
       this.lastDirection = direction
-      this.eventManager.raiseEvent(new TurnRequestDTO(direction))
+      this.eventManager.raiseEvent(new GameUpdateSnakeDirectionDTO(direction))
     } 
   }
 

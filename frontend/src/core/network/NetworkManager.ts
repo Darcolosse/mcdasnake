@@ -1,5 +1,6 @@
 import { GameManager } from "../GameManager"
 import { DTOType, type DTO } from "./dto/DTO"
+import { GameRefreshDTO } from "./dto/responses/GameRefresh"
 import { GameUpdateResponseDTO } from "./dto/responses/GameUpdateResponse"
 
 export class NetworkManager {
@@ -18,6 +19,7 @@ export class NetworkManager {
   // ====================== Vertical layer ======================= \\
 
   public connect() : Promise<void> {
+    this.gameManager.log(this, `Trying to connect to the server on ${this.websocketURL}`)
     return new Promise((openHandler) => {
       this.socket = new WebSocket(this.websocketURL)
       this.registerHandlers(openHandler)
@@ -29,6 +31,7 @@ export class NetworkManager {
       this.gameManager.raiseError("Tried to disconnect from the game with a non initialized socket.");
       return;
     } 
+    this.gameManager.log(this, `Closing websocket connection to ${this.websocketURL}`)
     this.socket.close()
   }
 
@@ -37,6 +40,7 @@ export class NetworkManager {
       this.gameManager.raiseError("Tried to emit a message to the server with a non initialized socket.");
       return;
     } 
+    this.gameManager.log(this, `Sending to server:`, message)
     this.socket.send(JSON.stringify(message)) 
   }
 
@@ -52,6 +56,7 @@ export class NetworkManager {
     // # Connection established #
     // #                        #
     this.socket.addEventListener('open', _ => {
+      this.gameManager.log(this, "Connection established")
       openHandler()
     });
 
@@ -60,9 +65,13 @@ export class NetworkManager {
     // #                                 #
     this.socket.addEventListener('message', event => {
       try {
+        this.gameManager.log(this, "Received from server:", event)
         const json = JSON.parse(event.data);
         switch(json.type) {
-          case DTOType.GameUpdate: this.gameManager.handleServerEvent(new GameUpdateResponseDTO(json));
+          case DTOType.GameRefresh: this.gameManager.handleServerEvent(new GameRefreshDTO(json)); break
+          case DTOType.GameUpdate: this.gameManager.handleServerEvent(new GameUpdateResponseDTO(json)); break
+          default:
+            this.gameManager.log(this, "Handler of event not implemented", event)
         }
       } catch (error) {
         this.gameManager.raiseError("Couldn't read received event :", error)

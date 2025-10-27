@@ -1,9 +1,8 @@
 import { DisplayManager } from './DisplayManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
-import { SnakeDisplayed } from './SnakeDisplayed.ts';
 import { SnakeDisplayed2 } from './SnakeDisplayed2.ts';
-import type { EntitiesRefresh, EntitiesUpdate, EntityServer } from '../network/dto/responses/EntityServer.ts';
+import type { EntityServer } from '../network/dto/responses/EntityServer.ts';
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
 import { AppleDisplayed } from './AppleDisplayed.ts';
 import { SpriteManager } from './SpriteManager.ts';
@@ -79,7 +78,8 @@ export class DisplayGame {
     this.show();
   }
 
-  public refresh(dto : GameUpdateResponseDTO | GameRefreshDTO){
+  public refresh(dto : GameRefreshDTO | GameUpdateResponseDTO){
+    console.log("in refresh")
     const snakes = dto.entities.snakes;
     const apples = dto.entities.apples;
 

@@ -1,11 +1,15 @@
+import { CookieType, getCookie } from "../util/cookies";
 import { DisplayManager } from "./display/DisplayManager"
 import { EventManager } from "./event/EventManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
-import { GameUpdateRequestDTO } from "./network/dto/requests/GameUpdateRequest";
+import { GameAddPlayerDTO } from "./network/dto/requests/GameAddPlayerDTO";
+import type { GameRefreshDTO } from "./network/dto/responses/GameRefresh";
 import { GameUpdateResponseDTO } from "./network/dto/responses/GameUpdateResponse";
 import { NetworkManager } from "./network/NetworkManager";
 
 export class GameManager {
+
+  private readonly debug : boolean = true;
 
   private readonly displayManager: DisplayManager;
   private readonly eventManager: EventManager;
@@ -21,31 +25,21 @@ export class GameManager {
 
   public start(background : HTMLCanvasElement | null, canvas : HTMLCanvasElement | null) {
     if(background && canvas) {
+      this.log(this, "Initializing canvas and connecting to server")
       this.displayManager.initialize(background as HTMLCanvasElement, canvas as HTMLCanvasElement)
       this.displayManager.showConnection()
       this.networkManager.connect().then(() => {
+        this.log(this, "Sending an add request to the server after being connected")
         this.eventManager.startListening()
-        this.networkManager.emit(new GameUpdateRequestDTO())
+        this.handleClientEvent(new GameAddPlayerDTO(getCookie(CookieType.Username) as string))
       })
-      this.test();
     } else {
       this.raiseError("Canvas elements not found. Couldn't start the game.")
     }
   }
 
-  public test(){
-    this.handleServerEvent(new GameUpdateResponseDTO(
-      {
-        "boxSize": 20,
-        "entities": [
-                      {"id": 1, "boxes":[[1,1],[2,1],[3,1],[3,2]], "type": "SNAKE"},
-                      {"id": 2, "boxes":[[3,6]], "type": "APPLE"},
-                    ] 
-      }
-    ))
-  }
-
   public close() {
+    this.log(this, "Closing")
     this.eventManager.stopListening()
     this.displayManager.destroy()
     this.networkManager.disconnect()
@@ -54,18 +48,44 @@ export class GameManager {
   // ===================== Management layer ====================== \\
 
   public handleClientEvent(eventDTO: DTO) {
-    console.log(eventDTO);
-    this.networkManager.emit(eventDTO);
+    this.log(this, "Handling client event", eventDTO)
+    switch(eventDTO.type) {
+      case DTOType.AddPlayer :
+      case DTOType.GameUpdate :
+      case DTOType.SnakeTurn :
+        this.networkManager.emit(eventDTO);
+        break;
+      default:
+        this.log(this, "Handler of event not implemented.", eventDTO)
+        break;
+    }
   }
 
   public handleServerEvent(eventDTO: DTO) {
+    this.log(this, "Handling an event from server")
     switch(eventDTO.type) {
+      case DTOType.GameRefresh :
+        this.displayManager.refreshGame(eventDTO as GameRefreshDTO)
+        break;
       case DTOType.GameUpdate :
-        this.displayManager.refreshGame(eventDTO as GameUpdateResponseDTO)
+        this.displayManager.updateGameLayers(eventDTO as GameUpdateResponseDTO)
         this.displayManager.showGame()
+        break;
+      default:
+        this.log(this, "Handler of event not implemented.", eventDTO)
         break;
     }
     
+  }
+
+  public log(responsible: object, ...data: any[]){
+    if(this.debug) {
+      if(data[0] && typeof data[0] === "string") {
+        console.log(`[${responsible.constructor.name.toUpperCase()}] ${data[0]}`, data.slice(1))
+      } else {
+        console.log(`[${responsible.constructor.name.toUpperCase()}]`, data)
+      }
+    }
   }
 
   public raiseError(errorMessage: string, error: any = null) {

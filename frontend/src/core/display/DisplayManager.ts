@@ -1,4 +1,5 @@
 import { GameManager } from '../GameManager.ts'
+import type { GameRefreshDTO } from '../network/dto/responses/GameRefresh.ts'
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts'
 import { DisplayConnect } from './DisplayConnect.ts'
 import { DisplayGame } from './DisplayGame.ts'
@@ -31,6 +32,7 @@ export class DisplayManager {
   // ======================== Life Cycle ========================= \\
 
   public initialize(background: HTMLCanvasElement, canvas: HTMLCanvasElement) {
+    this.gameManager.log(this, "Initializing background and game canvas")
     this.setBackground(background)
     this.setCanvas(canvas)
     this.synchronizeCanvasToCSS()
@@ -39,31 +41,42 @@ export class DisplayManager {
   }
 
   public clearBackgroundCanvas(){
+    this.gameManager.log(this, "Clearing background canvas")
     this.clearCanvas(this.background, this.bgCtx)
   }
 
   public clearGameCanvas(){
+    this.gameManager.log(this, "Clearing game canvas")
     this.clearCanvas(this.canvas, this.ctx)
   }
 
-  public refreshGame(dto: GameUpdateResponseDTO) {
-    this.gridHelper.setSize(dto.boxSize, dto.boxSize)
+  public refreshGame(dto : GameRefreshDTO) {
+    this.gameManager.log(this, "Refreshing game with new information")
+    this.displayGame.refresh(dto)
+  }
+
+  public updateGameLayers(dto: GameUpdateResponseDTO) {
+    this.gameManager.log(this, "Updating game and grid with most recent information")
+    this.gridHelper.setSize(dto.gridSize[0], dto.gridSize[1])
     this.displayGame.refresh(dto)
   }
 
   public destroy() {
+    this.gameManager.log(this, "Cleaning")
     this.background = this.bgCtx = this.canvas = this.ctx = null
   }
 
   // =========================== Show ============================ \\
 
   public showGame() {
+    this.gameManager.log(this, "Showing game screen")
     this.displayGrid.show()
     this.displayGame.show()
     this.displayGame.startLoop()
   }
 
   public showConnection() {
+    this.gameManager.log(this, "Showing connection screen")
     this.gridHelper.setSize(2, 2)
     this.displayGrid.show()
     this.displayConnect.show()
@@ -123,6 +136,7 @@ export class DisplayManager {
       this.gameManager.raiseError("Tried synchronize canvas' scale to css realtime scale on a non initialized canvas.")
       return
     }
+    this.gameManager.log(this, "Synchronizing canvas to CSS realtime pixels")
     const ratio = window.devicePixelRatio || 1
     this.scaleToRealtimePixels(this.background, ratio)
     this.scaleToRealtimePixels(this.canvas, ratio)

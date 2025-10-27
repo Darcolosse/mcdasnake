@@ -2,11 +2,17 @@ import { NetworkManager } from "@network/NetworkManager";
 import { Game } from "@game/Game";
 import { Direction } from "@/Direction";
 import { DTO, DTOType } from "@/network/dto/DTO";
+import { GameUpdateSnakeDirectionDTO } from "@/network/dto/requests/GameUpdateSnakeDirectionDTO";
+
+export interface TrucMoche {
+  id: string,
+  dto: GameUpdateSnakeDirectionDTO
+}
 
 export class GameManager {
 	private networkManager: NetworkManager;
 	private game: Game;
-	private eventBuffer: Direction[];
+	private eventBuffer: TrucMoche[];
 
 	constructor(port: number) {
 		this.networkManager = new NetworkManager(this);
@@ -14,13 +20,12 @@ export class GameManager {
 		this.game = new Game(this);
 		this.eventBuffer = [];
 	}
+  
+  // ===================== Management layer ====================== \\
 
-	public addPlayer(id: string, name:string) {
-		const coord = this.game.getCoordinates();
-    const randomCoordinates: [number, number] = [Game.random(0, coord[0] + 10), Game.random(0, coord[1] - 10)] 
-    const caseUnderRandom: [number, number] = [randomCoordinates[0], randomCoordinates[1]+1]
-		this.game.addSnake(id, name, [randomCoordinates, caseUnderRandom], Direction.DOWN);
-	}
+  public start() {
+    this.game.updateGame();
+  }
 
 	public handleGameEvent(eventDTO: DTO, id: string = '') {
 		switch (eventDTO.type) {
@@ -39,16 +44,15 @@ export class GameManager {
 	public handleClientEvent(eventDTO: any, id: string = '') {
     console.log('Received:', eventDTO);
 		switch (eventDTO.type) {
-			case DTOType.GameUpdate:
-				//récup info
-				this.game.getState(id);
-				break;
 			case DTOType.AddPlayer:
         this.addPlayer(id, eventDTO.playerName);
-				this.game.getState(id);
+				this.networkManager.emit(id, this.game.getState());
+				break;
+			case DTOType.GameUpdate:
+				this.networkManager.emit(id, this.game.getState());
 				break;
 			case DTOType.SnakeTurn:
-				this.game.updateDirection(id, eventDTO.direction);
+        this.eventBuffer.push({ id: id, dto: eventDTO } as TrucMoche)
 				break;
 			case DTOType.RemovePlayer:
 				this.game.removeSnake(id);
@@ -58,17 +62,19 @@ export class GameManager {
 		}
 	}
 
-	public gameUpdate() {
-		return
-	}
-
-	public popBuffer(): Direction[] {
+	public popBuffer(): TrucMoche[] {
 		const events = this.eventBuffer.slice();
 		this.eventBuffer = [];
 		return events;
 	}
+  
+  // ========================== Private ========================== \\
+
+	private addPlayer(id: string, name:string) {
+		const coord = this.game.getCoordinates();
+    const randomCoordinates = [Game.random(0, coord[0] + 10), Game.random(0, coord[1] - 10)] 
+    const caseUnderRandom = [randomCoordinates[0], randomCoordinates[1]+1]
+		this.game.addSnake(id, name, [randomCoordinates, caseUnderRandom] as [number, number][], Direction.DOWN);
+	}
+
 }
-
-
-
-

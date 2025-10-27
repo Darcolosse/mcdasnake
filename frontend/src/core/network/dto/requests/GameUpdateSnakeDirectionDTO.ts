@@ -9,12 +9,12 @@ export const Direction = {
 
 export type Direction = typeof Direction[keyof typeof Direction]
 
-export class TurnRequestDTO implements DTO {
-  type = DTOType.Turn
-  public direction: Direction
+export class GameUpdateSnakeDirectionDTO implements DTO {
+  type = DTOType.SnakeTurn;
 
+  public direction: Direction;
 
-  constructor(direction: Direction) {
-    this.direction = direction
+  constructor(dir: Direction) {
+    this.direction = dir;
   }
 }
