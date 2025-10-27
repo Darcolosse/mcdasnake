@@ -4,9 +4,8 @@ export interface DTO {
 
 export const DTOType = {
   GameUpdate: 'GameUpdate',
-  GameAddPlayer: 'GameAddPlayer',
-  GameRemovePlayer: 'GameRemovePlayer',
+  AddPlayer: 'AddPlayer',
+  RemovePlayer: 'RemovePlayer',
   SnakeTurn: 'SnakeTurn',
-  GameRefreshResponse: 'GameRefreshResponse',
-  GameUpdateResponse: 'GameUpdateResponse',
+  GameRefresh: 'GameRefresh',
 }

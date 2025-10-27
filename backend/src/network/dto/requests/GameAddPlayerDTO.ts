@@ -1,7 +1,7 @@
 import { DTOType, type DTO } from "@network/dto/DTO";
 
 export class GameAddPlayerDTO implements DTO {
-  type = DTOType.GameAddPlayer;
+  type = DTOType.AddPlayer;
 
   public name: string;
 

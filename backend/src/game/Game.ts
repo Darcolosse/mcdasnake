@@ -19,7 +19,7 @@ export class Game {
 
 	private gameManager: GameManager;
 
-	constructor(gameManager: GameManager, width: number = 800, height: number = 800, tickRate: number = 200) {
+	constructor(gameManager: GameManager, width: number = 64, height: number = 64, tickRate: number = 200) {
 		this.gameManager = gameManager;
 		this.width = width;
 		this.height = height;
@@ -112,7 +112,8 @@ export class Game {
 
 	}
 
-	public addSnake(snakeId: string, name: string, coordinates: [[number, number]], direction: Direction) {
+	public addSnake(snakeId: string, name: string, coordinates: [number, number][], direction: Direction) {
+    console.log(coordinates)
 		this.snakes.set(snakeId, new Snake(snakeId, name, coordinates, direction));
 	}
 

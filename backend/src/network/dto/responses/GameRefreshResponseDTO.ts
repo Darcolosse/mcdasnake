@@ -4,7 +4,7 @@ import { DTOType, type DTO } from "@network/dto/DTO";
 import { Entity } from "@/Entity";
 
 export class GameRefreshResponseDTO implements DTO {
-    type = DTOType.GameRefreshResponse;
+    type = DTOType.GameRefresh;
 
     public entities: { snakes: Array<Entity>, apples: Array<Entity>, removed: Array<string> };
 
