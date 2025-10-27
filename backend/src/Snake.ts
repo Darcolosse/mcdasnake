@@ -21,12 +21,13 @@ export class Snake implements Entity {
 	}
 
 	public move(entities: Map<string, Entity>, gameRefresh: GameRefreshResponseDTO) {
-		let head = this.getHead();
 		if (this.newDirection !== this.direction) {
 			this.direction = this.newDirection;
 			gameRefresh.entities.snakes.push(this);
 		}
+    
 		// Add head
+		let head = this.getHead();
 		switch (this.direction) {
 			case Direction.UP:
 				this.cases.push([head[0], head[1] - 1]);
@@ -41,23 +42,32 @@ export class Snake implements Entity {
 				this.cases.push([head[0] - 1, head[1]]);
 				break;
 			default:
+        console.log("moving")
 				for (let i = 0; i < 10; i++) {
 					this.cases.push([head[0] + i, head[1]]);
 				}
+        break;
 		}
 
 		// Remove tail
 		head = this.getHead();
+    let headOnSomething: boolean = false;
 		for (const [_id, entity] of entities) {
-			if (head === entity.cases[0]) {
-				this.cases.shift(); // Delete tail
-				break;
-			}
+      for(const [x, y] of entity.cases) {
+        if (head[0] === x && head[1] === y) {
+          headOnSomething = true;
+          break;
+        }
+      }
+      if(headOnSomething) break;
 		}
+    if(!headOnSomething) {
+      this.cases.shift(); // Delete tail
+    }
 	}
 
 	public setDirection(direction: Direction) {
-		this.direction = direction;
+		this.newDirection = direction;
 	}
 
 	public getHead(): [number, number] {

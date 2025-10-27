@@ -5,6 +5,7 @@ import { Direction } from "@/Direction";
 import { GameRefreshResponseDTO } from "@/network/dto/responses/GameRefreshResponseDTO";
 import { GameManager, TrucMoche } from "@game/GameManager";
 import { GameUpdateResponseDTO } from "@/network/dto/responses/GameUpdateResponseDTO";
+import { randomUUID } from "crypto";
 
 export class Game {
 	private height: number;
@@ -19,7 +20,7 @@ export class Game {
 
 	private gameManager: GameManager;
 
-	constructor(gameManager: GameManager, width: number = 64, height: number = 64, tickRate: number = 200) {
+	constructor(gameManager: GameManager, width: number = 16, height: number = 16, tickRate: number = 200) {
 		this.gameManager = gameManager;
 		this.width = width;
 		this.height = height;
@@ -37,15 +38,16 @@ export class Game {
       this.updateDirection(event.id, event.dto.direction)
     })
 
-		//Voir pour ajouter des Pommes
-
-		// Déplacer les têtes et éventuellement garder les queues
 		this.moveSnakes(gameRefresh);
-
-		// Pour chaque snake, tester la position de la tête et traiter les incoherences
 		this.checkCollisions(gameRefresh);
 
-		// Broadcast 
+    if(Math.random() < 0.03) {
+      const apple = new Apple(randomUUID(), [[0, 0]])
+      apple.generateRandom(this.width, this.height)
+      this.addApple(apple)
+      gameRefresh.entities.apples.push(apple)
+    }
+
 		if(!gameRefresh.isEmpty()) {
 			this.gameManager.handleGameEvent(gameRefresh);
       console.log("refresh not empty")
@@ -70,48 +72,53 @@ export class Game {
 	}
 
 	private checkCollisions(gameRefresh: GameRefreshResponseDTO) {
+    // Clearing map
+    this.map.clear();
+
+    // Adding apples
+		this.apples.forEach(apple => {
+      if(!this.map.has(apple.getHead())) {
+				this.map.set(apple.getHead(), apple);
+      }
+		});
+
+    // Checking snake collisions
 		this.snakes.forEach(snake => {
 			this.check(snake, gameRefresh);
 		});
-		this.apples.forEach(apple => {
-			this.check(apple, gameRefresh);
-		});
 	}
 
-	private check(entity: Entity, gameRefresh: GameRefreshResponseDTO) {
-		entity.cases.forEach(coord => {
-			if (this.map.has(coord)) {
+	private check(snake: Entity, gameRefresh: GameRefreshResponseDTO) {
+		snake.cases.forEach(coord => {
+			if (!this.map.has(coord)) {
+				this.map.set(coord, snake);
+			} else {
 				let other_entity = this.map.get(coord);
+        console.log(other_entity)
+
+        if(other_entity) {
+          console.log("Head on something")
+        }
+
+        // Collides with an apple
 				if (other_entity instanceof Apple) {
 					this.apples.delete(other_entity.id);
 					this.map.delete(coord);
 					gameRefresh.entities.removed.push(other_entity.id);
-				} else if (other_entity instanceof Snake) {
-					if (other_entity.getHead() == coord && entity.getHead() == coord) {
-						// Head-on collision
-						entity.dead = true;
-						other_entity.dead = true;
-						gameRefresh.entities.removed.push(entity.id);
-						gameRefresh.entities.removed.push(other_entity.id);
-					} else if (other_entity.getHead() == coord && entity.getHead() != coord) {
-						// body collision
-						other_entity.dead = true;
-						gameRefresh.entities.removed.push(other_entity.id);
-					} else if (other_entity.getHead() != coord && entity.getHead() == coord) {
-						// body collision
-						entity.dead = true;
-						gameRefresh.entities.removed.push(entity.id);
-					}
+          console.log("should eat an apple")
+				} 
+
+        // Collides with a snake
+        else if (other_entity instanceof Snake) {
+          snake.dead = true;
+          gameRefresh.entities.removed.push(snake.id);
 				}
-			} else {
-				this.map.set(coord, entity);
 			}
 		});
 	}
 
 	public updateDirection(snakeId: string, direction: Direction) {
 		this.snakes.get(snakeId)?.setDirection(direction);
-
 	}
 
 	public addSnake(snakeId: string, name: string, coordinates: [number, number][], direction: Direction) {
