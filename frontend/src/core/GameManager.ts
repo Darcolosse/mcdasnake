@@ -65,6 +65,7 @@ export class GameManager {
     this.log(this, "Handling an event from server")
     switch(eventDTO.type) {
       case DTOType.GameRefresh :
+        console.log(eventDTO)
         this.displayManager.refreshGame(eventDTO as GameRefreshDTO)
         break;
       case DTOType.GameUpdate :

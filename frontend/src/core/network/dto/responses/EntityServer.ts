@@ -18,7 +18,7 @@ export interface EntitiesUpdate{
 export function EntitiesRefreshLoader(entities: any) : EntitiesRefresh{
   return {
     snakes: EntitiesLoader(entities.snakes),
-    apples: EntitiesLoader(entities.apple),
+    apples: EntitiesLoader(entities.apples),
     removed: entities.removed
   }
 }
@@ -26,7 +26,7 @@ export function EntitiesRefreshLoader(entities: any) : EntitiesRefresh{
 export function EntitiesUpdateLoader(entities: any) : EntitiesUpdate{
   return {
     snakes: EntitiesLoader(entities.snakes),
-    apples: EntitiesLoader(entities.apple),
+    apples: EntitiesLoader(entities.apples),
   }
 }
 

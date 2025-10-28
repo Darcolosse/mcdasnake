@@ -79,9 +79,9 @@ export class DisplayGame {
   }
 
   public refresh(dto : GameRefreshDTO | GameUpdateResponseDTO){
-    console.log("in refresh")
     const snakes = dto.entities.snakes;
     const apples = dto.entities.apples;
+    console.log(apples)
 
     if ("speed" in dto){
       this.gameSpeed = dto.speed;
@@ -101,7 +101,7 @@ export class DisplayGame {
    * Update les entités affichées
    * @param enities // objets entité données par le serveur
    */
-  private setEntities(entityType: EntityType, entites: EntityServer[], speed: number | undefined =undefined): void {
+  private setEntities(entityType: EntityType, entites: EntityServer[]): void {
 
     entites.forEach(entity => {
       const entityBoxes = entity.boxes;
@@ -115,6 +115,7 @@ export class DisplayGame {
             entityObject = new SnakeDisplayed2(this, entityBoxes, this.gameSpeed, new Design(Colors.LIME), 1, 0);
             break;
           case ("APPLE"):
+            console.log("drawing apple")
             entityObject = new AppleDisplayed(this, entityBoxes, 1000, new Design("red"), 0, 0);
             break;
 
@@ -152,13 +153,15 @@ export class DisplayGame {
       oldEntity.clear();
     }
     this.entities.set(id,entity);
-    this.updateZindex(entity);
+    this.updateZindex(oldEntity, entity);
   }
 
-  private updateZindex(entity: EntityDisplayed){
-    if (this.zindex.indexOf(entity) === -1){
-      this.zindex.push(entity)
+  private updateZindex(oldEntity: EntityDisplayed, entity: EntityDisplayed){
+    const index = this.zindex.indexOf(oldEntity)
+    if (index !== -1){
+      this.zindex.splice(index, 1)
     }
+    this.zindex.push(entity)
     this.zindex.sort((a, b) => a.getZindex() - b.getZindex());
   }
 

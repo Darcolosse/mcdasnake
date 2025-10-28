@@ -51,9 +51,9 @@ export class EntityDisplayed{
      * Fait disparaitre entièrement les cases ou se trouve l'entité.
      */
     public clear(): void{
-        this.boxes.forEach(box => {
-            this.display.clearBox(box);
-        });
+      this.boxes.forEach(box => {
+        this.display.clearBox(box);
+      });
     }
 
     /**
