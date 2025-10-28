@@ -90,34 +90,32 @@ export class Game {
 
 	private check(snake: Snake, gameRefresh: GameRefreshResponseDTO) {
 		snake.cases.forEach(coord => {
-      let found: boolean = false;
-      let apple: Apple | undefined = undefined;
-      let snake: Snake | undefined = undefined;
+      let found_apple: Apple | undefined = undefined;
+      let found_snake: Snake | undefined = undefined;
       this.map.forEach((entity, otherCoord) => {
         if(coord[0] === otherCoord[0] && coord[1] === otherCoord[1]) {
-          found = true;
           if(entity instanceof Apple) {
-            apple = entity;
+            found_apple = entity;
           } else if (entity instanceof Snake) {
-            snake = entity;
+            found_snake = entity;
           }
         }
       }) 
-      if(!found) {
-        if(apple) this.map.set(coord, apple);
-        if(snake) this.map.set(coord, snake);
+      if(!found_apple && !found_snake) {
+        this.map.set(coord, snake);
       } else {
-        console.log("Head on something", found)
+        console.log("Head on something")
         // Collides with an apple
-				if (apple) {
-					this.apples.delete(apple.id);
+				if (found_apple) {
+          const eaten_apple = found_apple as Apple;
+					this.apples.delete(eaten_apple.id);
 					this.map.delete(coord);
-					gameRefresh.entities.removed.push(apple.id);
+					gameRefresh.entities.removed.push(eaten_apple.id);
           console.log("should eat an apple")
 				} 
 
         // Collides with a snake
-        else if (snake) {
+        else if (found_snake) {
           snake.dead = true;
           gameRefresh.entities.removed.push(snake.id);
 				}
