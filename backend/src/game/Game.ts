@@ -41,7 +41,7 @@ export class Game {
 		this.moveSnakes(gameRefresh);
 		this.checkCollisions(gameRefresh);
 
-    if(Math.random() < 0.03) {
+    if(this.snakes.size > 0 && Math.random() < 0.03) {
       const apple = new Apple(randomUUID(), [[0, 0]])
       apple.generateRandom(this.width, this.height)
       this.addApple(apple)
