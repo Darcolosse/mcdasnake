@@ -2,7 +2,7 @@ import { Direction } from "@/Direction";
 
 export const GameConfig = {
   GAME_TICKRATE_MS: 10,
-  GAME_SPEED_MS: 500,
+  GAME_SPEED_MS: 50,
 
   GRID_COLS: 24,
   GRID_ROWS: 24,

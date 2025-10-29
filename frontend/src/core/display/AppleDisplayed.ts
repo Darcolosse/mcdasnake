@@ -3,12 +3,10 @@ import { EntityDisplayed } from './EntityDisplayed.ts';
 export class AppleDisplayed extends EntityDisplayed{
     
         // ============================ Override ============================ \\
-
     
-        public animate(time: number = this.lastAnimation): void{
+        protected drawNormalGraphism(): void{
             const ctx = this.display.getCtx();
             const boxSize = this.display.getBoxSize();
-            this.updateAnimationTime(time);
 
             const rapport = this.animationTime / this.speedAnimation;
             const zoom = (rapport < 0.5 ) ? rapport : (1-rapport);
@@ -34,10 +32,7 @@ export class AppleDisplayed extends EntityDisplayed{
                     ctx.arc(boxPoint[0], boxPoint[1], radius, 0, Math.PI * 2);
                     ctx.fill();
                 });
-            }
-
-
-            
+            }            
         }
 
     // ============================ Methode utile ============================ \\

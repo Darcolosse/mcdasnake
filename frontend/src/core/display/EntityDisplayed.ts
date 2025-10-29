@@ -1,4 +1,4 @@
-import { DisplayGame } from './DisplayGame.ts';
+import { DisplayGame, Graphism } from './DisplayGame.ts';
 import { Design } from './Design.ts';
 
 export class EntityDisplayed{
@@ -10,6 +10,7 @@ export class EntityDisplayed{
     protected display : DisplayGame; // objet qui contient le canvas, et la taille des cases
     protected design : Design; // objet qui contient le design de l'entité
     protected zindex : number; // plan sur laquel l'entité doit être dessiné
+    protected graphism!: Graphism;
     protected fullAnimation : boolean = false; // indique si l'entité doit être entièrement affiché ou si on n'affiche que se qui change
 
     constructor(
@@ -18,6 +19,7 @@ export class EntityDisplayed{
         speedAnimation : number,
         design : Design,
         zindex : number,
+        graphism : Graphism = Graphism.VERY_LOW,
         animationTime=0,
     ){
         this.display = display;
@@ -27,7 +29,16 @@ export class EntityDisplayed{
         this.lastAnimation = Date.now();
         this.design = design;
         this.zindex = zindex;
+        this.graphism = graphism;
         this.setFullAnimation(true);
+    }
+
+    // ============================ Override ============================ \\
+
+    public toString(): string {
+        return "{" +
+            "boxes : " + this.boxes +
+            "}"
     }
 
     // ============================ Set ============================ \\
@@ -39,10 +50,29 @@ export class EntityDisplayed{
         this.fullAnimation = value;
     }
 
+    public setGraphism(graphism : Graphism){
+        this.graphism = graphism;
+    }
+
     // ============================ Get ============================ \\
 
     public getZindex(): number {
         return this.zindex;
+    }
+
+    protected getboxChange(): [number, number][]{
+        
+        if (this.fullAnimation){
+            return this.boxes;
+        } else {
+            let modifiedboxes: [number, number][] = [];
+            this.boxes.forEach(box => {
+                if (this.display.existeModifiedBox(box)){
+                    modifiedboxes.push(box);
+                }
+            });
+            return modifiedboxes;
+        }
     }
 
     // ============================ Methode d'affichage ============================ \\
@@ -61,9 +91,9 @@ export class EntityDisplayed{
      */
     public clearChange(time = this.animationTime as number): void{
         this.updateAnimationTime(time);
-        this.boxes.forEach(box => {
-            this.display.clearBox(box);
-        });
+        // this.boxes.forEach(box => {
+        //     this.display.clearBox(box);
+        // });
     }
 
     /**
@@ -72,19 +102,50 @@ export class EntityDisplayed{
      */
     public animate(time = this.animationTime as number): void{
         this.updateAnimationTime(time);
+        switch (this.graphism) {
+            case "VERY_LOW":
+                this.drawVeryLowGraphism();
+                break;
+            
+            case "LOW":
+                this.drawLowGraphism();
+                break;
+
+            case "NORMAL":
+                this.drawNormalGraphism();
+                break;
+        
+            default:
+                break;
+        }
+
+    }
+
+    protected drawVeryLowGraphism() : void{
         const ctx = this.display.getCtx();
         const boxSize = this.display.getBoxSize();
         ctx.fillStyle = this.design.getColor();
-        this.boxes.forEach(box => {
+        const boxChange = this.getboxChange();
+        boxChange.forEach(box => {
             ctx.fillRect(
-                box[0]*boxSize[0],
-                box[1]*boxSize[1],
-                boxSize[0],
-                boxSize[1]
+                Math.ceil(box[0]*boxSize[0]),
+                Math.ceil(box[1]*boxSize[1]),
+                Math.ceil(boxSize[0]),
+                Math.ceil(boxSize[1])
             );
         });
         this.setFullAnimation(false);
     }
+
+    protected drawLowGraphism() : void{
+        this.drawVeryLowGraphism();
+    }
+
+    protected drawNormalGraphism() : void{
+        this.drawVeryLowGraphism();
+    }
+
+    // ============================ Methodes Utile ============================ \\
 
     protected updateAnimationTime(time = this.animationTime as number) : number{
         const nbStep = Math.floor((this.animationTime + (time - this.lastAnimation)) / this.speedAnimation);

@@ -1,16 +1,24 @@
 import { DisplayManager } from './DisplayManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 import { Design } from './Design.ts';
-import { SnakeDisplayed2 } from './SnakeDisplayed2.ts';
 import type { EntityServer } from '../network/dto/responses/EntityServer.ts';
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
 import { AppleDisplayed } from './AppleDisplayed.ts';
 import { SpriteManager } from './SpriteManager.ts';
 import { Colors } from './colors.ts';
 import type { GameRefreshDTO } from '../network/dto/responses/GameRefresh.ts';
+import { SnakeDisplayed } from './SnakeDisplayed.ts';
 
 export type SpriteName = "APPLE" | "HEAD" | "SCALE";
 type EntityType = "SNAKE" | "APPLE" | "ENTITY";
+
+
+export type Graphism = (typeof Graphism)[keyof typeof Graphism];
+export const Graphism = {
+  VERY_LOW:"VERY_LOW",
+  LOW:"LOW",
+  NORMAL:"NORMAL"
+} as const;
 
 export class DisplayGame {
 
@@ -21,10 +29,12 @@ export class DisplayGame {
   private inLoop: boolean = false;
   private spriteManager: SpriteManager;
   private gameSpeed : number = 500;
+  private graphism : Graphism;
 
   constructor(displayManager: DisplayManager) {
     this.displayManager = displayManager;
     this.spriteManager = new SpriteManager();
+    this.graphism = Graphism.NORMAL;
     this.loop = this.loop.bind(this);
   }
 
@@ -59,7 +69,7 @@ export class DisplayGame {
    * @param coordinate Coordonnée de la case à vérifier
    * @returns si la case à été effacé ou non
    */
-  public existeModifiedBox(coordinate: number[]): boolean {console
+  public existeModifiedBox(coordinate: number[]): boolean {
     return this.modifiedboxes.has(coordinate.join(","));
   }
 
@@ -112,15 +122,38 @@ export class DisplayGame {
         let entityObject: EntityDisplayed;
         switch (entityType) {
           case ("SNAKE"):
-            entityObject = new SnakeDisplayed2(this, entityBoxes, this.gameSpeed, new Design(Colors.LIME), 1, 0);
+            entityObject = new SnakeDisplayed(
+              this,
+              entityBoxes,
+              this.gameSpeed,
+              new Design("lightblue"),
+              1,
+              this.graphism,
+              0
+            );
             break;
           case ("APPLE"):
-            console.log("drawing apple")
-            entityObject = new AppleDisplayed(this, entityBoxes, 1000, new Design("red"), 0, 0);
+            entityObject = new AppleDisplayed(
+              this,
+              entityBoxes,
+              1000,
+              new Design("red"),
+              0,
+              this.graphism,
+              0
+            );
             break;
 
           default:
-            entityObject = new EntityDisplayed(this, entityBoxes, 1000, new Design("black"), -1, 0);
+            entityObject = new EntityDisplayed(
+              this,
+              entityBoxes,
+              1000,
+              new Design("black"),
+              -1,
+              this.graphism,
+              0
+            );
             break;
         }
         this.setEntity(entityID, entityObject);
@@ -234,8 +267,13 @@ export class DisplayGame {
    * La boucle de jeu
    */
   private loop() {
-    //this.animate();
-    this.show();
+    if (this.graphism === "NORMAL"){
+      this.show();
+    }
+    else{
+      this.animate();
+    }
+    
     if (this.inLoop){
       setTimeout(this.loop, 1000 / 60);
     }
