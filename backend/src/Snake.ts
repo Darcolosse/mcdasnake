@@ -21,9 +21,10 @@ export class Snake implements Entity {
 	}
 
 	public move(entities: Map<string, Entity>, gameRefresh: GameRefreshResponseDTO) {
+    let shouldRefresh = false;
 		if (this.newDirection !== this.direction) {
 			this.direction = this.newDirection;
-			gameRefresh.entities.snakes.push(this);
+      shouldRefresh = true;
 		}
     
 		// Add head
@@ -63,6 +64,12 @@ export class Snake implements Entity {
 		}
     if(!headOnSomething) {
       this.cases.shift(); // Delete tail
+    } else {
+      shouldRefresh = true;
+    }
+
+    if(shouldRefresh) {
+			gameRefresh.entities.snakes.push(this);
     }
 	}
 

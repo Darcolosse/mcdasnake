@@ -14,20 +14,20 @@ export class Game {
 	private snakes: Map<string, Snake>;
 	private apples: Map<string, Apple>;
 
-	private map: Map<[number, number], Entity>;
+	private map: Map<string, Entity>;
 
 	private tickRate: number;
 
 	private gameManager: GameManager;
 
-	constructor(gameManager: GameManager, width: number = 16, height: number = 16, tickRate: number = 200) {
+	constructor(gameManager: GameManager, width: number = 16, height: number = 16, tickRate: number = 1000) {
 		this.gameManager = gameManager;
 		this.width = width;
 		this.height = height;
 		this.snakes = new Map<string, Snake>();
 		this.apples = new Map<string, Apple>();
 		this.tickRate = tickRate;
-		this.map = new Map<[number, number], Entity>();
+		this.map = new Map<string, Entity>();
 	}
 
 	public updateGame() {
@@ -77,8 +77,9 @@ export class Game {
 
     // Adding apples
 		this.apples.forEach(apple => {
-      if(!this.map.has(apple.getHead())) {
-				this.map.set(apple.getHead(), apple);
+      const jsonHead = JSON.stringify(apple.getHead())
+      if(!this.map.has(jsonHead)) {
+				this.map.set(jsonHead, apple);
       }
 		});
 
@@ -90,36 +91,22 @@ export class Game {
 
 	private check(snake: Snake, gameRefresh: GameRefreshResponseDTO) {
 		snake.cases.forEach(coord => {
-      let found_apple: Apple | undefined = undefined;
-      let found_snake: Snake | undefined = undefined;
-      this.map.forEach((entity, otherCoord) => {
-        if(coord[0] === otherCoord[0] && coord[1] === otherCoord[1]) {
-          if(entity instanceof Apple) {
-            found_apple = entity;
-          } else if (entity instanceof Snake) {
-            found_snake = entity;
-          }
-        }
-      }) 
-      if(!found_apple && !found_snake) {
-        this.map.set(coord, snake);
-      } else {
-        console.log("Head on something")
-        // Collides with an apple
-				if (found_apple) {
-          const eaten_apple = found_apple as Apple;
-					this.apples.delete(eaten_apple.id);
-					this.map.delete(coord);
-					gameRefresh.entities.removed.push(eaten_apple.id);
-          console.log("should eat an apple")
-				} 
+      const jsonCoord = JSON.stringify(coord);
+      const entityAtCoord = this.map.get(jsonCoord);
 
-        // Collides with a snake
-        else if (found_snake) {
-          snake.dead = true;
-          gameRefresh.entities.removed.push(snake.id);
-				}
-			}
+      if(!entityAtCoord){
+        this.map.set(jsonCoord, snake);
+      } else {
+          if(entityAtCoord instanceof Apple) {
+            const eaten_apple = entityAtCoord as Apple;
+            this.apples.delete(eaten_apple.id);
+            this.map.delete(jsonCoord);
+            gameRefresh.entities.removed.push(eaten_apple.id);
+          } else if (entityAtCoord instanceof Snake) {
+            snake.dead = true;
+            gameRefresh.entities.removed.push(snake.id);
+          }
+      }
 		});
 	}
 
@@ -148,7 +135,7 @@ export class Game {
 		return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
 
-	public getCoordinates(): [number, number] {
-		return [this.width, this.height]
-	}
+  public getSize(): [number, number] {
+    return [this.width, this.height];
+  }
 }

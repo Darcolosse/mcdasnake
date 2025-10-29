@@ -72,8 +72,8 @@ export class GameManager {
   // ========================== Private ========================== \\
 
 	private addPlayer(id: string, name:string) {
-		const coord = this.game.getCoordinates();
-    const randomCoordinates = [Game.random(0, coord[0] + 10), Game.random(0, coord[1] - 10)] 
+		const size = this.game.getSize();
+    const randomCoordinates = [Game.random(Math.ceil((1/3)*size[0]), Math.ceil((2/3)*size[0])), Game.random(Math.floor((1/3)*size[1]), Math.floor((2/3)*size[1]))] 
     const caseUnderRandom = [randomCoordinates[0], randomCoordinates[1]+1]
 		this.game.addSnake(id, name, [randomCoordinates, caseUnderRandom] as [number, number][], Direction.DOWN);
 	}
