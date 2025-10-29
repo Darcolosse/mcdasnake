@@ -121,7 +121,7 @@ export class Game {
   }
 
   private createCollideKey(_case: [number, number]) {
-    return `${_case[0]}${_case[1]}`
+    return `[${_case[0]},${_case[1]}]`
   }
 
   // ========================== Random =========================== \\
