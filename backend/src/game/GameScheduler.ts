@@ -1,7 +1,7 @@
 import { GameRefreshResponseDTO } from "@/network/dto/responses/GameRefreshResponseDTO";
 import { Game } from "./Game";
 import { GameConfig } from "./GameConfig";
-import { GameManager, Event, Buffers } from "./GameManager";
+import { GameManager, Buffers } from "./GameManager";
 import { GameUpdateSnakeDirectionDTO } from "@/network/dto/requests/GameUpdateSnakeDirectionDTO";
 import { GameAddPlayerDTO } from "@/network/dto/requests/GameAddPlayerDTO";
 
@@ -42,7 +42,6 @@ export class GameScheduler {
     this.gameManager.popBuffer(Buffers.CONNECTION_BUFFER).forEach((connection) => {
       const snake = this.game.addSnake(connection.id, (connection.dto as GameAddPlayerDTO).name);
       gameRefresh.entities.snakes.push(snake);
-      console.log("Handling a connection")
     })
 
     this.gameManager.popBuffer(Buffers.DECONNECTION_BUFFER).forEach((deconnection) => {

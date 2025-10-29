@@ -43,7 +43,6 @@ export class Snake implements Entity {
 				this.cases.push([head[0] - 1, head[1]]);
 				break;
 			default:
-        console.log("moving")
 				for (let i = 0; i < 10; i++) {
 					this.cases.push([head[0] + i, head[1]]);
 				}

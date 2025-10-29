@@ -62,7 +62,6 @@ export class Game {
   // ### GAME EVENTS ###
 
   public processGenerateBonus(gameRefresh: GameRefreshResponseDTO) {
-    console.log("generating random")
     const random = Math.random();
     if(this.snakes.size > 0) {
       if(random <= GameConfig.BONUS_PROBABILITY_SPAWN_APPLE) {
@@ -70,7 +69,6 @@ export class Game {
         gameRefresh.entities.apples.push(this.addApple(uuid));
       }
     }
-    console.log("end generating random")
   }
 
   public processMove(gameRefresh: GameRefreshResponseDTO) {
@@ -134,7 +132,6 @@ export class Game {
     const map = this.buildMap(true, true);
     while(!success) {
       cases = this.generateRandomSpawnUnchecked(length, minPercentage, maxPercentage);
-      console.log(cases)
       success = true;
       this.checkCollisions(cases, map, (_) => success = false)
     }
