@@ -6,7 +6,6 @@ import { GameUpdateDTO } from "@/network/dto/requests/GameUpdateDTO";
 import { GameAddPlayerDTO } from "@network/dto/requests/GameAddPlayerDTO";
 import { GameUpdateSnakeDirectionDTO } from "@network/dto/requests/GameUpdateSnakeDirectionDTO";
 
-import { randomUUID } from "crypto";
 import { WebSocket } from "ws";
 import { GameRemovePlayerDTO } from "./dto/requests/GameRemovePlayerDTO";
 
@@ -27,7 +26,7 @@ export class NetworkManager {
 		console.log(`WebSocket server started on ws://localhost:${port}`);
 
 		this.wss.on('connection', (ws: WebSocket) => {
-			const snakeId = randomUUID();
+			const snakeId = GameManager.generateUUID();
 			this.clients.set(snakeId, ws);
 
 			this.emit(snakeId, { type: "Welcome to McdaSnake!" });
@@ -66,7 +65,7 @@ export class NetworkManager {
 						break;
 				}
 			} catch (error) {
-				//this.gameManager.raiseError("Couldn't read received event :", error)
+				console.log("Couldn't read received event :", error)
 			}
 		});
 	}

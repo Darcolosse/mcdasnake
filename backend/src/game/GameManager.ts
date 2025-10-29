@@ -1,30 +1,45 @@
 import { NetworkManager } from "@network/NetworkManager";
 import { Game } from "@game/Game";
-import { Direction } from "@/Direction";
 import { DTO, DTOType } from "@/network/dto/DTO";
-import { GameUpdateSnakeDirectionDTO } from "@/network/dto/requests/GameUpdateSnakeDirectionDTO";
+import { randomUUID } from "crypto";
+import { GameScheduler } from "./GameScheduler";
+import { GameConfig } from "./GameConfig";
 
-export interface TrucMoche {
+export interface Event {
   id: string,
-  dto: GameUpdateSnakeDirectionDTO
+  dto: DTO,
 }
 
+export const Buffers = {
+  TURN_BUFFER: 'TB',
+  CONNECTION_BUFFER: 'CB',
+  DECONNECTION_BUFFER: 'DB',
+}
+
+export type Buffers = typeof Buffers[keyof typeof Buffers];
+
 export class GameManager {
-	private networkManager: NetworkManager;
-	private game: Game;
-	private eventBuffer: TrucMoche[];
+	private readonly networkManager: NetworkManager;
+	private readonly game: Game;
+	private readonly gameScheduler: GameScheduler;
+
+	private readonly buffers = {
+    TURN_BUFFER: [] as Event[],
+    CONNECTION_BUFFER: [] as Event[],
+    DECONNECTION_BUFFER: [] as Event[],
+  };
 
 	constructor(port: number) {
 		this.networkManager = new NetworkManager(this);
 		this.networkManager.createServer(port);
-		this.game = new Game(this);
-		this.eventBuffer = [];
+		this.game = new Game([GameConfig.GRID_COLS, GameConfig.GRID_ROWS]);
+    this.gameScheduler = new GameScheduler(this, this.game);
 	}
   
   // ===================== Management layer ====================== \\
 
   public start() {
-    this.game.updateGame();
+    this.gameScheduler.start();
   }
 
 	public handleGameEvent(eventDTO: DTO, id: string = '') {
@@ -44,38 +59,54 @@ export class GameManager {
 
 	public handleClientEvent(eventDTO: any, id: string = '') {
     console.log('Received:', eventDTO);
+    const event = { id: id, dto: eventDTO } as Event;
 		switch (eventDTO.type) {
 			case DTOType.AddPlayer:
-        this.addPlayer(id, eventDTO.playerName);
+        this.buffers.CONNECTION_BUFFER.push(event);
 				this.networkManager.emit(id, this.game.getState());
 				break;
 			case DTOType.GameUpdate:
 				this.networkManager.emit(id, this.game.getState());
 				break;
 			case DTOType.SnakeTurn:
-        this.eventBuffer.push({ id: id, dto: eventDTO } as TrucMoche)
+        this.buffers.TURN_BUFFER.push(event);
 				break;
 			case DTOType.RemovePlayer:
-				this.game.removeSnake(id);
+        this.buffers.DECONNECTION_BUFFER.push(event);
 				break;
 			default:
 				console.log("Unhandled event type:", eventDTO.type);
 		}
 	}
 
-	public popBuffer(): TrucMoche[] {
-		const events = this.eventBuffer.slice();
-		this.eventBuffer = [];
-		return events;
+	public popBuffer(buffer: Buffers): Event[] {
+    let popped: Event[] = []
+    this.getBuffer(buffer, (events) => {
+      popped = events.splice(0, events.length);
+    })
+    return popped;
 	}
   
-  // ========================== Private ========================== \\
+  // =========================== Utils =========================== \\
 
-	private addPlayer(id: string, name:string) {
-		const size = this.game.getSize();
-    const randomCoordinates = [Game.random(Math.ceil((1/3)*size[0]), Math.ceil((2/3)*size[0])), Game.random(Math.floor((1/3)*size[1]), Math.floor((2/3)*size[1]))] 
-    const caseUnderRandom = [randomCoordinates[0], randomCoordinates[1]+1]
-		this.game.addSnake(id, name, [randomCoordinates, caseUnderRandom] as [number, number][], Direction.DOWN);
-	}
+  public static generateUUID(): string {
+    return randomUUID();
+  }
+
+  // ========================== Private =========================== \\
+
+  private getBuffer(buffer: Buffers, onFound: (buffer: Event[]) => void) {
+    switch(buffer) {
+      case Buffers.TURN_BUFFER:
+        onFound(this.buffers.TURN_BUFFER)
+        break;
+      case Buffers.CONNECTION_BUFFER:
+        onFound(this.buffers.CONNECTION_BUFFER)
+        break;
+      case Buffers.DECONNECTION_BUFFER:
+        onFound(this.buffers.DECONNECTION_BUFFER)
+        break;
+    }
+  }
 
 }
