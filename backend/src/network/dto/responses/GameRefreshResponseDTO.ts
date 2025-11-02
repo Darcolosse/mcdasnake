@@ -7,9 +7,11 @@ export class GameRefreshResponseDTO implements DTO {
     type = DTOType.GameRefresh;
 
     public entities: { snakes: Array<Entity>, apples: Array<Entity>, removed: Array<string> };
+    public scoreBoard: Map<string, [number, number, number]>;
 
-    constructor(snakes: Array<Snake> = [], apples: Array<Apple> = [], removed: Array<string> = []) {
+    constructor(snakes: Array<Snake> = [], apples: Array<Apple> = [], removed: Array<string> = [], scoreBoard: Map<string, [number, number, number]> = new Map()) {
         this.entities = { snakes: snakes, apples: apples, removed: removed };
+        this.scoreBoard = scoreBoard;
     }
 
     public isEmpty(): boolean {

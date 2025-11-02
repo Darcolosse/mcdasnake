@@ -8,4 +8,5 @@ export const DTOType = {
   RemovePlayer: 'RemovePlayer',
   SnakeTurn: 'SnakeTurn',
   GameRefresh: 'GameRefresh',
+  GameScoreBoard: 'GameScoreBoard',
 }

@@ -22,9 +22,9 @@ export class Snake implements Entity {
 
 	public move(entities: Map<string, Entity>, gameRefresh: GameRefreshResponseDTO) {
     let shouldRefresh = false;
-		if (this.newDirection !== this.direction) {
+		if (this.newDirection !== this.direction && this.checkIncorrectTurn(this.newDirection) === false) {
 			this.direction = this.newDirection;
-      shouldRefresh = true;
+    		shouldRefresh = true;
 		}
     
 		// Add head
@@ -78,5 +78,13 @@ export class Snake implements Entity {
 
 	public getHead(): [number, number] {
 		return this.cases[this.cases.length - 1];
+	}
+
+	private checkIncorrectTurn(newDirection: Direction): boolean {
+		if (this.direction === Direction.UP && newDirection === Direction.DOWN) return true;
+		if (this.direction === Direction.DOWN && newDirection === Direction.UP) return true;
+		if (this.direction === Direction.LEFT && newDirection === Direction.RIGHT) return true;
+		if (this.direction === Direction.RIGHT && newDirection === Direction.LEFT) return true;
+		return false;
 	}
 }

@@ -2,8 +2,10 @@ import { NetworkManager } from "@network/NetworkManager";
 import { Game } from "@game/Game";
 import { DTO, DTOType } from "@/network/dto/DTO";
 import { randomUUID } from "crypto";
-import { GameScheduler } from "./GameScheduler";
-import { GameConfig } from "./GameConfig";
+import { GameScheduler } from "@game/GameScheduler";
+import { GameConfig } from "@game/GameConfig";
+import { PrismaClient } from '@prisma/client';
+
 
 export interface Event {
   id: string,
@@ -22,6 +24,7 @@ export class GameManager {
 	private readonly networkManager: NetworkManager;
 	private readonly game: Game;
 	private readonly gameScheduler: GameScheduler;
+  private readonly db: PrismaClient;
 
 	private readonly buffers = {
     TURN_BUFFER: [] as Event[],
@@ -32,7 +35,8 @@ export class GameManager {
 	constructor(port: number) {
 		this.networkManager = new NetworkManager(this);
 		this.networkManager.createServer(port);
-		this.game = new Game([GameConfig.GRID_COLS, GameConfig.GRID_ROWS]);
+    this.db = new PrismaClient();
+		this.game = new Game([GameConfig.GRID_COLS, GameConfig.GRID_ROWS], this.db);
     this.gameScheduler = new GameScheduler(this, this.game);
 	}
   

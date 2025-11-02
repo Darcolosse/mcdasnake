@@ -5,20 +5,30 @@ import { Direction } from "@/Direction";
 import { GameRefreshResponseDTO } from "@/network/dto/responses/GameRefreshResponseDTO";
 import { GameManager } from "@game/GameManager";
 import { GameUpdateResponseDTO } from "@/network/dto/responses/GameUpdateResponseDTO";
-import { GameConfig } from "./GameConfig";
+import { GameConfig } from "@game/GameConfig";
+import { PrismaClient } from '@prisma/client';
+import { ScoreBoard } from "@game/ScoreBoard";
+
 
 export class Game {
-	private rows: number;
-	private cols: number;
+	private readonly rows: number;
+	private readonly cols: number;
 
 	private snakes: Map<string, Snake>;
 	private apples: Map<string, Apple>;
 
-	constructor(size: [number, number]) {
+  private readonly scoreBoard: ScoreBoard;
+
+  private readonly sessionId: string;
+
+	constructor(size: [number, number], db: PrismaClient) {
 		this.cols = size[0];
 		this.rows = size[1];
 		this.snakes = new Map<string, Snake>();
 		this.apples = new Map<string, Apple>();
+    this.sessionId = GameManager.generateUUID();
+    this.scoreBoard = new ScoreBoard(db);
+    this.scoreBoard.createGameSession(this.sessionId);
 	}
 
   // ==================== Available Actions ====================== \\
@@ -33,6 +43,7 @@ export class Game {
       GameConfig.SNAKE_SPAWNING_DIRECTION
     )
 		this.snakes.set(snakeId, newSnake);
+    this.scoreBoard.createScore(name, this.sessionId);
     return newSnake;
 	}
 
@@ -51,7 +62,8 @@ export class Game {
       Array.from(this.snakes.values()),
       Array.from(this.apples.values()), 
       [this.cols, this.rows], 
-      GameConfig.GAME_SPEED_MS
+      GameConfig.GAME_SPEED_MS,
+      this.scoreBoard.getAllScores()
     )
 	}
 
@@ -84,7 +96,11 @@ export class Game {
           const eaten_apple = entityCollided as Apple;
           this.removeApple(eaten_apple.id);
           gameRefresh.entities.removed.push(eaten_apple.id);
+          this.scoreBoard.updateScore(snake.name, 100, 0, 1);
         } else if (entityCollided instanceof Snake) {
+          if (!snake.dead) {
+            this.scoreBoard.updateScore(snake.name, 1000, 1, 0);
+          }
           snake.dead = true;
           gameRefresh.entities.removed.push(snake.id);
         }
