@@ -1,9 +1,8 @@
 import { NetworkManager } from "@network/NetworkManager";
 import { Game } from "@game/Game";
-import { DTO, DTOType } from "@/network/dto/DTO";
+import { DTO, DTOType } from "@network/dto/DTO";
 import { randomUUID } from "crypto";
 import { GameScheduler } from "@game/GameScheduler";
-import { GameConfig } from "@game/GameConfig";
 import { PrismaClient } from '@prisma/client';
 
 
@@ -32,11 +31,11 @@ export class GameManager {
     DECONNECTION_BUFFER: [] as Event[],
   };
 
-	constructor(port: number) {
+	constructor(host: string, port: number) {
 		this.networkManager = new NetworkManager(this);
-		this.networkManager.createServer(port);
+		this.networkManager.createServer(host, port);
     this.db = new PrismaClient();
-		this.game = new Game([GameConfig.GRID_COLS, GameConfig.GRID_ROWS], this.db);
+		this.game = new Game([Number(process.env.GRID_COLS), Number(process.env.GRID_ROWS)], this.db);
     this.gameScheduler = new GameScheduler(this, this.game);
 	}
   

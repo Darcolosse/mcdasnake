@@ -13,7 +13,8 @@
     "paths": {
       "@/*": ["*"],
       "@game/*": ["game/*"],
-      "@network/*": ["network/*"]
+      "@network/*": ["network/*"],
+      "@entities/*": ["entities/*"]
     },
     "noUnusedLocals": true,
     "noUnusedParameters": true,

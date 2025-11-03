@@ -1,10 +1,10 @@
-import { Entity } from "@/Entity";
-import { Snake } from "@/Snake";
-import { Apple } from "@/Apple";
-import { Direction } from "@/Direction";
-import { GameRefreshResponseDTO } from "@/network/dto/responses/GameRefreshResponseDTO";
+import { Entity } from "@entities/Entity";
+import { Snake } from "@entities/Snake";
+import { Apple } from "@entities/Apple";
+import { Direction } from "@entities/Direction";
+import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshResponseDTO";
 import { GameManager, TrucMoche } from "@game/GameManager";
-import { GameUpdateResponseDTO } from "@/network/dto/responses/GameUpdateResponseDTO";
+import { GameUpdateResponseDTO } from "@network/dto/responses/GameUpdateResponseDTO";
 import { randomUUID } from "crypto";
 
 export class Game {

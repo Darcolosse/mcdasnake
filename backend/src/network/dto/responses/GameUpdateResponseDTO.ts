@@ -1,5 +1,5 @@
-import { DTOType, type DTO } from "../DTO";
-import { Entity } from "@/Entity";
+import { DTOType, type DTO } from "@network/dto/DTO";
+import { Entity } from "@entities/Entity";
 
 export class GameUpdateResponseDTO implements DTO {
   type = DTOType.GameUpdate;

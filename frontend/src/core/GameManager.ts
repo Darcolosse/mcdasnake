@@ -18,7 +18,7 @@ export class GameManager {
   constructor () {
     this.displayManager = new DisplayManager(this)
     this.eventManager = new EventManager(this)
-    this.networkManager = new NetworkManager(this, "ws://127.0.0.1:5001")
+    this.networkManager = new NetworkManager(this, `ws://${import.meta.env.VITE_BACKEND_IP}:${import.meta.env.VITE_BACKEND_PORT}`)
   }
 
   // ====================== Vertical layer ======================= \\

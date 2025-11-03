@@ -1,4 +1,4 @@
-import { Entity } from "@/Entity"
+import { Entity } from "@entities/Entity"
 
 export class Apple implements Entity {
     public readonly id: string;

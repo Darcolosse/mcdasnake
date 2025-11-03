@@ -1,6 +1,6 @@
-import { Direction } from "@/Direction";
-import { Entity } from "@/Entity"
-import { GameRefreshResponseDTO } from "./network/dto/responses/GameRefreshResponseDTO";
+import { Direction } from "@entities/Direction";
+import { Entity } from "@entities/Entity"
+import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshResponseDTO";
 
 export class Snake implements Entity {
 	public readonly id: string;

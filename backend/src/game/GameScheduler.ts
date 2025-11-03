@@ -1,9 +1,8 @@
-import { GameRefreshResponseDTO } from "@/network/dto/responses/GameRefreshResponseDTO";
-import { Game } from "./Game";
-import { GameConfig } from "./GameConfig";
-import { GameManager, Buffers } from "./GameManager";
-import { GameUpdateSnakeDirectionDTO } from "@/network/dto/requests/GameUpdateSnakeDirectionDTO";
-import { GameAddPlayerDTO } from "@/network/dto/requests/GameAddPlayerDTO";
+import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshResponseDTO";
+import { Game } from "@game/Game";
+import { GameManager, Buffers } from "@game/GameManager";
+import { GameUpdateSnakeDirectionDTO } from "@network/dto/requests/GameUpdateSnakeDirectionDTO";
+import { GameAddPlayerDTO } from "@network/dto/requests/GameAddPlayerDTO";
 
 export class GameScheduler {
   private readonly game: Game;
@@ -21,7 +20,7 @@ export class GameScheduler {
 
   public start() {
     this.tickCount = 0;
-    this.gameLoop = setInterval(this.onTick.bind(this), GameConfig.GAME_TICKRATE_MS);
+    this.gameLoop = setInterval(this.onTick.bind(this), Number(process.env.GAME_TICKRATE_MS));
   }
 
   public stop() {
@@ -31,7 +30,7 @@ export class GameScheduler {
   // ===================== Management layer ====================== \\
 
   private onTick() {
-    this.tickCount += GameConfig.GAME_TICKRATE_MS;
+    this.tickCount += Number(process.env.GAME_TICKRATE_MS);
 
     // ### Game refresh barebone ###
     const gameRefresh: GameRefreshResponseDTO = new GameRefreshResponseDTO();
@@ -57,7 +56,7 @@ export class GameScheduler {
     // #           #
     // # Game step #
     // #           #
-    if(this.tickCount % GameConfig.GAME_SPEED_MS == 0) {
+    if(this.tickCount % Number(process.env.GAME_SPEED_MS) == 0) {
       this.onGameStep(gameRefresh);
     }
 

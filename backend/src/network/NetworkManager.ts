@@ -21,9 +21,13 @@ export class NetworkManager {
 		this.clients = new Map<string, WebSocket>();
 	}
 
-	public createServer(port: number) {
-		this.wss = new WebSocketServer({ port: port });
-		console.log(`WebSocket server started on ws://localhost:${port}`);
+	public createServer(host: string, port: number) {
+		this.wss = new WebSocketServer(
+			{ 
+				port: port, 
+				host: host
+			});
+		console.log(`WebSocket server started on ws://${host}:${port}`);
 
 		this.wss.on('connection', (ws: WebSocket) => {
 			const snakeId = GameManager.generateUUID();

@@ -1,4 +1,4 @@
-import { Direction } from "@/Direction";
+import { Direction } from "@entities/Direction";
 import { DTOType, type DTO } from "@network/dto/DTO";
 
 export class GameUpdateSnakeDirectionDTO implements DTO {

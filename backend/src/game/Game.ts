@@ -1,11 +1,10 @@
-import { Entity } from "@/Entity";
-import { Snake } from "@/Snake";
-import { Apple } from "@/Apple";
-import { Direction } from "@/Direction";
-import { GameRefreshResponseDTO } from "@/network/dto/responses/GameRefreshResponseDTO";
+import { Entity } from "@entities/Entity";
+import { Snake } from "@entities/Snake";
+import { Apple } from "@entities/Apple";
+import { Direction } from "@entities/Direction";
+import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshResponseDTO";
 import { GameManager } from "@game/GameManager";
-import { GameUpdateResponseDTO } from "@/network/dto/responses/GameUpdateResponseDTO";
-import { GameConfig } from "@game/GameConfig";
+import { GameUpdateResponseDTO } from "@network/dto/responses/GameUpdateResponseDTO";
 import { PrismaClient } from '@prisma/client';
 import { ScoreBoard } from "@game/ScoreBoard";
 
@@ -21,6 +20,8 @@ export class Game {
 
   private readonly sessionId: string;
 
+  private readonly maxBonus: number;
+
 	constructor(size: [number, number], db: PrismaClient) {
 		this.cols = size[0];
 		this.rows = size[1];
@@ -29,6 +30,7 @@ export class Game {
     this.sessionId = GameManager.generateUUID();
     this.scoreBoard = new ScoreBoard(db);
     this.scoreBoard.createGameSession(this.sessionId);
+    this.maxBonus = (this.cols * this.rows) * (Number(process.env.BONUS_PERCENTAGE_MAX)/100);
 	}
 
   // ==================== Available Actions ====================== \\
@@ -39,8 +41,8 @@ export class Game {
     const newSnake = new Snake(
       snakeId,
       name,
-      this.generateRandomSpawn(GameConfig.SNAKE_SPAWNING_LENGTH, 1/3, 1/3),
-      GameConfig.SNAKE_SPAWNING_DIRECTION
+      this.generateRandomSpawn(Number(process.env.SNAKE_SPAWNING_LENGTH), 100/3, 200/3),
+      process.env.SNAKE_SPAWNING_DIRECTION as Direction
     )
 		this.snakes.set(snakeId, newSnake);
     this.scoreBoard.createScore(name, this.sessionId);
@@ -62,7 +64,7 @@ export class Game {
       Array.from(this.snakes.values()),
       Array.from(this.apples.values()), 
       [this.cols, this.rows], 
-      GameConfig.GAME_SPEED_MS,
+      Number(process.env.GAME_SPEED_MS),
       this.scoreBoard.getAllScores()
     )
 	}
@@ -75,8 +77,8 @@ export class Game {
 
   public processGenerateBonus(gameRefresh: GameRefreshResponseDTO) {
     const random = Math.random();
-    if(this.snakes.size > 0) {
-      if(random <= GameConfig.BONUS_PROBABILITY_SPAWN_APPLE) {
+    if(this.snakes.size > 0 && this.apples.size < this.maxBonus) {
+      if(random <= Number(process.env.BONUS_PROBABILITY_SPAWN_APPLE)) {
         let uuid = GameManager.generateUUID()
         gameRefresh.entities.apples.push(this.addApple(uuid));
       }
@@ -156,6 +158,7 @@ export class Game {
 
 	private generateRandomSpawnUnchecked(length: number, minPercentage: number, maxPercentage: number) : [number, number][] {
     const cases: [number, number][] = [[this.random(true, minPercentage, maxPercentage), this.random(false, minPercentage, maxPercentage)]]
+    console.log(cases);
     for(let _ = 1; _<length; _++) {
       const lastCase = cases[cases.length-1];
       cases.push([lastCase[0], lastCase[1]+1]);

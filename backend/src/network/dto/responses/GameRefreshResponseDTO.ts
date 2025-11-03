@@ -1,7 +1,7 @@
-import { Snake } from "@/Snake";
-import { Apple } from "@/Apple";
+import { Snake } from "@entities/Snake";
+import { Apple } from "@entities/Apple";
 import { DTOType, type DTO } from "@network/dto/DTO";
-import { Entity } from "@/Entity";
+import { Entity } from "@entities/Entity";
 
 export class GameRefreshResponseDTO implements DTO {
     type = DTOType.GameRefresh;
