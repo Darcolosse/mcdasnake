@@ -4,6 +4,7 @@ import { DTO, DTOType } from "@network/dto/DTO";
 import { randomUUID } from "crypto";
 import { GameScheduler } from "@game/GameScheduler";
 import { PrismaClient } from '@prisma/client';
+import { logger } from "@/app";
 
 
 export interface Event {
@@ -32,8 +33,10 @@ export class GameManager {
   };
 
 	constructor(host: string, port: number) {
+    logger.debug(`Creating websocket server on IP ${String(process.env.BACKEND_IP)} PORT ${Number(process.env.BACKEND_PORT)} in game manager initialization`)
 		this.networkManager = new NetworkManager(this);
 		this.networkManager.createServer(host, port);
+    logger.debug(`Starting prisma client in game manager initialization`)
     this.db = new PrismaClient();
 		this.game = new Game([Number(process.env.GRID_COLS), Number(process.env.GRID_ROWS)], this.db);
     this.gameScheduler = new GameScheduler(this, this.game);
@@ -42,43 +45,48 @@ export class GameManager {
   // ===================== Management layer ====================== \\
 
   public start() {
+    logger.info("Starting game manager")
     this.gameScheduler.start();
   }
 
 	public handleGameEvent(eventDTO: DTO, id: string = '') {
 		switch (eventDTO.type) {
 			case DTOType.GameRefresh:
-        console.log("Broadcasting", JSON.stringify(eventDTO))
+        logger.debug("Broadcasting", JSON.stringify(eventDTO))
 				this.networkManager.broadcast(eventDTO);
 				break;
 			case DTOType.GameUpdate:
 				this.networkManager.emit(id, eventDTO);
-				console.log("Sent game update response to", id);
+				logger.debug("Sent game update response to", id);
 				break;
 			default:
-				console.log("Unhandled event type:", eventDTO.type);
+				logger.warn("Game tried to send to ws " + id + " a suspicious websocket:", eventDTO.type);
 		}
 	}
 
 	public handleClientEvent(eventDTO: any, id: string = '') {
-    console.log('Received:', eventDTO);
+    logger.debug('GameManager received a new client event', eventDTO);
     const event = { id: id, dto: eventDTO } as Event;
 		switch (eventDTO.type) {
 			case DTOType.AddPlayer:
         this.buffers.CONNECTION_BUFFER.push(event);
 				this.networkManager.emit(id, this.game.getState());
+        logger.debug('Pushed event in connection buffer');
 				break;
 			case DTOType.GameUpdate:
 				this.networkManager.emit(id, this.game.getState());
+        logger.debug('Emitting back the current game state');
 				break;
 			case DTOType.SnakeTurn:
         this.buffers.TURN_BUFFER.push(event);
+        logger.debug('Pushed event in the turn buffer');
 				break;
 			case DTOType.RemovePlayer:
         this.buffers.DECONNECTION_BUFFER.push(event);
+        logger.debug('Pushed event in deconnection buffer');
 				break;
 			default:
-				console.log("Unhandled event type:", eventDTO.type);
+				logger.warn("Client " + id + " sent to server a suspicious websocket:", eventDTO.type);
 		}
 	}
 
@@ -93,6 +101,7 @@ export class GameManager {
   // =========================== Utils =========================== \\
 
   public static generateUUID(): string {
+    logger.debug("Generating a new UUID");
     return randomUUID();
   }
 
@@ -109,6 +118,8 @@ export class GameManager {
       case Buffers.DECONNECTION_BUFFER:
         onFound(this.buffers.DECONNECTION_BUFFER)
         break;
+      default:
+				logger.warn("Couldn't retrieve a buffer from its enum on tick.");
     }
   }
 

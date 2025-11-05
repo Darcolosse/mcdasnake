@@ -8,6 +8,7 @@ import { GameUpdateSnakeDirectionDTO } from "@network/dto/requests/GameUpdateSna
 
 import { WebSocket } from "ws";
 import { GameRemovePlayerDTO } from "./dto/requests/GameRemovePlayerDTO";
+import { logger } from "@/app";
 
 export class NetworkManager {
 
@@ -22,12 +23,13 @@ export class NetworkManager {
 	}
 
 	public createServer(host: string, port: number) {
+    logger.info("Initializing websocket service...")
 		this.wss = new WebSocketServer(
 			{ 
 				port: port, 
 				host: host
 			});
-		console.log(`WebSocket server started on ws://${host}:${port}`);
+		logger.info(`WebSocket server started on ws://${host}:${port}`);
 
 		this.wss.on('connection', (ws: WebSocket) => {
 			const snakeId = GameManager.generateUUID();
@@ -36,19 +38,20 @@ export class NetworkManager {
 			this.emit(snakeId, { type: "Welcome to McdaSnake!" });
 			this.register(ws);
 			this.closeConnection(ws, snakeId);
-			console.log(`New client connected: ${snakeId}`);
+			logger.info(`New client connected: ${snakeId}`);
 		});
+    logger.info("Initialized websocket service")
 	}
 
 	public emit(id: string, message: DTO) {
 		const jsonMessage = JSON.stringify(message);
 		this.clients.get(id)?.send(jsonMessage);
-		console.log(`Sent message to ${id}: ${jsonMessage}`);
+		logger.debug(`Sent message to ${id}: ${jsonMessage}`);
 	}
 
 	private register(ws: WebSocket) {
 		ws.on('message', (message: string) => {
-			console.log(`Received message: ${message}`);
+			logger.debug(`Received message: ${message}`);
 			try {
 				const json = JSON.parse(message);
 				switch(json.type) {
@@ -69,14 +72,14 @@ export class NetworkManager {
 						break;
 				}
 			} catch (error) {
-				console.log("Couldn't read received event :", error)
+				logger.warn("Couldn't read a suspicious or malformed received websocket event", error)
 			}
 		});
 	}
 
 	private closeConnection(ws: WebSocket, snakeId: string) {
 		ws.on('close', () => {
-			console.log(`Client disconnected: ${snakeId}`);
+			logger.info(`Client disconnected: ${snakeId}`);
 			this.clients.delete(snakeId);
 			ws.close();
 			this.gameManager.handleClientEvent(new GameRemovePlayerDTO(), snakeId);
@@ -84,6 +87,7 @@ export class NetworkManager {
 	}
 
 	public broadcast(data: DTO) {
+		logger.debug(`Broadcasting a websocket message...`, data);
 		const jsonMessage = JSON.stringify(data);
 		this.wss?.clients.forEach(function each(client) {
 			if (client.readyState === WebSocket.OPEN) {
@@ -95,10 +99,12 @@ export class NetworkManager {
 	private executeOnFound(ws: WebSocket, onFound: (clientId: string) => void): void {
 		for (const [clientId, clientWs] of this.clients) {
 			if (clientWs === ws) {
+        logger.debug(`Websocket client found. Ready for processing.`);
 				onFound(clientId);
 				return;
 			}
 		}
+    logger.warn(`Websocket client not found in memory. Couldn't process further.`);
 	}
 
 }
