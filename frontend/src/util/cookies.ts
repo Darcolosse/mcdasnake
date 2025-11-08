@@ -1,5 +1,6 @@
 export const CookieType = {
-  Username: "username"
+  Username: "username",
+  Design: "design"
 }
 
 export function setCookie(cookieType: string, value: string, days: number) {

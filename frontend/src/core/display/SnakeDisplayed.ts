@@ -1,5 +1,5 @@
-import type { Design } from './Design.ts';
-import { DisplayGame, Graphism } from './DisplayGame.ts';
+import { Graphism, type Design } from './Design.ts';
+import { DisplayGame} from './DisplayGame.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
 
 type BoxSide = "TOP" | "RIGHT" | "BOTTOM" | "LEFT" | "UNKNOW";
@@ -21,7 +21,6 @@ export class SnakeDisplayed extends EntityDisplayed {
           speedAnimation : number,
           design : Design,
           zindex : number,
-          graphism : Graphism = Graphism.VERY_LOW,
           animationTime=0,
       ){
         super(
@@ -30,11 +29,10 @@ export class SnakeDisplayed extends EntityDisplayed {
           speedAnimation,
           design,
           zindex,
-          graphism,
           animationTime,
         );
         this.boxesInfo = new Map();;
-        this.setGraphism(graphism);
+        this.setDesign(design);
       }
 
   // ============================ Override ============================ \\
@@ -46,9 +44,14 @@ export class SnakeDisplayed extends EntityDisplayed {
     });
   }
 
+  public setDesign(design: Design): void {
+    this.design = design;
+    const graphism = this.design.getGraphism();
+    this.setGraphism(graphism);
+  }
+
   public setGraphism(graphism : Graphism){
-    this.graphism = graphism;
-    if (this.graphism === Graphism.LOW){
+    if (graphism === Graphism.LOW){
       this.boxesInfo.clear();
       for(let i=0; i<this.boxes.length; i++){
             const current = this.boxes[i];
@@ -62,7 +65,8 @@ export class SnakeDisplayed extends EntityDisplayed {
   public animate(time: number = this.lastAnimation): void {
     this.updateModel(time);
     this.updateAnimationTime(time);
-        switch (this.graphism) {
+    const graphism = this.design.getGraphism();
+        switch (graphism) {
             case Graphism.VERY_LOW:
                 this.drawVeryLowGraphism();
                 break;
@@ -152,7 +156,10 @@ export class SnakeDisplayed extends EntityDisplayed {
   private drawHead() {
     const ctx = this.display.getCtx();
     const boxSize = this.display.getBoxSize();
-    const head = this.display.getSprite("HEAD");
+    const headName = this.design.getHead();
+    const head = this.display.getSprite(headName);
+    console.log(headName);
+    console.log(head);
     const headSize = 1;
     const lastPoint = this.getMovedPoint(this.boxes.length-2, false, headSize);
     const direction = this.vectorToRadian(this.getDirection(this.boxes.length-1));// - (Math.PI/2);
@@ -186,37 +193,37 @@ export class SnakeDisplayed extends EntityDisplayed {
                 break;
         }
         // calcul du rapport
-        let rapport = this.animationTime / this.speedAnimation;
+        let ratio = this.getRatio();
         if ((direction === "RIGHT" || direction === "BOTTOM") && boxInfo.type === "HEAD"){
-            rapport = 1 - rapport;
+            ratio = 1 - ratio;
         }
         if ((direction === "LEFT" || direction === "TOP") && boxInfo.type === "QUEUE"){
-            rapport = 1 - rapport;
+            ratio = 1 - ratio;
         }
         // dessin
         switch (direction) {
             case "LEFT":
                 ctx.fillRect(
                   Math.ceil(box[0]*boxSize[0]), Math.ceil(box[1]*boxSize[1]),
-                  Math.ceil(boxSize[0]*rapport), Math.ceil(boxSize[1])
+                  Math.ceil(boxSize[0]*ratio), Math.ceil(boxSize[1])
                 );
                 break;
             case "TOP":
                 ctx.fillRect(
                   Math.ceil(box[0]*boxSize[0]), Math.ceil(box[1]*boxSize[1]),
-                  Math.ceil(boxSize[0]), Math.ceil(boxSize[1]*rapport)
+                  Math.ceil(boxSize[0]), Math.ceil(boxSize[1]*ratio)
                 );
                 break;
             case "RIGHT":
                 ctx.fillRect(
-                  Math.ceil((box[0]+rapport)*boxSize[0]), Math.ceil(box[1]*boxSize[1]),
-                  Math.ceil((1-rapport)*boxSize[0]), Math.ceil(boxSize[1])
+                  Math.ceil((box[0]+ratio)*boxSize[0]), Math.ceil(box[1]*boxSize[1]),
+                  Math.ceil((1-ratio)*boxSize[0]), Math.ceil(boxSize[1])
                 );
                 break;
             case "BOTTOM":
                 ctx.fillRect(
-                  Math.ceil(box[0]*boxSize[0]), Math.ceil((box[1]+rapport)*boxSize[1]),
-                  Math.ceil(boxSize[0]), Math.ceil((1-rapport)*boxSize[1])
+                  Math.ceil(box[0]*boxSize[0]), Math.ceil((box[1]+ratio)*boxSize[1]),
+                  Math.ceil(boxSize[0]), Math.ceil((1-ratio)*boxSize[1])
                 );
                 break;
             default:
@@ -394,7 +401,8 @@ export class SnakeDisplayed extends EntityDisplayed {
       }
     }
 
-    if (this.graphism === Graphism.LOW){
+    const graphism = this.design.getGraphism();
+    if (graphism === Graphism.LOW){
       if (newHead) {this.initBoxInfo(newHead);}
       if (oldTail) {this.removeBoxInfo(oldTail);}
       if (oldHead) {
@@ -443,10 +451,10 @@ export class SnakeDisplayed extends EntityDisplayed {
       direction[0] * boxSize[0],
       direction[1] * boxSize[1]
     ];
-    const rapport = this.animationTime / this.speedAnimation;
+    const ratio = this.getRatio();
     return [
-      boxPoint[0] + (vector[0] * rapport),
-      boxPoint[1] + (vector[1] * rapport),
+      boxPoint[0] + (vector[0] * ratio),
+      boxPoint[1] + (vector[1] * ratio),
     ];
   }
 

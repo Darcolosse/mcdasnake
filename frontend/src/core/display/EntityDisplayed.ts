@@ -1,4 +1,4 @@
-import { DisplayGame, Graphism } from './DisplayGame.ts';
+import { DisplayGame } from './DisplayGame.ts';
 import { Design } from './Design.ts';
 
 export class EntityDisplayed{
@@ -10,7 +10,6 @@ export class EntityDisplayed{
     protected display : DisplayGame; // objet qui contient le canvas, et la taille des cases
     protected design : Design; // objet qui contient le design de l'entité
     protected zindex : number; // plan sur laquel l'entité doit être dessiné
-    protected graphism!: Graphism;
     protected fullAnimation : boolean = false; // indique si l'entité doit être entièrement affiché ou si on n'affiche que se qui change
 
     constructor(
@@ -19,7 +18,6 @@ export class EntityDisplayed{
         speedAnimation : number,
         design : Design,
         zindex : number,
-        graphism : Graphism = Graphism.VERY_LOW,
         animationTime=0,
     ){
         this.display = display;
@@ -29,7 +27,6 @@ export class EntityDisplayed{
         this.lastAnimation = Date.now();
         this.design = design;
         this.zindex = zindex;
-        this.graphism = graphism;
         this.setFullAnimation(true);
     }
 
@@ -50,8 +47,8 @@ export class EntityDisplayed{
         this.fullAnimation = value;
     }
 
-    public setGraphism(graphism : Graphism){
-        this.graphism = graphism;
+    public setDesign(design : Design){
+        this.design = design;
     }
 
     // ============================ Get ============================ \\
@@ -102,7 +99,8 @@ export class EntityDisplayed{
      */
     public animate(time = this.animationTime as number): void{
         this.updateAnimationTime(time);
-        switch (this.graphism) {
+        const graphism = this.design.getGraphism();
+        switch (graphism) {
             case "VERY_LOW":
                 this.drawVeryLowGraphism();
                 break;
@@ -147,7 +145,17 @@ export class EntityDisplayed{
 
     // ============================ Methodes Utile ============================ \\
 
+    protected getRatio(){
+        if (this.speedAnimation === 0){
+            return 0;
+        }
+        return (this.animationTime / this.speedAnimation);
+    }
+
     protected updateAnimationTime(time = this.animationTime as number) : number{
+        if (this.speedAnimation === 0){
+            return 0;
+        }
         const nbStep = Math.floor((this.animationTime + (time - this.lastAnimation)) / this.speedAnimation);
         this.animationTime = ((this.animationTime + (time - this.lastAnimation))) % this.speedAnimation;
         this.lastAnimation = time;

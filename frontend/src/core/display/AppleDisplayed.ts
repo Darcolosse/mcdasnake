@@ -8,8 +8,8 @@ export class AppleDisplayed extends EntityDisplayed{
             const ctx = this.display.getCtx();
             const boxSize = this.display.getBoxSize();
 
-            const rapport = this.animationTime / this.speedAnimation;
-            const zoom = (rapport < 0.5 ) ? rapport : (1-rapport);
+            const ratio = this.getRatio();
+            const zoom = (ratio < 0.5 ) ? ratio : (1-ratio);
 
             const sprite = this.display.getSprite("APPLE");
             if (sprite) {

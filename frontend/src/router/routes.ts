@@ -8,10 +8,11 @@ export interface Route {
 }
 
 export const homeRoute: Route = { path: "/",     component: HomePage }
-//export const homeRoute: Route = { path: "/",     component: SettingPage } 
-export const playRoute: Route = { path: "/play", component: GamePage } 
+export const playRoute: Route = { path: "/play", component: GamePage }
+export const paramRoute: Route = { path: "/param", component: SettingPage } 
 
 export const routes: Route[] = [
   homeRoute,
-  playRoute
+  playRoute,
+  paramRoute
 ]

@@ -1,30 +1,20 @@
 import { DisplayManager } from './DisplayManager.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
-import { Design } from './Design.ts';
+import { Design, Graphism } from './Design.ts';
 import type { EntityServer } from '../network/dto/responses/EntityServer.ts';
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
 import { AppleDisplayed } from './AppleDisplayed.ts';
 import { SpriteManager } from './SpriteManager.ts';
-import { Colors } from './colors.ts';
 import type { GameRefreshDTO } from '../network/dto/responses/GameRefresh.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
 
-export type SpriteName = "APPLE" | "HEAD" | "SCALE";
 type EntityType = "SNAKE" | "APPLE" | "ENTITY";
-
-
-export type Graphism = (typeof Graphism)[keyof typeof Graphism];
-export const Graphism = {
-  VERY_LOW:"VERY_LOW",
-  LOW:"LOW",
-  NORMAL:"NORMAL"
-} as const;
 
 export class DisplayGame {
 
   private displayManager: DisplayManager;
-  private entities: Map<string, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
-  private zindex: EntityDisplayed[] = [];
+  protected entities: Map<string, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
+  protected zindex: EntityDisplayed[] = [];
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
   private spriteManager: SpriteManager;
@@ -34,9 +24,11 @@ export class DisplayGame {
   constructor(displayManager: DisplayManager) {
     this.displayManager = displayManager;
     this.spriteManager = new SpriteManager();
+    this.spriteManager.onReady(() => this.animate());
     this.graphism = Graphism.NORMAL;
     this.loop = this.loop.bind(this);
   }
+
 
   // ============================ Get ============================ \\
 
@@ -61,6 +53,8 @@ export class DisplayGame {
   public getSprite(sprite: SpriteName) : HTMLImageElement | undefined{
     return this.spriteManager.get(sprite);
   }
+
+
 
   // ============================ Methodes publiques ============================ \\
 
@@ -189,7 +183,7 @@ export class DisplayGame {
     this.updateZindex(oldEntity, entity);
   }
 
-  private updateZindex(oldEntity: EntityDisplayed, entity: EntityDisplayed){
+  protected updateZindex(oldEntity: EntityDisplayed, entity: EntityDisplayed){
     const index = this.zindex.indexOf(oldEntity)
     if (index !== -1){
       this.zindex.splice(index, 1)

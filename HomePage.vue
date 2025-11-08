@@ -2,7 +2,7 @@
 import { useTemplateRef } from 'vue';
 import { CookieType, setCookie } from '../util/cookies';
 import { router } from '../router/router';
-import { paramRoute, playRoute } from '../router/routes';
+import { playRoute, paramRoute } from '../router/routes';
 
   const usernameRef = useTemplateRef('username')
 
@@ -13,7 +13,7 @@ import { paramRoute, playRoute } from '../router/routes';
     }
   }
 
-  function goToSettings() {
+  function goToParam() {
     router.push(paramRoute.path);
   }
 
@@ -32,7 +32,6 @@ import { paramRoute, playRoute } from '../router/routes';
         type="text"
         class="w-1/5 h-1/18 min-h-10 bg-background-inverse-tertiary px-5 rounded-full border-3 border-background-brand-secondary text-center text-xl text-content-inverse-secondary focus:placeholder-transparent focus:outline-none placeholder:text-content-brand-secondary/40"
         placeholder="Username"
-        @keydown.enter="joinGame"
       />
       <button
         class="w-fit h-1/18 min-h-10 bg-background-brand-primary px-5 text-3xl text-content-neutral-primary font-semibold rounded-full grid place-items-center cursor-pointer hover:text-content-brand-primary hover:bg-background-inverse-tertiary hover:border-3 hover:border-background-brand-primary"
@@ -40,13 +39,11 @@ import { paramRoute, playRoute } from '../router/routes';
       >
         PLAY
       </button>
-
-
       <button
         class="w-fit h-1/18 min-h-10 bg-background-brand-primary px-5 text-3xl text-content-neutral-primary font-semibold rounded-full grid place-items-center cursor-pointer hover:text-content-brand-primary hover:bg-background-inverse-tertiary hover:border-3 hover:border-background-brand-primary"
-        @click="goToSettings"
+        @click="goToParam"
       >
-        SETTINGS
+        PARAM
       </button>
     </div>
   </div>
