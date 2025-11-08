@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prestart": "npm install && npx prisma db push && tsc",
+    "start": "node -r ./_module-alias.js dist/app.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node -r tsconfig-paths/register src/app.ts'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,9 +18,11 @@
     "@types/socket.io": "^3.0.1",
     "@types/ws": "^8.18.1",
     "express": "^5.1.0",
+    "module-alias": "^2.2.3",
     "prisma": "^6.18.0",
     "socket.io": "^4.8.1",
-    "ws": "^8.18.3"
+    "ws": "^8.18.3",
+    "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {
     "@types/node": "^24.9.1",

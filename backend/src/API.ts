@@ -21,6 +21,7 @@ export class API {
   }
 
   public registeringAllRoutes() {
+    this.baseRoute();
     this.healthRoute();
     this.scoreboardRoutes();
     this.userNameScoreboardRoute();
@@ -30,6 +31,12 @@ export class API {
 
   // ========================== Private =========================== \\
 
+  private baseRoute() {
+    this.app.get('/', async (_req, res) => {
+      res.send('Welcome to McdaSnake API');
+      logger.debug("Sending response for base route requested");
+    });
+  }
 
   private healthRoute() {
     this.app.get('/health', async (_req, res) => {
@@ -64,7 +71,7 @@ export class API {
 
   private scoreboardByIdRoute() {
     this.app.get('/scoreboard/:id', async (req, res) => {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       logger.debug("Retrieving id based scoreboard from database");
       const scoreboard = await this.prisma.scoreBoard.findUnique({
         where:

@@ -52,7 +52,7 @@ export class Game {
     logger.info("Spawing a snake on " + newSnake.cases + " for player " + name);
     logger.info("Creating an empty score in the scoreboard for the player '" + name + "'...");
 		this.snakes.set(snakeId, newSnake);
-    this.scoreBoard.createScore(name, this.sessionId);
+    this.scoreBoard.createScore(snakeId, name, this.sessionId);
     return newSnake;
 	}
 
@@ -116,14 +116,14 @@ export class Game {
           logger.debug("Snake on id " + snake.id + " ate apple on id " + eaten_apple.id);
           gameRefresh.entities.removed.push(eaten_apple.id);
           logger.debug("Updating database score of snake " + snake.name);
-          this.scoreBoard.updateScore(snake.name, 100, 0, 1);
+          this.scoreBoard.updateScore(snake.id, 100, 0, 1);
         } else if (entityCollided instanceof Snake) {
           const collided_snake = entityCollided as Snake;
           logger.debug("Snake on id " + snake.id + " was killed by " + collided_snake.id);
           if (!snake.dead) {
           logger.info(snake.name + " died from " + collided_snake.name + ". Last registered length of " + snake.cases.length);
             logger.debug("Updating database score of snake " + snake.name);
-            this.scoreBoard.updateScore(snake.name, 1000, 1, 0);
+            this.scoreBoard.updateScore(snake.id, 1000, 1, 0);
           }
           snake.dead = true;
           gameRefresh.entities.removed.push(snake.id);

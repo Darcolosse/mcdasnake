@@ -1,40 +1,33 @@
-import { PrismaClient } from '@prisma/client';
-
-export class ScoreBoard {
-    private scores: Map<string, [number, number, number]>;
-    private readonly db: PrismaClient;
-
-    constructor(db: PrismaClient) {
-        this.scores = new Map<string, [number, number, number]>();
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ScoreBoard = void 0;
+class ScoreBoard {
+    scores;
+    db;
+    constructor(db) {
+        this.scores = new Map();
         this.db = db;
     }
-
-    public createGameSession(sessionId: string): void {
+    createGameSession(sessionId) {
         this.createGameSessionScoreboard(sessionId);
     }
-
-
-    public createScore(playerId: string, playerName: string, sessionId: string, score: number = 0, kills: number = 0, apples: number = 0): void {
+    createScore(playerId, playerName, sessionId, score = 0, kills = 0, apples = 0) {
         const currentScore = this.scores.get(playerId) || [0, 0, 0];
         this.scores.set(playerId, [currentScore[0] + score, currentScore[1] + kills, currentScore[2] + apples]);
         this.addSnakeScoreBoard(playerId, playerName, sessionId, score, kills, apples);
     }
-
-    public updateScore(playerId: string, score: number, kills: number, apples: number): void {
+    updateScore(playerId, score, kills, apples) {
         const currentScore = this.scores.get(playerId) || [0, 0, 0];
         this.scores.set(playerId, [currentScore[0] + score, currentScore[1] + kills, currentScore[2] + apples]);
         this.updateSnakeScoreBoard(playerId, score, kills, apples);
     }
-
-    public getAllScores(): Map<string, [number, number, number]> {
+    getAllScores() {
         return this.scores;
     }
-
-    public getScore(playerId: string): [number, number, number] | undefined {
+    getScore(playerId) {
         return this.scores.get(playerId);
     }
-
-    private async addSnakeScoreBoard(playerId: string, playerName: string, gameSessionId: string, score: number = 0, kills: number = 0, apples: number = 0) {
+    async addSnakeScoreBoard(playerId, playerName, gameSessionId, score = 0, kills = 0, apples = 0) {
         await this.db.scoreBoard.create({
             data: {
                 id: playerId,
@@ -45,9 +38,9 @@ export class ScoreBoard {
                 gameSessionId: gameSessionId
             }
         });
-    };
-
-    private async updateSnakeScoreBoard(playerId: string, score: number, kills: number, apples: number) {
+    }
+    ;
+    async updateSnakeScoreBoard(playerId, score, kills, apples) {
         await this.db.scoreBoard.updateMany({
             where: { id: playerId },
             data: {
@@ -56,9 +49,9 @@ export class ScoreBoard {
                 apples: { increment: apples }
             }
         });
-    };
-
-    private async createGameSessionScoreboard(sessionId: string) {
+    }
+    ;
+    async createGameSessionScoreboard(sessionId) {
         await this.db.gameSession.create({
             data: {
                 sessionId: sessionId
@@ -66,3 +59,4 @@ export class ScoreBoard {
         });
     }
 }
+exports.ScoreBoard = ScoreBoard;

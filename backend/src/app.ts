@@ -22,6 +22,7 @@ try {
   try {
     const api = new API();
     api.start(String(process.env.API_IP), Number(process.env.API_PORT));
+    api.registeringAllRoutes();
   } catch (error) {
     logger.error("Couldn't start the api", error);
   }
