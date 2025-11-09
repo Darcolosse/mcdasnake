@@ -1,37 +1,35 @@
-# Utilise une image Node.js légère
 FROM node:18-alpine
 
-# Définit le répertoire de travail
 WORKDIR /app
 
-# Copie les fichiers de configuration et d'installation
+# Copy installation and configuration files
 COPY package.json package-lock.json ./
 
-# Copie les fichiers de configuration et le code source
+# Copy configuration files and source code
 COPY .env ./
 COPY prisma ./prisma/
 COPY src ./src/
 COPY _module-alias.js ./
 COPY tsconfig.json ./
 
-# Définit les arguments de build
+# Define build arguments
 ARG BACKEND_IP
 ARG API_IP
 ARG BACKEND_PORT
 ARG API_PORT
 
-# Expose les arguments comme variables d'environnement
+# Expose arguments as environment variables
 ENV BACKEND_IP=${BACKEND_IP}
 ENV API_IP=${API_IP}
 ENV BACKEND_PORT=${BACKEND_PORT}
 ENV API_PORT=${API_PORT}
 
-# Prépare l'application (installe, génère Prisma, compile TypeScript)
+# Prepare the application (install, generate db, compile TypeScript)
 RUN npm run prestart
 
-# Expose le port de l'application
+# Expose application ports
 EXPOSE ${BACKEND_PORT}
 EXPOSE ${API_PORT}
 
-# Démarre l'application avec module-alias
+# Start the application
 CMD ["node", "-r", "./_module-alias.js", "dist/app.js"]
