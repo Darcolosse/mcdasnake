@@ -1,3 +1,13 @@
+export const SpriteName = {
+  APPLE:"APPLE",
+  HEAD_BETA:"HEAD_BETA",
+  HEAD_FUN:"HEAD_FUN",
+  HEAD_CLASSIC:"HEAD_CLASSIC",
+  SCALE:"SCALE",
+} as const;
+export type SpriteName = typeof SpriteName[keyof typeof SpriteName];
+
+
 export class SpriteManager {
   private static SPRITE_FOLDER = "/src/core/display/sprite/";
 
@@ -11,11 +21,11 @@ export class SpriteManager {
 
   constructor() {
     this.spritesPath = {
-      APPLE: SpriteManager.SPRITE_FOLDER + "apple.png",
-      HEAD_BETA: SpriteManager.SPRITE_FOLDER + "head.png",
-      HEAD_FUN: SpriteManager.SPRITE_FOLDER + "head2.jpg",
-      HEAD_CLASSIC: SpriteManager.SPRITE_FOLDER + "head3.svg",
-      SCALE: SpriteManager.SPRITE_FOLDER + "scale2.jpg",
+      [SpriteName.APPLE] : SpriteManager.SPRITE_FOLDER + "apple.png",
+      [SpriteName.HEAD_BETA]: SpriteManager.SPRITE_FOLDER + "head.png",
+      [SpriteName.HEAD_FUN]: SpriteManager.SPRITE_FOLDER + "head2.jpg",
+      [SpriteName.HEAD_CLASSIC]: SpriteManager.SPRITE_FOLDER + "head3.svg",
+      [SpriteName.SCALE]: SpriteManager.SPRITE_FOLDER + "scale2.jpg",
     };
     this.totalToLoad = Object.keys(this.spritesPath).length;
     this.loadAllSprites(this.spritesPath);

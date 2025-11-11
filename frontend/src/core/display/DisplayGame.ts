@@ -4,7 +4,7 @@ import { Design, Graphism } from './Design.ts';
 import type { EntityServer } from '../network/dto/responses/EntityServer.ts';
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts';
 import { AppleDisplayed } from './AppleDisplayed.ts';
-import { SpriteManager } from './SpriteManager.ts';
+import { SpriteManager, SpriteName } from './SpriteManager.ts';
 import type { GameRefreshDTO } from '../network/dto/responses/GameRefresh.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
 
@@ -25,7 +25,7 @@ export class DisplayGame {
     this.displayManager = displayManager;
     this.spriteManager = new SpriteManager();
     this.spriteManager.onReady(() => this.animate());
-    this.graphism = Graphism.NORMAL;
+    this.graphism = Graphism.LOW;
     this.loop = this.loop.bind(this);
   }
 
@@ -120,10 +120,8 @@ export class DisplayGame {
               this,
               entityBoxes,
               this.gameSpeed,
-              new Design("lightblue"),
-              1,
-              this.graphism,
-              0
+              new Design("lightblue", SpriteName.HEAD_CLASSIC, this.graphism),
+              1
             );
             break;
           case ("APPLE"):
@@ -131,10 +129,8 @@ export class DisplayGame {
               this,
               entityBoxes,
               1000,
-              new Design("red"),
+              new Design("red", SpriteName.APPLE, this.graphism),
               0,
-              this.graphism,
-              0
             );
             break;
 
@@ -143,10 +139,8 @@ export class DisplayGame {
               this,
               entityBoxes,
               1000,
-              new Design("black"),
+              new Design("black", SpriteName.HEAD_CLASSIC, this.graphism),
               -1,
-              this.graphism,
-              0
             );
             break;
         }
@@ -166,7 +160,13 @@ export class DisplayGame {
     if (oldEntity) {
       this.entities.delete(id);
       const index = this.zindex.indexOf(oldEntity);
-      if (index !== -1) this.zindex.splice(index, 1);
+      if (index !== -1) {
+        this.zindex.splice(index, 1);
+      }
+      else {console.log("unknow in zindex : " + id);}
+    }
+    else{
+      console.log("unknow entity " + id);
     }
   }
 

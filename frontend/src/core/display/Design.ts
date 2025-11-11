@@ -1,4 +1,5 @@
-export type SpriteName = "APPLE" | "HEAD" | "SCALE";
+import type { SpriteName } from "./SpriteManager";
+
 export type Graphism = (typeof Graphism)[keyof typeof Graphism];
 export const Graphism = {
   VERY_LOW:"VERY_LOW",

@@ -158,8 +158,6 @@ export class SnakeDisplayed extends EntityDisplayed {
     const boxSize = this.display.getBoxSize();
     const headName = this.design.getHead();
     const head = this.display.getSprite(headName);
-    console.log(headName);
-    console.log(head);
     const headSize = 1;
     const lastPoint = this.getMovedPoint(this.boxes.length-2, false, headSize);
     const direction = this.vectorToRadian(this.getDirection(this.boxes.length-1));// - (Math.PI/2);
