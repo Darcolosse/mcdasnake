@@ -14,7 +14,7 @@ export class DisplayGame {
 
   private displayManager: DisplayManager;
   protected entities: Map<string, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
-  protected zindex: string[] = [];
+  protected zindex: EntityDisplayed[] = [];
   private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
   private inLoop: boolean = false;
   private spriteManager: SpriteManager;
@@ -28,6 +28,7 @@ export class DisplayGame {
     this.graphism = Graphism.LOW;
     this.loop = this.loop.bind(this);
   }
+
 
   // ============================ Get ============================ \\
 
@@ -52,6 +53,8 @@ export class DisplayGame {
   public getSprite(sprite: SpriteName) : HTMLImageElement | undefined{
     return this.spriteManager.get(sprite);
   }
+
+
 
   // ============================ Methodes publiques ============================ \\
 
@@ -153,12 +156,17 @@ export class DisplayGame {
   }
 
   private removeEntity(id: string){
-    const oldEntity = this.entities.get(id)
+    const oldEntity = this.entities.get(id);
     if (oldEntity) {
-      this.entities.delete(id)
-      this.removeFromZindex(id)
-    } else {
-      console.log("unknow entity " + id)
+      this.entities.delete(id);
+      const index = this.zindex.indexOf(oldEntity);
+      if (index !== -1) {
+        this.zindex.splice(index, 1);
+      }
+      else {console.log("unknow in zindex : " + id);}
+    }
+    else{
+      console.log("unknow entity " + id);
     }
   }
 
@@ -170,30 +178,18 @@ export class DisplayGame {
     const oldEntity = this.entities.get(id) as EntityDisplayed;
     if (oldEntity) {
       oldEntity.clear();
-      this.removeFromZindex(id);
     }
     this.entities.set(id,entity);
-    this.insertInZindex(id, entity.getZindex());
+    this.updateZindex(oldEntity, entity);
   }
 
-  private insertInZindex(id: string, layer: number) {
-    let insertionIndex = 0;
-    for (const [index, otherId] of this.zindex.entries()) {
-      const otherEntity = this.entities.get(otherId) as EntityDisplayed;
-      if (otherEntity.getZindex() >= layer) {
-        break;
-      }
-      insertionIndex = index+1
-    }
-
-    this.zindex.splice(insertionIndex, 0, id);
-  }
-
-  private removeFromZindex(id: string) {
-    const index = this.zindex.indexOf(id)
+  protected updateZindex(oldEntity: EntityDisplayed, entity: EntityDisplayed){
+    const index = this.zindex.indexOf(oldEntity)
     if (index !== -1){
       this.zindex.splice(index, 1)
     }
+    this.zindex.push(entity)
+    this.zindex.sort((a, b) => a.getZindex() - b.getZindex());
   }
 
   // ============================ Méthodes d'affichage ============================ \\
@@ -220,11 +216,10 @@ export class DisplayGame {
     const canvas = this.displayManager.getCanvas()
 
     if (canvas) {
-      this.getCtx().clearRect(0, 0, canvas.width, canvas.height)
-      for (const id of this.zindex) {
-        const entity = this.entities.get(id) as EntityDisplayed
-        entity.setFullAnimation(true)
-        entity.animate(Date.now())
+      this.getCtx().clearRect(0, 0, canvas.width, canvas.height);
+      for (const entity of this.zindex) {
+        entity.setFullAnimation(true);
+        entity.animate(Date.now());
       }
     }
   }
@@ -233,14 +228,14 @@ export class DisplayGame {
    * Update les partie qui ont changé sur la grille de jeu
    */
   public animate(): void {
-    this.clearModifiedboxes()
-    for (const id of this.zindex) {
-      this.entities.get(id)?.clearChange(Date.now())
+    this.clearModifiedboxes();
+    for (const entity of this.zindex) {
+      entity.clearChange(Date.now());
     }
-    for (const id of this.zindex) {
-      this.entities.get(id)?.animate()
+    for (const entity of this.zindex) {
+      entity.animate();
     }
-    this.clearModifiedboxes()
+    this.clearModifiedboxes();
   };
 
   // ============================ Methodes privées de case modifié ============================ \\
