@@ -39,7 +39,7 @@ export class GameScheduler {
     // # Realtime events #
     // #                 #
     this.gameManager.popBuffer(Buffers.CONNECTION_BUFFER).forEach((connection) => {
-      const snake = this.game.addSnake(connection.id, (connection.dto as GameAddPlayerDTO).name);
+      const snake = this.game.addSnake(connection.id, (connection.dto as GameAddPlayerDTO).name, (connection.dto as GameAddPlayerDTO).design);
       gameRefresh.entities.snakes.push(snake);
     })
 

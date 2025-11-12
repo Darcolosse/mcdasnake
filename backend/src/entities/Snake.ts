@@ -9,15 +9,17 @@ export class Snake implements Entity {
 	public direction: Direction;
 	public newDirection: Direction;
 	public dead: boolean;
+	public design: [string, string];
 
 
-	constructor(id: string, name:string, cases: [number, number][], direction: Direction) {
+	constructor(id: string, name:string, cases: [number, number][], direction: Direction, design: [string, string] = ["LIME", "HEAD_CLASSIC"]) {
 		this.id = id;
 		this.name = name;
 		this.cases = cases;
 		this.direction = direction;
 		this.newDirection = direction;
 		this.dead = false;
+		this.design = design;
 	}
 
 	public move(entities: Map<string, Entity>, gameRefresh: GameRefreshResponseDTO) {
@@ -51,25 +53,25 @@ export class Snake implements Entity {
 
 		// Remove tail
 		head = this.getHead();
-    let headOnSomething: boolean = false;
-		for (const [_id, entity] of entities) {
-      for(const [x, y] of entity.cases) {
-        if (head[0] === x && head[1] === y) {
-          headOnSomething = true;
-          break;
-        }
-      }
-      if(headOnSomething) break;
+		let headOnSomething: boolean = false;
+			for (const [_id, entity] of entities) {
+		for(const [x, y] of entity.cases) {
+			if (head[0] === x && head[1] === y) {
+			headOnSomething = true;
+			break;
+			}
 		}
-    if(!headOnSomething) {
-      this.cases.shift(); // Delete tail
-    } else {
-      shouldRefresh = true;
-    }
+		if(headOnSomething) break;
+			}
+		if(!headOnSomething) {
+		this.cases.shift(); // Delete tail
+		} else {
+		shouldRefresh = true;
+		}
 
-    if(shouldRefresh) {
+		if(shouldRefresh) {
 			gameRefresh.entities.snakes.push(this);
-    }
+		}
 	}
 
 	public setDirection(direction: Direction) {

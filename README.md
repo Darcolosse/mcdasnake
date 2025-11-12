@@ -19,7 +19,7 @@ This project is a multiplayer Snake game implemented with Node.js, Express and P
     - BACKEND_IP, API_IP — IP addresses to bind the services
     - BACKEND_PORT, API_PORT — ports used by the services
 
-- For local development, create a .env file in ./backend with the required variables (DATABASE_URL, NODE_ENV, any JWT or session secrets) and run npm scripts as described below.
+
 
 ## How to run ?
 
@@ -44,14 +44,14 @@ npm run start
 docker build \
     --build-arg BACKEND_IP=0.0.0.0 \
     --build-arg API_IP=0.0.0.0 \
-    --build-arg BACKEND_PORT=5000 \
-    --build-arg API_PORT=5001 \
+    --build-arg BACKEND_PORT=5001 \
+    --build-arg API_PORT=5002 \
     -t mcdasnake .
 ```
 2. Run a container with persistent volumes for the database and logs:
 ```bash
 docker run -d \
-    -p 5000:5000 -p 5001:5001 \
+    -p 5001:5001 -p 5002:5002 \
     -v mcdasnake_database:/app/prisma \
     -v mcdasnake_logs:/app/logs \
     mcdasnake

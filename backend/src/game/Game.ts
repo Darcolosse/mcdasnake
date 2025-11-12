@@ -41,14 +41,16 @@ export class Game {
 
   // ### SNAKES ###
 
-	public addSnake(snakeId: string, name: string): Snake {
+	public addSnake(snakeId: string, name: string, design: [string, string]): Snake {
     logger.debug("Adding a new snake in game for player '" + name + "'...");
     const newSnake = new Snake(
       snakeId,
       name,
       this.generateRandomSpawn(Number(process.env.SNAKE_SPAWNING_LENGTH), 100/3, 200/3),
-      process.env.SNAKE_SPAWNING_DIRECTION as Direction
+      process.env.SNAKE_SPAWNING_DIRECTION as Direction,
+      design
     )
+    console.log(newSnake);
     logger.info("Spawing a snake on " + newSnake.cases + " for player " + name);
     logger.info("Creating an empty score in the scoreboard for the player '" + name + "'...");
 		this.snakes.set(snakeId, newSnake);
@@ -110,48 +112,51 @@ export class Game {
 
 		this.snakes.forEach(snake => {
 
-      const head = snake.cases[0];
+      const head = snake.getHead();
 
       if (this.isOutOfBounds(head)) {
         logger.info(`${snake.name} hit the border (${this.cols}, ${this.rows}) at ${head}`);
         logger.debug("Snake on id " + snake.id + " hit border");
         snake.dead = true;
         gameRefresh.entities.removed.push(snake.id);
+
       } else {
         this.checkCollisions(snake, map,
           (entityCollided) => {
             logger.debug("Snake collided with an entity");
             if(entityCollided instanceof Apple) {
               const eaten_apple = entityCollided as Apple;
-              this.removeApple(eaten_apple.id);
+
               logger.info(snake.name + " ate an apple. Current length of " + snake.cases.length);
               logger.debug("Snake on id " + snake.id + " ate apple on id " + eaten_apple.id);
+              this.removeApple(eaten_apple.id);
               gameRefresh.entities.removed.push(eaten_apple.id);
+
               logger.debug("Updating database score of snake " + snake.name);
               this.scoreBoard.updateScore(snake.id, 100, 0, 1);
+
             } else if (entityCollided instanceof Snake) {
               const collided_snake = entityCollided as Snake;
               logger.debug("Snake on id " + snake.id + " was killed by " + collided_snake.id);
+
               if (!snake.dead) {
-              logger.info(snake.name + " died from " + collided_snake.name + ". Last registered length of " + snake.cases.length);
+                logger.info(snake.name + " died from " + collided_snake.name + ". Last registered length of " + snake.cases.length);
                 logger.debug("Updating database score of snake " + snake.name);
                 this.scoreBoard.updateScore(snake.id, 1000, 1, 0);
               }
               snake.dead = true;
               gameRefresh.entities.removed.push(snake.id);
+
             } else {
               logger.warn("Couldn't figure what snake on id " + snake.id + " and name " + snake.name + " collided. Game state on tick unstable.");
             }
           }
         )
       }
-    });
-
-    this.snakes.forEach(snake => {
       if (snake.dead) {
         this.removeSnake(snake.id)
       }
-    })
+    });
     logger.debug("Checked collisions");
   }
 
@@ -178,7 +183,7 @@ export class Game {
 
   private isOutOfBounds(cases: [number, number]) {
     const [x, y] = cases;
-    return (x < 0 || x > this.cols) || (y < 0 || y > this.rows)
+    return (x < 0 || x > this.cols - 1) || (y < 0 || y > this.rows - 1)
   }
 
   private buildMap(includeApples: boolean, includeSnakes: boolean) : Map<string, Entity> {

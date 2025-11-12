@@ -4,6 +4,7 @@ export interface Entity {
     name: string;
     dead: boolean;
 
+
     getHead(): [number, number];
 }
 
