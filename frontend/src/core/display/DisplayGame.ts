@@ -155,8 +155,9 @@ export class DisplayGame {
   private removeEntity(id: string){
     const oldEntity = this.entities.get(id)
     if (oldEntity) {
-      this.entities.delete(id)
       this.removeFromZindex(id)
+      oldEntity.clear()
+      this.entities.delete(id)
     } else {
       console.log("unknow entity " + id)
     }
@@ -222,9 +223,9 @@ export class DisplayGame {
     if (canvas) {
       this.getCtx().clearRect(0, 0, canvas.width, canvas.height)
       for (const id of this.zindex) {
-        const entity = this.entities.get(id) as EntityDisplayed
-        entity.setFullAnimation(true)
-        entity.animate(Date.now())
+        const entity = this.entities.get(id)
+        entity?.setFullAnimation(true)
+        entity?.animate(Date.now())
       }
     }
   }
