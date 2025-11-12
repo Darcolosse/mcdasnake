@@ -7,6 +7,7 @@ import { AppleDisplayed } from './AppleDisplayed.ts';
 import { SpriteManager, SpriteName } from './SpriteManager.ts';
 import type { GameRefreshDTO } from '../network/dto/responses/GameRefresh.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
+import { CookieType, getCookie } from '../../util/cookies.ts';
 
 type EntityType = "SNAKE" | "APPLE" | "ENTITY";
 
@@ -25,8 +26,11 @@ export class DisplayGame {
     this.displayManager = displayManager;
     this.spriteManager = new SpriteManager();
     this.spriteManager.onReady(() => this.animate());
-    this.graphism = Graphism.LOW;
     this.loop = this.loop.bind(this);
+
+    // graphics parameter
+    this.graphism = this.getGraphismFromCookie();
+    console.log(this.graphism);
   }
 
   // ============================ Get ============================ \\
@@ -113,11 +117,12 @@ export class DisplayGame {
         let entityObject: EntityDisplayed;
         switch (entityType) {
           case ("SNAKE"):
+            const design = this.getEntityDesign(entity);
             entityObject = new SnakeDisplayed(
               this,
               entityBoxes,
               this.gameSpeed,
-              new Design("lightblue", SpriteName.HEAD_CLASSIC, this.graphism),
+              design,
               1
             );
             break;
@@ -132,6 +137,7 @@ export class DisplayGame {
             break;
 
           default:
+            console.log("default")
             entityObject = new EntityDisplayed(
               this,
               entityBoxes,
@@ -167,7 +173,7 @@ export class DisplayGame {
    * @param id identifié de l'entité à ajouter / ou  à modifier
    * @param entity objet représentant l'entité
    */
-  private setEntity(id: string, entity: EntityDisplayed): void {
+  protected setEntity(id: string, entity: EntityDisplayed): void {
     const oldEntity = this.entities.get(id) as EntityDisplayed;
     if (oldEntity) {
       oldEntity.clear();
@@ -276,6 +282,31 @@ export class DisplayGame {
     
     if (this.inLoop){
       setTimeout(this.loop, 1000 / 60);
+    }
+  }
+
+  private getEntityDesign(entity: EntityServer): Design {
+    const DEFAULT_COLOR = "lightblue";
+    const DEFAULT_HEAD: SpriteName = "HEAD_CLASSIC";
+
+    const [rawColor, rawHead] = entity.design ?? [];
+
+    const color = rawColor ?? DEFAULT_COLOR;
+    const headSprite = (rawHead as SpriteName) ?? DEFAULT_HEAD;
+    return new Design(color, headSprite, this.graphism)
+  }
+
+  private getGraphismFromCookie(): Graphism {
+    const DEFAULT_GRAPHISM = Graphism.NORMAL;
+
+    const designStr = getCookie(CookieType.Design);
+    if (!designStr) return DEFAULT_GRAPHISM;
+
+    try {
+      const design = JSON.parse(designStr) as { graphics?: string };
+      return (design.graphics as Graphism) ?? DEFAULT_GRAPHISM;
+    } catch {
+      return DEFAULT_GRAPHISM; // sécurité en cas de JSON invalide
     }
   }
 }

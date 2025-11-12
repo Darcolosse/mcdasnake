@@ -41,12 +41,7 @@ export class DisplayGameFake extends DisplayGame{
   // ========================= Override ============================ \\
 
   public setEntity2(id: string, entity: EntityDisplayed): void {
-      const oldEntity = this.entities.get(id) as EntityDisplayed;
-      if (oldEntity) {
-        oldEntity.clear();
-      }
-      this.entities.set(id,entity);
-      this.updateZindex(oldEntity, entity);
+      this.setEntity(id, entity);
     }
 
 }
