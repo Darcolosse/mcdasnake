@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 
 export class ScoreBoard {
-    private scores: Map<string, [number, number, number]>;
+    private scores: Map<string, [string, number, number, number]>;
     private readonly db: PrismaClient;
 
     constructor(db: PrismaClient) {
-        this.scores = new Map<string, [number, number, number]>();
+        this.scores = new Map<string, [string, number, number, number]>();
         this.db = db;
     }
 
@@ -15,22 +15,22 @@ export class ScoreBoard {
 
 
     public createScore(playerId: string, playerName: string, sessionId: string, score: number = 0, kills: number = 0, apples: number = 0): void {
-        const currentScore = this.scores.get(playerId) || [0, 0, 0];
-        this.scores.set(playerId, [currentScore[0] + score, currentScore[1] + kills, currentScore[2] + apples]);
+        const currentScore = this.scores.get(playerId) || [0, 0, 0, 0];
+        this.scores.set(playerId, [playerName, currentScore[1] + score, currentScore[2] + kills, currentScore[3] + apples]);
         this.addSnakeScoreBoard(playerId, playerName, sessionId, score, kills, apples);
     }
 
     public updateScore(playerId: string, score: number, kills: number, apples: number): void {
-        const currentScore = this.scores.get(playerId) || [0, 0, 0];
-        this.scores.set(playerId, [currentScore[0] + score, currentScore[1] + kills, currentScore[2] + apples]);
+        const currentScore = this.scores.get(playerId) || ["null", 0, 0, 0, 0];
+        this.scores.set(playerId, [currentScore[0], currentScore[1] + score, currentScore[2] + kills, currentScore[3] + apples]);
         this.updateSnakeScoreBoard(playerId, score, kills, apples);
     }
 
-    public getAllScores(): Map<string, [number, number, number]> {
+    public getAllScores(): Map<string, [string, number, number, number]> {
         return this.scores;
     }
 
-    public getScore(playerId: string): [number, number, number] | undefined {
+    public getScore(playerId: string): [string, number, number, number] | undefined {
         return this.scores.get(playerId);
     }
 

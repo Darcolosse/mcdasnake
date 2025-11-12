@@ -50,7 +50,6 @@ export class Game {
       process.env.SNAKE_SPAWNING_DIRECTION as Direction,
       design
     )
-    console.log(newSnake);
     logger.info("Spawing a snake on " + newSnake.cases + " for player " + name);
     logger.info("Creating an empty score in the scoreboard for the player '" + name + "'...");
 		this.snakes.set(snakeId, newSnake);
@@ -82,6 +81,12 @@ export class Game {
 
   public getSize(): [number, number] {
     return [this.cols, this.rows];
+  }
+
+  public getScore(){
+    logger.debug("Scoreboard ...");
+    logger.debug(this.scoreBoard.getAllScores());
+    return this.scoreBoard.getAllScores();
   }
 
   // ### GAME EVENTS ###
@@ -243,4 +248,5 @@ export class Game {
     logger.debug("Deleting apple of id " + id);
 		this.apples.delete(id);
 	}
+
 }
