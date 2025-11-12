@@ -34,6 +34,7 @@ export class GameScheduler {
 
     // ### Game refresh barebone ###
     const gameRefresh: GameRefreshResponseDTO = new GameRefreshResponseDTO();
+    gameRefresh.scoreBoard = this.game.getScore();
 
     // #                 #
     // # Realtime events #
