@@ -31,13 +31,7 @@ export class GameManager {
       this.networkManager.connect().then(() => {
         this.log(this, "Sending an add request to the server after being connected")
         this.eventManager.startListening()
-
-        const design = JSON.parse(getCookie(CookieType.Design) as string);
-        this.handleClientEvent(new GameAddPlayerDTO(
-          getCookie(CookieType.Username) as string,
-          design.color,
-          design.head
-        ))
+        this.askServerForRespawn()
       })
     } else {
       this.raiseError("Canvas elements not found. Couldn't start the game.")
@@ -49,6 +43,15 @@ export class GameManager {
     this.eventManager.stopListening()
     this.displayManager.destroy()
     this.networkManager.disconnect()
+  }
+
+  public askServerForRespawn() {
+    const design = JSON.parse(getCookie(CookieType.Design) as string)
+    this.handleClientEvent(new GameAddPlayerDTO(
+      getCookie(CookieType.Username) as string,
+      design.color,
+      design.head
+    ))
   }
   
   // ===================== Management layer ====================== \\
