@@ -59,6 +59,10 @@ export class GameManager {
 				this.networkManager.emit(id, eventDTO);
 				logger.debug("Sent game update response to", id);
 				break;
+      case DTOType.GameDeadPlayer:
+        this.networkManager.emit(id, eventDTO);
+        logger.debug("Notifying player is dead", id);
+        break;
 			default:
 				logger.warn("Game tried to send to ws " + id + " a suspicious websocket:", eventDTO.type);
 		}
