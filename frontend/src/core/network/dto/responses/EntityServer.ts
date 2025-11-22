@@ -2,6 +2,7 @@ export interface EntityServer {
   id: string;
   name: string;
   boxes: [number,number][];
+  design: [string, string];
 }
 
 export interface EntitiesRefresh{

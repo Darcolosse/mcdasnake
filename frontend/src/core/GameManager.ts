@@ -31,7 +31,13 @@ export class GameManager {
       this.networkManager.connect().then(() => {
         this.log(this, "Sending an add request to the server after being connected")
         this.eventManager.startListening()
-        this.handleClientEvent(new GameAddPlayerDTO(getCookie(CookieType.Username) as string))
+
+        const design = JSON.parse(getCookie(CookieType.Design) as string);
+        this.handleClientEvent(new GameAddPlayerDTO(
+          getCookie(CookieType.Username) as string,
+          design.color,
+          design.head
+        ))
       })
     } else {
       this.raiseError("Canvas elements not found. Couldn't start the game.")
@@ -62,18 +68,18 @@ export class GameManager {
   }
 
   public handleServerEvent(eventDTO: DTO) {
-    this.log(this, "Handling an event from server")
+    this.log(this, "Handling an event from server");
     switch(eventDTO.type) {
       case DTOType.GameRefresh :
-        console.log(eventDTO)
-        this.displayManager.refreshGame(eventDTO as GameRefreshDTO)
+        console.log(eventDTO);
+        this.displayManager.refreshGame(eventDTO as GameRefreshDTO);
         break;
       case DTOType.GameUpdate :
-        this.displayManager.updateGameLayers(eventDTO as GameUpdateResponseDTO)
-        this.displayManager.showGame()
+        this.displayManager.updateGameLayers(eventDTO as GameUpdateResponseDTO);
+        this.displayManager.showGame();
         break;
       default:
-        this.log(this, "Handler of event not implemented.", eventDTO)
+        this.log(this, "Handler of event not implemented.", eventDTO);
         break;
     }
     
