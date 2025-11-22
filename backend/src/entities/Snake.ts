@@ -23,7 +23,6 @@ export class Snake implements Entity {
 	}
 
 	public move(entities: Map<string, Entity>, gameRefresh: GameRefreshResponseDTO) {
-		console.log("\n\n\n" + this.design +"\n\n\n"  );
     	let shouldRefresh = false;
 		if (this.newDirection !== this.direction && this.checkIncorrectTurn(this.newDirection) === false) {
 			this.direction = this.newDirection;

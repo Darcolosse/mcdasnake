@@ -52,7 +52,7 @@ export class GameManager {
 	public handleGameEvent(eventDTO: DTO, id: string = '') {
 		switch (eventDTO.type) {
 			case DTOType.GameRefresh:
-        logger.debug("Broadcasting", JSON.stringify(eventDTO))
+        logger.debug("Broadcasting")
 				this.networkManager.broadcast(eventDTO);
 				break;
 			case DTOType.GameUpdate:
