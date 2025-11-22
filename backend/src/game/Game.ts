@@ -158,8 +158,11 @@ export class Game {
           }
         )
       }
+      
+    });
+    this.snakes.forEach(snake => {
       if (snake.dead) {
-        this.removeSnake(snake.id)
+        this.snakes.delete(snake.id);
       }
     });
     logger.debug("Checked collisions");

@@ -153,12 +153,13 @@ export class DisplayGame {
   }
 
   private removeEntity(id: string){
-    const oldEntity = this.entities.get(id)
+    const oldEntity = this.entities.get(id);
     if (oldEntity) {
-      this.entities.delete(id)
-      this.removeFromZindex(id)
+      oldEntity.clear();
+      this.removeFromZindex(id);
+      this.entities.delete(id);
     } else {
-      console.log("unknow entity " + id)
+      console.log("unknow entity " + id);
     }
   }
 
