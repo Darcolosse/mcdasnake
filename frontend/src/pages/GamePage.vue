@@ -18,6 +18,11 @@ onMounted(() => {
   }
 })
 
+function askServerForRespawn(){
+  gameManager.askServerForRespawn();
+  gameRef.value?.focus();
+}
+
 function goToHome(){
   router.push(homeRoute.path);
 }
@@ -40,6 +45,14 @@ function goToHome(){
             <span class="text-content-brand-primary">Snake</span>
           </h1>
       </div>
+      <button 
+        class="absolute -bottom-11 right-2 py-1 px-4 bg-background-inverse-secondary/60 rounded-lg font-semibold text-background-inverse-tertiary"
+        @click="askServerForRespawn"
+        >
+        <span class="text-content-brand-primary">Click here to </span>
+        <span class="text-content-brand-secondary">Re</span>
+        <span class="text-content-brand-primary">spawn</span>
+      </button>
       <div class="relative w-full h-full rounded-3xl overflow-hidden">
         <!-- Background canvas -->
         <canvas

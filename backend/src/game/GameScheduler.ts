@@ -1,6 +1,6 @@
 import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshResponseDTO";
 import { Game } from "@game/Game";
-import { GameManager, Buffers } from "@game/GameManager";
+import { GameManager, Buffers, Event } from "@game/GameManager";
 import { GameUpdateSnakeDirectionDTO } from "@network/dto/requests/GameUpdateSnakeDirectionDTO";
 import { GameAddPlayerDTO } from "@network/dto/requests/GameAddPlayerDTO";
 import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
@@ -41,13 +41,12 @@ export class GameScheduler {
     // # Realtime events #
     // #                 #
     this.gameManager.popBuffer(Buffers.CONNECTION_BUFFER).forEach((connection) => {
-      const snake = this.game.addSnake(connection.id, (connection.dto as GameAddPlayerDTO).name, (connection.dto as GameAddPlayerDTO).design);
-      gameRefresh.entities.snakes.push(snake);
+      if (this.game.isSnakePlaying(connection.id)) this.onRemove(connection.id, gameRefresh);
+      this.onAdd(connection, gameRefresh);
     })
 
     this.gameManager.popBuffer(Buffers.DECONNECTION_BUFFER).forEach((deconnection) => {
-      this.game.removeSnake(deconnection.id);
-      gameRefresh.entities.removed.push(deconnection.id);
+      this.onRemove(deconnection.id, gameRefresh);
     })
 
     // #                  #
@@ -80,6 +79,16 @@ export class GameScheduler {
 
 		this.game.processMove(gameRefresh);
 		this.game.processCollisions(gameRefresh);
+  }
+
+  private onAdd(connection: Event, gameRefresh: GameRefreshResponseDTO) {
+    const snake = this.game.addSnake(connection.id, (connection.dto as GameAddPlayerDTO).name, (connection.dto as GameAddPlayerDTO).design);
+    gameRefresh.entities.snakes.push(snake);
+  }
+
+  private onRemove(id: string, gameRefresh: GameRefreshResponseDTO) {
+    this.game.removeSnake(id);
+    gameRefresh.entities.removed.push(id);
   }
 
 }

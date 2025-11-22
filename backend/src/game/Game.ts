@@ -53,9 +53,21 @@ export class Game {
     logger.info("Spawing a snake on " + newSnake.cases + " for player " + name);
     logger.info("Creating an empty score in the scoreboard for the player '" + name + "'...");
 		this.snakes.set(snakeId, newSnake);
-    this.scoreBoard.createScore(snakeId, name, this.sessionId);
+
+    // console.log(this.scoreBoard.getScore(snakeId));
+
+    // if(this.scoreBoard.getScore(snakeId) !== undefined) {
+
+    //   this.scoreBoard.createScore(snakeId, name, this.sessionId);
+
+    // }
+
     return newSnake;
 	}
+
+  public isSnakePlaying(id: string): boolean {
+    return this.snakes.get(id) !== undefined;
+  }
 
 	public removeSnake(id: string) {
     logger.info("Deleting snake of id " + id);

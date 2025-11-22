@@ -92,12 +92,12 @@ export class DisplayGame {
       this.gameSpeed = dto.speed;
     }
     
-    this.setEntities("SNAKE", snakes);
-    this.setEntities("APPLE", apples);
     if ("removed" in dto.entities){
       this.removeEntities(dto.entities.removed);
     }
-    
+
+    this.setEntities("SNAKE", snakes);
+    this.setEntities("APPLE", apples);
   }
 
   // ============================ Requete DTO ============================ \\
