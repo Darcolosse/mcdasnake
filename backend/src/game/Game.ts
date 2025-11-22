@@ -97,7 +97,6 @@ export class Game {
 
   public getScore(){
     logger.debug("Scoreboard ...");
-    logger.debug(this.scoreBoard.getAllScores());
     return this.scoreBoard.getAllScores();
   }
 
