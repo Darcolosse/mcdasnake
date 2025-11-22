@@ -2,19 +2,41 @@
 import { ref, onMounted } from 'vue'
 import { Colors } from '../core/display/colors'
 import { SnakeDisplayed } from '../core/display/SnakeDisplayed'
-import { Design, Graphism, type SpriteName } from '../core/display/Design'
+import { Design, Graphism } from '../core/display/Design'
+
 import { DisplayGameFake } from '../core/display/DisplayGameFake'
 import { router } from '../router/router'
 import { homeRoute } from '../router/routes'
-import { CookieType, setCookie } from '../util/cookies'
+import { CookieType, setCookie, getCookiePlus } from '../util/cookies'
+import type { SpriteName } from '../core/display/SpriteManager'
+import { DisplayManager } from '../core/display/DisplayManager'
+import { GameManager } from '../core/GameManager'
+
+interface snakeColorsInterface {
+  name:string,
+  value:string
+}
+
+interface snakeHeadsInterface {
+  name:string,
+  src:string
+}
 
 // === Snake customization ===
 const snakeColors = [
-  { name: 'Lime', value: Colors.LIME },
-  { name: 'Pig', value: 'rgb(255, 128, 135)' },
-  { name: 'Sand', value: 'rgb(255, 220, 100)' },
-  { name: 'Dark', value: 'rgb(75, 63, 78)' },
-]
+  { name: 'Pig', value: 'rgb(255, 145, 155)' },        // rose doux
+  { name: 'Coral', value: 'rgb(255, 185, 170)' },      // corail pastel
+  { name: 'Peach', value: 'rgb(254, 200, 170)' },      // pêche pastel
+  { name: 'Apricot', value: 'rgb(255, 215, 160)' },    // abricot léger
+  { name: 'Lemon', value: 'rgb(255, 245, 170)' },      // jaune pastel
+  { name: 'Mint', value: 'rgb(180, 240, 210)' },       // vert menthe
+  { name: 'Aqua', value: 'rgb(185, 235, 245)' },       // bleu aqua soft
+  { name: 'Sky', value: 'rgb(190, 220, 255)' },        // bleu ciel pastel
+  { name: 'Lavender', value: 'rgb(215, 190, 255)' },   // violet pastel
+  { name: 'Mauve', value: 'rgb(220, 180, 220)' },      // mauve doux
+  { name: 'Lilac', value: 'rgb(230, 200, 245)' },      // lilas clair
+];
+
 
 const snakeHeads = [
   { name: 'HEAD_CLASSIC', src: '/src/core/display/sprite/head3.svg' },
@@ -23,8 +45,9 @@ const snakeHeads = [
 ] //as {name : SpriteName, src : string}[];
 
   
-const selectedColor = ref(snakeColors[0]);
-const selectedHead = ref(snakeHeads[0]);
+const selectedColor = ref<snakeColorsInterface>(snakeColors[0] as snakeColorsInterface);
+const selectedHead = ref<snakeHeadsInterface>(snakeHeads[0] as snakeHeadsInterface);
+
 
 // === General graphics ===
 const graphicsLevels = ['VERY_LOW', 'LOW', 'NORMAL'];
@@ -42,11 +65,13 @@ const snakeDesign = new Design(
 );
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 onMounted(() => {
+  loadCookieParameter();
   canvas = canvasRef.value;
-  if (!canvas) return;
+  if (!canvas) {console.log("canva null"); return;}
+
   preview = new DisplayGameFake(canvas, [5,3]);
   snakePreview = new SnakeDisplayed(
-    new DisplayGameFake(canvas, [5,3]),
+    preview,
     [[1,1],[2,1],[3,1]],
     0,
     snakeDesign,
@@ -57,6 +82,26 @@ onMounted(() => {
   preview.show();
   console.log(canvas);
 })
+
+function loadCookieParameter(){
+  const raw = getCookiePlus(CookieType.Design);
+  if (raw) {
+    try {
+      const saved = JSON.parse(raw);
+
+      const col = snakeColors.find(c => c.value === saved.color);
+      if (col) selectColor(col);
+
+      const head = snakeHeads.find(h => h.name === saved.head);
+      if (head) selectHead(head);
+
+      if (saved.graphics) selectGraphics(saved.graphics);
+
+    } catch (err) {
+      console.warn("Cookie design invalide", err);
+    }
+  }
+}
 
 
 

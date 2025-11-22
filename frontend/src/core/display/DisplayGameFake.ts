@@ -1,32 +1,25 @@
 import { DisplayGame } from './DisplayGame.ts';
 import { DisplayManager } from './DisplayManager.ts';
-import { GameManager } from '../GameManager.ts';
 import type { EntityDisplayed } from './EntityDisplayed.ts';
 
 export class DisplayGameFake extends DisplayGame{
 
-  private ctx: CanvasRenderingContext2D;
   private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
   private gridSize: [number, number];
 
 
   constructor(canvas: HTMLCanvasElement, gridSize : [number, number]) {
-    const useless = new DisplayManager(new GameManager());
-    useless.initialize(canvas, canvas);
-    super(useless);
-    this.canvas = canvas;
-    this.ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+    console.log("new DisplayGameFake");
+    let test = undefined as unknown
+    super(test as DisplayManager);
     this.gridSize = gridSize;
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
   }
 
   // ============================ Get ============================ \\
 
-  /**
-   * @returns renvoie le pinceau permettant d'afficher des éléments sur la grille
-   */
-  public getCtx(): CanvasRenderingContext2D {
-    return this.ctx;
-  }
 
   /**
    * @returns Renvoie la taille en pixel d'une case de jeu
@@ -41,7 +34,34 @@ export class DisplayGameFake extends DisplayGame{
   // ========================= Override ============================ \\
 
   public setEntity2(id: string, entity: EntityDisplayed): void {
-      this.setEntity(id, entity);
+    this.setEntity(id, entity);
+  }
+
+  public show(): void {
+    const canvas = this.canvas
+
+    if (canvas) {
+      this.ctx.clearRect(0, 0, canvas.width, canvas.height)
+      for (const id of this.zindex) {
+        const entity = this.entities.get(id)
+        entity?.setFullAnimation(true)
+        entity?.animate(Date.now())
+      }
     }
+  }
+
+  /**
+   * @returns Renvoie la taille en pixel d'une case de jeu
+   */
+  public getCtx(): CanvasRenderingContext2D {
+    return this.ctx;
+  }
+
+  /**
+   * @returns Renvoie la taille en pixel d'une case de jeu
+   */
+  public getCanvas(): HTMLCanvasElement {
+    return this.canvas;
+  }
 
 }

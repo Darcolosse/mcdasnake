@@ -3,7 +3,6 @@ export const SpriteName = {
   HEAD_BETA:"HEAD_BETA",
   HEAD_FUN:"HEAD_FUN",
   HEAD_CLASSIC:"HEAD_CLASSIC",
-  SCALE:"SCALE",
 } as const;
 export type SpriteName = typeof SpriteName[keyof typeof SpriteName];
 
@@ -25,7 +24,6 @@ export class SpriteManager {
       [SpriteName.HEAD_BETA]: SpriteManager.SPRITE_FOLDER + "head.png",
       [SpriteName.HEAD_FUN]: SpriteManager.SPRITE_FOLDER + "head2.jpg",
       [SpriteName.HEAD_CLASSIC]: SpriteManager.SPRITE_FOLDER + "head3.svg",
-      [SpriteName.SCALE]: SpriteManager.SPRITE_FOLDER + "scale2.jpg",
     };
     this.totalToLoad = Object.keys(this.spritesPath).length;
     this.loadAllSprites(this.spritesPath);
@@ -45,6 +43,7 @@ export class SpriteManager {
   private handleLoaded(name: string, img: HTMLImageElement): void {
     this.sprites.set(name, img);
     this.loadedCount++;
+    console.log(name + " loaded " + this.loadedCount);
 
     if (this.loadedCount === this.totalToLoad) {
       this.isReady = true;
