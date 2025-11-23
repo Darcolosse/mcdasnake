@@ -3,6 +3,7 @@ import { Game } from "@game/Game";
 import { GameManager, Buffers, Event } from "@game/GameManager";
 import { GameUpdateSnakeDirectionDTO } from "@network/dto/requests/GameUpdateSnakeDirectionDTO";
 import { GameAddPlayerDTO } from "@network/dto/requests/GameAddPlayerDTO";
+import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
 
 export class GameScheduler {
   private readonly game: Game;
@@ -65,6 +66,9 @@ export class GameScheduler {
     // #                        #
     if(!gameRefresh.isEmpty()) {
       this.gameManager.handleGameEvent(gameRefresh);
+      for (const id of gameRefresh.entities.removed) {
+        this.gameManager.handleGameEvent(new GameDeadPlayerDTO(id), id);
+      }
     }
   }
 

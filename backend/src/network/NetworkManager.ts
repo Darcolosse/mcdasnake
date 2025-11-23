@@ -99,7 +99,7 @@ export class NetworkManager {
 	private executeOnFound(ws: WebSocket, onFound: (clientId: string) => void): void {
 		for (const [clientId, clientWs] of this.clients) {
 			if (clientWs === ws) {
-        logger.debug(`Websocket client found. Ready for processing.`);
+        		logger.debug(`Websocket client found. Ready for processing.`);
 				onFound(clientId);
 				return;
 			}

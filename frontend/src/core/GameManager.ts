@@ -1,4 +1,4 @@
-import { CookieType, getCookie } from "../util/cookies";
+import { CookieType, getCookie, getCookiePlus } from "../util/cookies";
 import { DisplayManager } from "./display/DisplayManager"
 import { EventManager } from "./event/EventManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
@@ -46,7 +46,7 @@ export class GameManager {
   }
 
   public askServerForRespawn() {
-    const design = JSON.parse(getCookie(CookieType.Design) as string)
+    const design = JSON.parse(getCookiePlus(CookieType.Design) as string)
     this.handleClientEvent(new GameAddPlayerDTO(
       getCookie(CookieType.Username) as string,
       design.color,

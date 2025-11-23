@@ -25,3 +25,30 @@ export function getCookie(cookieType: string) {
   }
   return undefined;
 }
+
+
+export function getCookiePlus(cookieType: string) {
+  let result = getCookie(cookieType);
+  if (!result){
+    result = getDefaultValue(cookieType);
+  }
+  return result;
+}
+
+export function getDefaultValue(cookieType: string) {
+  switch (cookieType) {
+    case "username":
+        return "newPlayer";
+
+    case "design":
+      const design = {
+        color: 'rgb(255, 128, 135)',
+        head: 'HEAD_CLASSIC',
+        graphics: 'NORMAL',
+      }
+      return JSON.stringify(design);
+  
+    default:
+      break;
+  }
+}

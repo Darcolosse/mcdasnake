@@ -100,6 +100,10 @@ export class Game {
     return this.scoreBoard.getAllScores();
   }
 
+  public getSnakes(): Map<string, Snake> {
+    return this.snakes;
+  }
+
   // ### GAME EVENTS ###
 
   public processGenerateBonus(gameRefresh: GameRefreshResponseDTO) {
