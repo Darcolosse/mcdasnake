@@ -4,6 +4,7 @@ import { GameManager, Buffers, Event } from "@game/GameManager";
 import { GameUpdateSnakeDirectionDTO } from "@network/dto/requests/GameUpdateSnakeDirectionDTO";
 import { GameAddPlayerDTO } from "@network/dto/requests/GameAddPlayerDTO";
 import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
+import { logger } from "@/app";
 
 export class GameScheduler {
   private readonly game: Game;
@@ -13,12 +14,18 @@ export class GameScheduler {
   private tickCount!: number;
   private gameTickRateMs: number;
   private gameSpeedMs: number;
+  private gameDuration!: NodeJS.Timeout;
+  private timeLeft: number;
+  private gameRestart!: NodeJS.Timeout;
+  private restartTimeBeforeRestart: number;
 
   constructor(gameManager: GameManager, game: Game) {
     this.gameManager = gameManager;
     this.game = game;
     this.gameTickRateMs = Number(process.env.GAME_TICKRATE_MS);
     this.gameSpeedMs = Number(process.env.GAME_SPEED_MS);
+    this.timeLeft = this.game.GetGameSessionDuration();
+    this.restartTimeBeforeRestart = Number(process.env.GAME_RESTART_DELAY_S);
   }
 
   // ====================== Vertical layer ======================= \\
@@ -26,12 +33,20 @@ export class GameScheduler {
   public start() {
     this.tickCount = 0;
     this.gameLoop = setInterval(this.onTick.bind(this), Number(process.env.GAME_TICKRATE_MS));
+    this.gameDuration = setInterval(this.startGameSessionTimer.bind(this), 1000);
   }
 
   public stop() {
     clearInterval(this.gameLoop);
   }
-  
+
+  public stopGameSession() {
+    clearInterval(this.gameDuration);
+    this.stop();
+
+    this.gameRestart = setInterval(this.restartGameSessionTimer.bind(this), 1000);    
+  }
+
   // ===================== Management layer ====================== \\
 
   private onTick() {
@@ -88,6 +103,25 @@ export class GameScheduler {
 		this.game.processCollisions(gameRefresh);
   }
 
+  private startGameSessionTimer() {
+    this.timeLeft -= 1;
+    if (this.timeLeft <= 0) {
+      this.stopGameSession();
+    }
+    if (this.timeLeft % 30 === 0 || this.timeLeft <= 10) {
+      logger.info("Time left in game (" + this.game.GetGameSessionId() + "): " + this.timeLeft + " s");
+    }
+  }
+
+  private restartGameSessionTimer() {
+    logger.info("Restarting game session timer with " + this.restartTimeBeforeRestart + " seconds left.");
+    this.restartTimeBeforeRestart--;
+    if (this.restartTimeBeforeRestart <= 0) {
+      this.gameManager.autoRestartGameSession();
+      clearInterval(this.gameRestart);
+    }
+  }
+
   private onAdd(connection: Event, gameRefresh: GameRefreshResponseDTO) {
     const snake = this.game.addSnake(connection.id, (connection.dto as GameAddPlayerDTO).name, (connection.dto as GameAddPlayerDTO).design);
     gameRefresh.entities.snakes.push(snake);
@@ -98,4 +132,10 @@ export class GameScheduler {
     gameRefresh.entities.removed.push(id);
   }
 
+  public isFinished(): boolean {
+    if (this.timeLeft <= 0) {
+      return true;
+    }
+    return false;
+  }
 }
