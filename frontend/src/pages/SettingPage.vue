@@ -1,16 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { Colors } from '../core/display/colors'
 import { SnakeDisplayed } from '../core/display/SnakeDisplayed'
 import { Design, Graphism } from '../core/display/Design'
-
-import { DisplayGameFake } from '../core/display/DisplayGameFake'
+import { DisplayGameSimple } from '../core/display/DisplayGameSimple'
 import { router } from '../router/router'
 import { homeRoute } from '../router/routes'
 import { CookieType, setCookie, getCookiePlus } from '../util/cookies'
 import type { SpriteName } from '../core/display/SpriteManager'
-import { DisplayManager } from '../core/display/DisplayManager'
-import { GameManager } from '../core/GameManager'
 
 interface snakeColorsInterface {
   name:string,
@@ -41,22 +37,29 @@ const snakeColors = [
 const snakeHeads = [
   { name: 'HEAD_CLASSIC', src: '/src/core/display/sprite/head3.svg' },
   { name: 'HEAD_BETA', src: '/src/core/display/sprite/head.png' },
-  { name: 'HEAD_FUN', src: '/src/core/display/sprite/head2.jpg' },
+  { name: 'HEAD_HUGOAT', src: '/src/core/display/sprite/head_hugoat.jpg' },
+  { name: 'HEAD_DARCO', src: '/src/core/display/sprite/head_darco.jpg' },
+  { name: 'HEAD_MCDALA', src: '/src/core/display/sprite/head_mcdala.jpg' },
 ] //as {name : SpriteName, src : string}[];
 
-  
+
+// === Color choice ===
 const selectedColor = ref<snakeColorsInterface>(snakeColors[0] as snakeColorsInterface);
+const customColor = ref("#ffffff");
+const customColorInput = ref<HTMLInputElement | null>(null);
+
+// === Head choice ===
 const selectedHead = ref<snakeHeadsInterface>(snakeHeads[0] as snakeHeadsInterface);
 
 
-// === General graphics ===
+// === graphics choice ===
 const graphicsLevels = ['VERY_LOW', 'LOW', 'NORMAL'];
 const selectedGraphics = ref('NORMAL');
 const showHeadSection = ref(true);
 
 // === Canvas preview ===
 let canvas : (HTMLCanvasElement | null) = null;
-let preview : (DisplayGameFake | null) = null;
+let preview : (DisplayGameSimple | null) = null;
 let snakePreview : (SnakeDisplayed | null) = null;
 const snakeDesign = new Design(
   selectedColor.value.value,
@@ -69,7 +72,7 @@ onMounted(() => {
   canvas = canvasRef.value;
   if (!canvas) {console.log("canva null"); return;}
 
-  preview = new DisplayGameFake(canvas, [5,3]);
+  preview = new DisplayGameSimple(canvas, [5,3]);
   snakePreview = new SnakeDisplayed(
     preview,
     [[1,1],[2,1],[3,1]],
@@ -89,12 +92,21 @@ function loadCookieParameter(){
     try {
       const saved = JSON.parse(raw);
 
-      const col = snakeColors.find(c => c.value === saved.color);
-      if (col) selectColor(col);
-
+      // color
+      if (saved.color) {
+        const col = snakeColors.find(c => c.value === saved.color);
+        if (col) {
+          selectColor(col);
+        } else {
+          customColor.value = saved.color;
+          selectCustomColor();
+        }
+      }
+      // head
       const head = snakeHeads.find(h => h.name === saved.head);
       if (head) selectHead(head);
 
+      //graphics
       if (saved.graphics) selectGraphics(saved.graphics);
 
     } catch (err) {
@@ -106,6 +118,13 @@ function loadCookieParameter(){
 
 
 // === function ===
+
+function selectCustomColor() {
+  const colorObj = { name: "custom", value: customColor.value };
+  selectedColor.value = colorObj;
+  snakeDesign.setColor(colorObj.value);
+  drawPreview();
+}
 
 function selectColor(color: { name: string, value: string }) {
   selectedColor.value = color;
@@ -204,6 +223,24 @@ function applyChanges() {
             @click="selectColor(color)"
 
           ></div>
+           <!-- Bouton Custom Color -->
+          <div
+            class="w-10 h-10 rounded-full cursor-pointer border-2 flex items-center justify-center text-xl font-bold"
+            :class="selectedColor.name === 'custom'
+              ? 'border-4 bg-background-brand-primary'
+              : 'bg-background-inverse-primary hover:bg-background-brand-primary/30'"
+            :style="{ borderColor: selectedColor.name === 'custom' ? 'var(--color-lime-100)' : 'var(--color-sand-100)', background: customColor }"
+            @click="() => { selectCustomColor(); customColorInput?.click(); }"
+          >+</div>
+          <input
+            ref="customColorInput"
+            type="color"
+            class="hidden"
+            v-model="customColor"
+            @input="selectCustomColor"
+          />
+
+
         </div>
       </div>
 

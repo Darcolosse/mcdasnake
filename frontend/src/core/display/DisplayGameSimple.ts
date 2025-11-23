@@ -2,7 +2,7 @@ import { DisplayGame } from './DisplayGame.ts';
 import { DisplayManager } from './DisplayManager.ts';
 import type { EntityDisplayed } from './EntityDisplayed.ts';
 
-export class DisplayGameFake extends DisplayGame{
+export class DisplayGameSimple extends DisplayGame{
 
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
@@ -10,7 +10,6 @@ export class DisplayGameFake extends DisplayGame{
 
 
   constructor(canvas: HTMLCanvasElement, gridSize : [number, number]) {
-    console.log("new DisplayGameFake");
     let test = undefined as unknown
     super(test as DisplayManager);
     this.gridSize = gridSize;
@@ -33,35 +32,18 @@ export class DisplayGameFake extends DisplayGame{
 
   // ========================= Override ============================ \\
 
-  public setEntity2(id: string, entity: EntityDisplayed): void {
-    this.setEntity(id, entity);
-  }
-
-  public show(): void {
-    const canvas = this.canvas
-
-    if (canvas) {
-      this.ctx.clearRect(0, 0, canvas.width, canvas.height)
-      for (const id of this.zindex) {
-        const entity = this.entities.get(id)
-        entity?.setFullAnimation(true)
-        entity?.animate(Date.now())
-      }
-    }
-  }
-
-  /**
-   * @returns Renvoie la taille en pixel d'une case de jeu
-   */
   public getCtx(): CanvasRenderingContext2D {
     return this.ctx;
   }
 
-  /**
-   * @returns Renvoie la taille en pixel d'une case de jeu
-   */
   public getCanvas(): HTMLCanvasElement {
     return this.canvas;
+  }
+
+  // ========================= Other ============================ \\
+
+  public setEntity2(id: string, entity: EntityDisplayed): void {
+    this.setEntity(id, entity);
   }
 
 }
