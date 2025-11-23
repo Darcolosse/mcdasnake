@@ -60,14 +60,9 @@ export class Game {
     logger.info("Creating an empty score in the scoreboard for the player '" + name + "'...");
 		this.snakes.set(snakeId, newSnake);
 
-    // console.log(this.scoreBoard.getScore(snakeId));
-
-    // if(this.scoreBoard.getScore(snakeId) !== undefined) {
-
-    //   this.scoreBoard.createScore(snakeId, name, this.sessionId);
-
-    // }
-
+    if(this.scoreBoard.getScore(snakeId) === undefined) {
+      this.scoreBoard.createScore(snakeId, name, this.sessionId);
+    }
     return newSnake;
 	}
 
@@ -89,8 +84,8 @@ export class Game {
 	public getState(): GameUpdateResponseDTO {
     logger.debug("Retrieving game state in a dto");
     return new GameUpdateResponseDTO(
-      Array.from(this.snakes.values()),
-      Array.from(this.apples.values()), 
+      this.snakes,
+      this.apples, 
       [this.cols, this.rows], 
       Number(process.env.GAME_SPEED_MS),
       this.scoreBoard.getAllScores()
