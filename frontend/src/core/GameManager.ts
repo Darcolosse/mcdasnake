@@ -55,6 +55,7 @@ export class GameManager {
       design.color,
       design.head
     ))
+    this.eventManager.startListening();
     this.interfaceManager.restrictRespawn()
   }
   
@@ -78,6 +79,8 @@ export class GameManager {
     this.log(this, "Handling an event from server");
     switch(eventDTO.type) {
       case DTOType.GameDeadPlayer :
+        this.eventManager.clearSavedInputs();
+        this.eventManager.stopListening();
         this.interfaceManager.permitToRespawn();
         break;
       case DTOType.GameRefresh :

@@ -41,6 +41,10 @@ export class SnakeEvent {
     document.addEventListener('touchmove', this.eventTouchmove.bind(this), { passive: false });
   }
 
+  public clearSavedInputs() {
+    this.lastDirection = null
+  }
+
   public stopListening() : void {
     // keyboard
     document.removeEventListener('keydown', this.eventInput);

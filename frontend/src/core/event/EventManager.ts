@@ -19,6 +19,10 @@ export class EventManager {
     this.snakeEventListener.listen()
   }
 
+  public clearSavedInputs() {
+    this.snakeEventListener.clearSavedInputs();
+  }
+
   public stopListening() {
     this.gameManager.log(this, "Stopping listeners")
     this.snakeEventListener.stopListening()
