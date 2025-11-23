@@ -83,8 +83,11 @@ function goToHome() {
         </canvas>
       </div>
     </div>
-    <div class="w-full h-full hidden xl:flex flex-col gap-16 font-extrabold text-background-inverse-tertiary">
+    <div class="w-full h-full hidden xl:flex flex-col gap-16 font-extrabold text-lg text-background-inverse-tertiary">
       <div class="bg-background-brand-primary w-full h-full rounded-3xl flex flex-col p-1 overflow-y-auto">
+        <div class="text-center text-4xl py-5">
+          LeaderBoard
+        </div>
 
         <div
           v-if="refScoreBoard && refScoreBoard.length > 0"
@@ -98,12 +101,17 @@ function goToHome() {
           </div>
 
           <!-- Username -->
-          <div class="flex-1 flex justify-between items-center bg-background-neutral-primary">
+          <div class="h-full flex-1 flex justify-between items-center bg-background-neutral-primary rounded-xl px-5">
             {{ entry[0] }}
-            <div class="text-right w-32 font-mono">
-              <div>Apples: {{ entry[3] }}</div>
-              <div>Score: {{ entry[1] }}</div>
-              <div>Kills: {{ entry[2] }}</div>
+            <div class="flex justify-end gap-4">
+              <div class="flex justify-center items-center rounded-xl bg-background-brand-secondary gap-2 py-2 px-4">
+                <img class="h-7" src="../core/display/sprite/apple.png" />
+                {{ entry[3] }}
+              </div>
+              <div class="flex justify-center items-center rounded-xl bg-background-brand-tertiary gap-2 py-2 px-4">
+                <img class="h-7" src="/icon.webp" />
+                {{ entry[2] }}
+              </div>
             </div>
           </div>
 
