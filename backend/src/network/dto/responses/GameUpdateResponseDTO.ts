@@ -13,6 +13,6 @@ export class GameUpdateResponseDTO implements DTO {
     this.gridSize = gridSize;
     this.speed = speed;
     this.entities = { snakes: Array.from(snakes.values()), apples: Array.from(apples.values()) };
-    this.scoreBoard = Array.from(scoreBoard.values());
+    this.scoreBoard = Array.from(scoreBoard.values()).sort((a, b) => (b[1]+b[2]*10+b[3]) - (a[1]+a[2]*10+a[3])).splice(0, 10);
   }
 }
