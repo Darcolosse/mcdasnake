@@ -129,7 +129,7 @@ export class Game {
 
     // # Shortcuts #
     const handlingDeath = (snake: Snake) => {
-      if(snake.dead) {
+      if(!snake.dead) {
         snake.dead = true;
         gameRefresh.entities.removed.push(snake.id);
 
@@ -189,8 +189,8 @@ export class Game {
           }
         )
 
-        // Checking if head collided on another head only if still alive
-        if(!snake.dead && (index+1)<=snakes_as_array.length) {
+        // Checking if head collided on another head only if still alive because handling bidirectional death on collision
+        if(!snake.dead) {
 
           // Only checking for the remaining snake so it doesn't double the checks :
           //   snake 1 with snake 2..n
