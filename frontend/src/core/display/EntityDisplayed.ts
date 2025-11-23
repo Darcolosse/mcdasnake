@@ -122,7 +122,7 @@ export class EntityDisplayed{
     protected drawVeryLowGraphism() : void{
         const ctx = this.display.getCtx();
         const boxSize = this.display.getBoxSize();
-        ctx.fillStyle = this.design.getColor();
+        ctx.fillStyle = this.design.getColor1() as string;
         const boxChange = this.getboxChange();
         boxChange.forEach(box => {
             ctx.fillRect(

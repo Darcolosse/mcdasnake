@@ -24,7 +24,7 @@ export class AppleDisplayed extends EntityDisplayed{
                 });
             }
             else{
-                ctx.fillStyle = this.design.getColor();
+                ctx.fillStyle = this.design.getColor1() as string;
                 const radius = (0.5 + zoom) * boxSize[0];
                 this.boxes.forEach(box => {
                     const boxPoint = this.getMiddlePoint(box);
