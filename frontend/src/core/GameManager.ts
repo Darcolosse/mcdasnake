@@ -1,6 +1,7 @@
 import { CookieType, getCookie, getCookiePlus } from "../util/cookies";
 import { DisplayManager } from "./display/DisplayManager"
 import { EventManager } from "./event/EventManager";
+import type { InterfaceManager } from "./interface/InterfaceManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
 import { GameAddPlayerDTO } from "./network/dto/requests/GameAddPlayerDTO";
 import type { GameRefreshDTO } from "./network/dto/responses/GameRefresh";
@@ -14,11 +15,13 @@ export class GameManager {
   private readonly displayManager: DisplayManager;
   private readonly eventManager: EventManager;
   private readonly networkManager: NetworkManager;
+  private readonly interfaceManager: InterfaceManager;
 
-  constructor () {
+  constructor (interfaceManager: InterfaceManager) {
     this.displayManager = new DisplayManager(this)
     this.eventManager = new EventManager(this)
     this.networkManager = new NetworkManager(this, `ws://${import.meta.env.VITE_BACKEND_IP}:${import.meta.env.VITE_BACKEND_PORT}`)
+    this.interfaceManager = interfaceManager
   }
 
   // ====================== Vertical layer ======================= \\
@@ -52,6 +55,7 @@ export class GameManager {
       design.color,
       design.head
     ))
+    this.interfaceManager.restrictRespawn()
   }
   
   // ===================== Management layer ====================== \\
@@ -73,6 +77,9 @@ export class GameManager {
   public handleServerEvent(eventDTO: DTO) {
     this.log(this, "Handling an event from server");
     switch(eventDTO.type) {
+      case DTOType.GameDeadPlayer :
+        this.interfaceManager.permitToRespawn();
+        break;
       case DTOType.GameRefresh :
         console.log(eventDTO);
         this.displayManager.refreshGame(eventDTO as GameRefreshDTO);

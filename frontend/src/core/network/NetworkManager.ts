@@ -1,5 +1,6 @@
 import { GameManager } from "../GameManager"
 import { DTOType, type DTO } from "./dto/DTO"
+import { GameDeadPlayerResponseDTO } from "./dto/responses/GamePlayerDead"
 import { GameRefreshDTO } from "./dto/responses/GameRefresh"
 import { GameUpdateResponseDTO } from "./dto/responses/GameUpdateResponse"
 
@@ -68,6 +69,7 @@ export class NetworkManager {
         this.gameManager.log(this, "Received from server:", event)
         const json = JSON.parse(event.data);
         switch(json.type) {
+          case DTOType.GameDeadPlayer: this.gameManager.handleServerEvent(new GameDeadPlayerResponseDTO(json)); break
           case DTOType.GameRefresh: this.gameManager.handleServerEvent(new GameRefreshDTO(json)); break
           case DTOType.GameUpdate: this.gameManager.handleServerEvent(new GameUpdateResponseDTO(json)); break
           default:

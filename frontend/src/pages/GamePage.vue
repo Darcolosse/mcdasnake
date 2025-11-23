@@ -4,10 +4,15 @@ import { GameManager } from '../core/GameManager'
 import { CookieType, getCookie } from '../util/cookies'
 import { router } from '../router/router'
 import { homeRoute } from '../router/routes'
+import { InterfaceManager } from '../core/interface/InterfaceManager'
 
-const gameManager = new GameManager()
 const gameRef = ref<HTMLCanvasElement | null>(null)
 const bgRef = ref<HTMLCanvasElement | null>(null)
+const respawnAuthorisation = ref(true)
+
+const interfaceManager = new InterfaceManager(respawnAuthorisation)
+const gameManager = new GameManager(interfaceManager)
+interfaceManager.setGameManager(gameManager)
 
 onMounted(() => {
   const username = getCookie(CookieType.Username)
@@ -18,12 +23,7 @@ onMounted(() => {
   }
 })
 
-function askServerForRespawn(){
-  gameManager.askServerForRespawn();
-  gameRef.value?.focus();
-}
-
-function goToHome(){
+function goToHome() {
   router.push(homeRoute.path);
 }
 
@@ -31,12 +31,12 @@ function goToHome(){
 
 <template>
   <div class="relative w-screen h-screen flex flex-col lg:flex-row items-center justify-center xl:p-16 xl:gap-16 bg-background-inverse-primary">
-    <button 
+    <div 
        class="cursor-pointer absolute top-4 right-4 py-1 px-4 bg-background-inverse-secondary/60 rounded-lg font-semibold text-background-inverse-tertiary"
        @click="goToHome"
       >
       Exit
-    </button>
+    </div>
     <div class="relative w-[95vmin] xl:w-auto xl:h-full aspect-square">
       <div class="absolute -top-11 -left-2 md:-top-13 xl:-top-15.5 xl:-left-15 flex items-center py-1 px-2 gap-3">
         <img class="w-1/12" src="/icon.webp" />
@@ -45,14 +45,16 @@ function goToHome(){
             <span class="text-content-brand-primary">Snake</span>
           </h1>
       </div>
-      <button 
-        class="absolute -bottom-11 right-2 py-1 px-4 bg-background-inverse-secondary/60 rounded-lg font-semibold text-background-inverse-tertiary"
-        @click="askServerForRespawn"
+      <div 
+        :class="['z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 py-1 px-4 bg-background-inverse-secondary rounded-lg font-semibold text-3xl text-background-inverse-tertiary',
+                 respawnAuthorisation ? 'absolute cursor-pointer' : 'hidden']"
+        @click="interfaceManager.askForRespawn"
         >
         <span class="text-content-brand-primary">Click here to </span>
         <span class="text-content-brand-secondary">Re</span>
         <span class="text-content-brand-primary">spawn</span>
-      </button>
+        <span class="text-content-brand-secondary"> (r)</span>
+      </div>
       <div class="relative w-full h-full rounded-3xl overflow-hidden">
         <!-- Background canvas -->
         <canvas
@@ -65,7 +67,7 @@ function goToHome(){
         <canvas
           ref="gameRef"
           id="game"
-          class="absolute inset-0 w-full h-full block z-50">
+          class="absolute inset-0 w-full h-full block z-30">
         </canvas>
       </div>
     </div>
