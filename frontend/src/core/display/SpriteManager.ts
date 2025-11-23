@@ -1,5 +1,7 @@
 export const SpriteName = {
   APPLE:"APPLE",
+  SCALE:"SCALE",
+  SCALE2:"SCALE2",
   HEAD_BETA:"HEAD_BETA",
   HEAD_HUGOAT:"HEAD_HUGOAT",
   HEAD_DARCO:"HEAD_DARCO",
@@ -23,6 +25,8 @@ export class SpriteManager {
   constructor() {
     this.spritesPath = {
       [SpriteName.APPLE] : SpriteManager.SPRITE_FOLDER + "apple.png",
+      [SpriteName.SCALE] : SpriteManager.SPRITE_FOLDER + "scale.jpg",
+      [SpriteName.SCALE2] : SpriteManager.SPRITE_FOLDER + "scale2.jpg",
       [SpriteName.HEAD_BETA]: SpriteManager.SPRITE_FOLDER + "head.png",
       [SpriteName.HEAD_HUGOAT]: SpriteManager.SPRITE_FOLDER + "head_hugoat.jpg",
       [SpriteName.HEAD_DARCO]: SpriteManager.SPRITE_FOLDER + "head_darco.jpg",

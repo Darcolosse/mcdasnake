@@ -293,11 +293,33 @@ export class DisplayGame {
     const DEFAULT_COLOR = "lightblue";
     const DEFAULT_HEAD: SpriteName = "HEAD_CLASSIC";
 
-    const [rawColor, rawHead] = entity.design ?? [];
+    const [design, useless] = entity.design ?? [];
 
-    const color = rawColor ?? DEFAULT_COLOR;
-    const headSprite = (rawHead as SpriteName) ?? DEFAULT_HEAD;
-    return new Design(color, headSprite, this.graphism)
+    // design = {
+    //   color1: selectedColor1.value?.value,
+    //   color2: selectedColor2.value?.value,
+    //   head: selectedHead.value?.name,
+    //   graphics: selectedGraphics.value,
+    // }
+    if (design){
+      const designObject = JSON.parse(design);
+      const result = new Design(
+        designObject.color1,
+        designObject.head,
+        designObject.graphics,
+      );
+      if (designObject.color2){
+        result.setColor2(designObject.color2);
+      }
+      if (designObject.texture){
+        result.setTexture(designObject.texture);
+      }
+      return result;
+    }
+    else{
+      return new Design(DEFAULT_COLOR, DEFAULT_HEAD, this.graphism)
+    }
+    
   }
 
   private getGraphismFromCookie(): Graphism {

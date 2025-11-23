@@ -49,11 +49,11 @@ export class GameManager {
   }
 
   public askServerForRespawn() {
-    const design = JSON.parse(getCookiePlus(CookieType.Design) as string)
+    const design = getCookiePlus(CookieType.Design) as string
     this.handleClientEvent(new GameAddPlayerDTO(
       getCookie(CookieType.Username) as string,
-      design.color,
-      design.head
+      design,
+      ""
     ))
     this.eventManager.startListening();
     this.interfaceManager.restrictRespawn()
