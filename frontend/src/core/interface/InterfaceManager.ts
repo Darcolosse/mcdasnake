@@ -4,10 +4,10 @@ import type { GameUpdateResponseDTO } from "../network/dto/responses/GameUpdateR
 
 export class InterfaceManager {
   private gameManager!: GameManager;
-  private scoreBoard: Ref<Map<string, [string, number, number, number]> | null>;
+  private scoreBoard: Ref<Array<[string, number, number, number]> | null>;
   private respawnAuthorization: Ref<Boolean>;
 
-  constructor(respawnAuthorization: Ref<Boolean>, scoreBoard: Ref<Map<string, [string, number, number, number]> | null>)  {
+  constructor(respawnAuthorization: Ref<Boolean>, scoreBoard: Ref<Array<[string, number, number, number]> | null>)  {
     this.respawnAuthorization = respawnAuthorization
     this.scoreBoard = scoreBoard
 

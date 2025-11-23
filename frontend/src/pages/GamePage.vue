@@ -9,7 +9,7 @@ import { InterfaceManager } from '../core/interface/InterfaceManager'
 const gameRef = ref<HTMLCanvasElement | null>(null)
 const bgRef = ref<HTMLCanvasElement | null>(null)
 const respawnAuthorisation = ref(false)
-const refScoreBoard = ref<Map<string, [string, number, number, number]> | null>(null)
+const refScoreBoard = ref<Array<[string, number, number, number]> | null>(null)
 
 const interfaceManager = new InterfaceManager(respawnAuthorisation, refScoreBoard)
 const gameManager = new GameManager(interfaceManager)
@@ -87,26 +87,26 @@ function goToHome() {
       <div class="bg-background-neutral-primary w-full h-full rounded-3xl flex flex-col p-1">
 
         <div
-          v-if="refScoreBoard && refScoreBoard.size > 0"
-          v-for="[id, data] in refScoreBoard"
-          :key="id"
+          v-if="refScoreBoard && refScoreBoard.length > 0"
+          v-for="(entry, index) in refScoreBoard"
+          :key="entry[0]"
           class="flex flex-row items-center bg-background-neutral-secondary rounded-xl p-2"
         >
           <!-- Rank / Index -->
           <div class="w-12 text-center font-bold text-content-brand-primary">
-            {{ [...refScoreBoard.keys()].indexOf(id) + 1 }}
+            {{ index + 1 }}
           </div>
 
           <!-- Username -->
           <div class="flex-1 font-semibold">
-            {{ data[0] }}
+            {{ entry[0] }}
           </div>
 
           <!-- Stats -->
           <div class="text-right w-32 font-mono">
-            <div>Score: {{ data[1] }}</div>
-            <div>Kills: {{ data[2] }}</div>
-            <div>Deaths: {{ data[3] }}</div>
+            <div>Score: {{ entry[1] }}</div>
+            <div>Kills: {{ entry[2] }}</div>
+            <div>Deaths: {{ entry[3] }}</div>
           </div>
         </div>
 
