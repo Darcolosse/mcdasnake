@@ -85,6 +85,7 @@ export class GameManager {
         this.displayManager.refreshGame(eventDTO as GameRefreshDTO);
         break;
       case DTOType.GameUpdate :
+        this.interfaceManager.setEntireScoreboard(eventDTO as GameUpdateResponseDTO)
         this.displayManager.updateGameLayers(eventDTO as GameUpdateResponseDTO);
         this.displayManager.showGame();
         break;

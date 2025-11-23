@@ -7,10 +7,12 @@ export class GameUpdateResponseDTO implements DTO {
   public speed: number;
   public gridSize: [number, number];
   public entities: EntitiesUpdate;
+  public scoreBoard: Map<string, [string, number, number, number]>;
 
   constructor(json: any) {
     this.speed = json.speed as number;
     this.gridSize = json.gridSize as [number, number];
     this.entities = EntitiesUpdateLoader(json.entities);
+    this.scoreBoard = json.scoreBoard;
   }
 }

@@ -1,12 +1,15 @@
 import type { Ref } from "vue";
 import type { GameManager } from "../GameManager";
+import type { GameUpdateResponseDTO } from "../network/dto/responses/GameUpdateResponse";
 
 export class InterfaceManager {
   private gameManager!: GameManager;
+  private scoreBoard: Ref<Map<string, [string, number, number, number]> | null>;
   private respawnAuthorization: Ref<Boolean>;
 
-  constructor(respawnAuthorization: Ref<Boolean>)  {
+  constructor(respawnAuthorization: Ref<Boolean>, scoreBoard: Ref<Map<string, [string, number, number, number]> | null>)  {
     this.respawnAuthorization = respawnAuthorization
+    this.scoreBoard = scoreBoard
 
     // Default
     this.respawnAuthorization.value = false
@@ -30,5 +33,9 @@ export class InterfaceManager {
     if (this.respawnAuthorization.value) {
       this.gameManager.askServerForRespawn()
     }
+  }
+
+  public setEntireScoreboard(dto: GameUpdateResponseDTO) {
+    this.scoreBoard.value = dto.scoreBoard
   }
 }

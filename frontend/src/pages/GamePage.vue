@@ -9,8 +9,9 @@ import { InterfaceManager } from '../core/interface/InterfaceManager'
 const gameRef = ref<HTMLCanvasElement | null>(null)
 const bgRef = ref<HTMLCanvasElement | null>(null)
 const respawnAuthorisation = ref(false)
+const refScoreBoard = ref<Map<string, [string, number, number, number]> | null>(null)
 
-const interfaceManager = new InterfaceManager(respawnAuthorisation)
+const interfaceManager = new InterfaceManager(respawnAuthorisation, refScoreBoard)
 const gameManager = new GameManager(interfaceManager)
 interfaceManager.setGameManager(gameManager)
 
@@ -83,7 +84,37 @@ function goToHome() {
       </div>
     </div>
     <div class="w-full h-full hidden xl:flex flex-col gap-16">
-      <div class="bg-background-neutral-primary w-full h-full rounded-3xl">
+      <div class="bg-background-neutral-primary w-full h-full rounded-3xl flex flex-col p-1">
+
+        <div
+          v-if="refScoreBoard && refScoreBoard.size > 0"
+          v-for="[id, data] in refScoreBoard"
+          :key="id"
+          class="flex flex-row items-center bg-background-neutral-secondary rounded-xl p-2"
+        >
+          <!-- Rank / Index -->
+          <div class="w-12 text-center font-bold text-content-brand-primary">
+            {{ [...refScoreBoard.keys()].indexOf(id) + 1 }}
+          </div>
+
+          <!-- Username -->
+          <div class="flex-1 font-semibold">
+            {{ data[0] }}
+          </div>
+
+          <!-- Stats -->
+          <div class="text-right w-32 font-mono">
+            <div>Score: {{ data[1] }}</div>
+            <div>Kills: {{ data[2] }}</div>
+            <div>Deaths: {{ data[3] }}</div>
+          </div>
+        </div>
+
+        <!-- When no scoreboard yet -->
+        <div v-else class="text-center text-lg py-10 opacity-75">
+          No score yet.
+        </div>
+         
       </div>
       <div class="bg-background-inverse-secondary w-full h-fit py-5 text-center font-bold rounded-3xl">
         <p class="text-content-brand-primary">
