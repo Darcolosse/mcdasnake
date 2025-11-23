@@ -88,7 +88,7 @@ export class Game {
       this.apples, 
       [this.cols, this.rows], 
       Number(process.env.GAME_SPEED_MS),
-      this.scoreBoard.getAllScores()
+      this.getScore()
     )
 	}
 
@@ -98,7 +98,8 @@ export class Game {
 
   public getScore(){
     logger.debug("Scoreboard ...");
-    return this.scoreBoard.getAllScores();
+    
+    return Array.from(this.scoreBoard.getAllScores().values()).sort((a, b) => (b[1]+b[2]*10+b[3]) - (a[1]+a[2]*10+a[3])).splice(0, 10);
   }
 
   public getSnakes(): Map<string, Snake> {
@@ -128,11 +129,15 @@ export class Game {
     logger.debug("Checking collisions...");
 
     // # Shortcuts #
-    const handlingDeath = (snake: Snake, score: number, kill: number, apples: number) => {
+    const handlingDeath = (snake: Snake, score: number, kill: number, apples: number, reset: boolean = false) => {
       if(!snake.dead) {
         snake.dead = true;
         logger.debug("Updating database score of snake " + snake.name);
-        this.scoreBoard.updateScore(snake.id, score, kill, apples);
+        if (!reset) {
+          this.scoreBoard.updateScore(snake.id, score, kill, apples);
+        } else {
+          this.scoreBoard.resetScores(snake.id);
+        }
       }
     }
     const handlingEating = (snake: Snake, eaten: Entity) => {
@@ -161,7 +166,7 @@ export class Game {
 
       if (this.isOutOfBounds(head)) {
         logger.info(`${snake.name} hit the border (${this.cols}, ${this.rows}) at ${head}`);
-        handlingDeath(snake, 0, 0, 0);
+        handlingDeath(snake, 0, 0, 0, true);
       } else {
 
         // Only checking if head collided on an apple or the body of another snake
@@ -202,8 +207,8 @@ export class Game {
             // If colliding, they are both dead so we don't run any futile checks on the other snake later
             if(head[0] == other_snake_head[0] && head[1] == other_snake_head[1]) {
               logger.info(snake.name + " head collided with the head of " + other_snake.name);
-              handlingDeath(snake, 0, 0, 0);
-              handlingDeath(other_snake, 0, 0, 0);
+              handlingDeath(snake, 0, 0, 0, true);
+              handlingDeath(other_snake, 0, 0, 0, true);
             }
           }
         }
