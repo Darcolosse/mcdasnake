@@ -62,6 +62,8 @@ export class Game {
 
     if(this.scoreBoard.getScore(snakeId) === undefined) {
       this.scoreBoard.createScore(snakeId, name, this.sessionId);
+    } else {
+      this.scoreBoard.resetScores(snakeId);
     }
     return newSnake;
 	}
@@ -129,15 +131,10 @@ export class Game {
     logger.debug("Checking collisions...");
 
     // # Shortcuts #
-    const handlingDeath = (snake: Snake, score: number, kill: number, apples: number, reset: boolean = false) => {
+    const handlingDeath = (snake: Snake) => {
       if(!snake.dead) {
         snake.dead = true;
         logger.debug("Updating database score of snake " + snake.name);
-        if (!reset) {
-          this.scoreBoard.updateScore(snake.id, score, kill, apples);
-        } else {
-          this.scoreBoard.resetScores(snake.id);
-        }
       }
     }
     const handlingEating = (snake: Snake, eaten: Entity) => {
@@ -166,7 +163,7 @@ export class Game {
 
       if (this.isOutOfBounds(head)) {
         logger.info(`${snake.name} hit the border (${this.cols}, ${this.rows}) at ${head}`);
-        handlingDeath(snake, 0, 0, 0, true);
+        handlingDeath(snake);
       } else {
 
         // Only checking if head collided on an apple or the body of another snake
@@ -183,7 +180,10 @@ export class Game {
             if (entityCollided instanceof Snake) {
               const collided_snake = entityCollided as Snake;
               logger.info(snake.name + " died colliding on " + collided_snake.name + "'s body. Last registered length of " + snake.cases.length);
-              handlingDeath(snake, 1000, 1, 0);
+              handlingDeath(snake);
+              if (collided_snake.id !== snake.id) {
+                this.scoreBoard.updateScore(collided_snake.id, 1000, 1, 0);
+              }
             } 
 
             if ((entityCollided instanceof Snake) === false && (entityCollided instanceof Apple) === false) {
@@ -207,8 +207,8 @@ export class Game {
             // If colliding, they are both dead so we don't run any futile checks on the other snake later
             if(head[0] == other_snake_head[0] && head[1] == other_snake_head[1]) {
               logger.info(snake.name + " head collided with the head of " + other_snake.name);
-              handlingDeath(snake, 0, 0, 0, true);
-              handlingDeath(other_snake, 0, 0, 0, true);
+              handlingDeath(snake);
+              handlingDeath(other_snake);
             }
           }
         }
