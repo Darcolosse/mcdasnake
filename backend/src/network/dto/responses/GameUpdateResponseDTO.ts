@@ -9,10 +9,10 @@ export class GameUpdateResponseDTO implements DTO {
   public entities: { snakes: Array<Entity>, apples: Array<Entity> };
   public scoreBoard: Array<[string, number, number, number]>;
   
-  constructor(snakes: Map<string, Entity>, apples: Map<string, Entity>, gridSize: [number, number], speed: number, scoreBoard: Map<string, [string, number, number, number]>) {
+  constructor(snakes: Map<string, Entity>, apples: Map<string, Entity>, gridSize: [number, number], speed: number, scoreBoard: Array<[string, number, number, number]>) {
     this.gridSize = gridSize;
     this.speed = speed;
     this.entities = { snakes: Array.from(snakes.values()), apples: Array.from(apples.values()) };
-    this.scoreBoard = Array.from(scoreBoard.values()).sort((a, b) => (b[1]+b[2]*10+b[3]) - (a[1]+a[2]*10+a[3])).splice(0, 10);
+    this.scoreBoard = scoreBoard;
   }
 }

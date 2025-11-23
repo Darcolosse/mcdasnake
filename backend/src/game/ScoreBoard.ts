@@ -26,6 +26,11 @@ export class ScoreBoard {
         this.updateSnakeScoreBoard(playerId, score, kills, apples);
     }
 
+    public resetScores(playerId: string): void {
+        this.scores.set(playerId, [this.scores.get(playerId)?.[0] || "null", 0, 0, 0]);
+        this.resetSnakeScoreBoard(playerId);
+    }
+
     public getAllScores(): Map<string, [string, number, number, number]> {
         return this.scores;
     }
@@ -57,6 +62,17 @@ export class ScoreBoard {
             }
         });
     };
+
+    private async resetSnakeScoreBoard(playerId: string) {
+        await this.db.scoreBoard.updateMany({
+            where: { id: playerId },
+            data: {
+                score: 0,
+                kills: 0,
+                apples: 0
+            }
+        });
+    }
 
     private async createGameSessionScoreboard(sessionId: string) {
         await this.db.gameSession.create({
