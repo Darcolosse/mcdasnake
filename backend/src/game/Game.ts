@@ -126,21 +126,44 @@ export class Game {
 
   public processCollisions(gameRefresh: GameRefreshResponseDTO) {
     logger.debug("Checking collisions...");
+
+    // # Shortcuts #
+    const handlingDeath = (snake: Snake) => {
+      if(snake.dead) {
+        snake.dead = true;
+        gameRefresh.entities.removed.push(snake.id);
+
+        logger.debug("Updating database score of snake " + snake.name);
+        this.scoreBoard.updateScore(snake.id, 1000, 1, 0);
+      }
+    }
+    const handlingEating = (snake: Snake, eaten: Entity) => {
+      this.removeApple(eaten.id);
+      gameRefresh.entities.removed.push(eaten.id);
+
+      logger.debug("Updating database score of snake " + snake.name);
+      this.scoreBoard.updateScore(snake.id, 100, 0, 1);
+    }
+
+    // #              #
+    // # Requirements #
+    // #              #
     const map = new Map<string, Entity>();
     const snakes_as_array = Array.from(this.snakes);
 
 		this.apples.forEach(apple => map.set(this.createCollideKey(apple.getHead()), apple));
     this.snakes.forEach(snake => snake.cases.map((_case, index) => { if(index !== 0) map.set(this.createCollideKey(_case), snake)}));
 
+    // #           #
+    // # Alogrithm #
+    // #           #
 		snakes_as_array.forEach(([_, snake], index) => {
 
       const head = snake.getHead();
 
       if (this.isOutOfBounds(head)) {
         logger.info(`${snake.name} hit the border (${this.cols}, ${this.rows}) at ${head}`);
-        logger.debug("Snake on id " + snake.id + " hit border");
-        snake.dead = true;
-        gameRefresh.entities.removed.push(snake.id);
+        handlingDeath(snake);
       } else {
 
         const snake_head = [head];
@@ -149,28 +172,16 @@ export class Game {
         this.checkCollisions(snake_head, map,
           (entityCollided) => {
             logger.debug("Snake collided with an entity");
+
             if(entityCollided instanceof Apple) {
               const eaten_apple = entityCollided as Apple;
-
               logger.info(snake.name + " ate an apple. Current length of " + snake.cases.length);
-              logger.debug("Snake on id " + snake.id + " ate apple on id " + eaten_apple.id);
-              this.removeApple(eaten_apple.id);
-              gameRefresh.entities.removed.push(eaten_apple.id);
-
-              logger.debug("Updating database score of snake " + snake.name);
-              this.scoreBoard.updateScore(snake.id, 100, 0, 1);
+              handlingEating(snake, eaten_apple);
 
             } else if (entityCollided instanceof Snake) {
               const collided_snake = entityCollided as Snake;
-              logger.debug("Snake on id " + snake.id + " was killed by " + collided_snake.id);
-
-              if (!snake.dead) {
-                logger.info(snake.name + " died from " + collided_snake.name + ". Last registered length of " + snake.cases.length);
-                logger.debug("Updating database score of snake " + snake.name);
-                this.scoreBoard.updateScore(snake.id, 1000, 1, 0);
-              }
-              snake.dead = true;
-              gameRefresh.entities.removed.push(snake.id);
+              logger.info(snake.name + " died colliding on " + collided_snake.name + "'s body. Last registered length of " + snake.cases.length);
+              handlingDeath(snake);
 
             } else {
               logger.warn("Couldn't figure what snake on id " + snake.id + " and name " + snake.name + " collided. Game state on tick unstable.");
@@ -178,28 +189,26 @@ export class Game {
           }
         )
 
-        // Checking if head collided on another head
-        if(!snake.dead && (index+1)!=snakes_as_array.length) {
+        // Checking if head collided on another head only if still alive
+        if(!snake.dead && (index+1)<=snakes_as_array.length) {
+
+          // Only checking for the remaining snake so it doesn't double the checks :
+          //   snake 1 with snake 2..n
+          //   snake 2 with snake 3..n because already checked 1 & 2
+          //   snake 3 with snake 4..n because already checked 1 & 3 and 2 & 3
+          //   ...
           for(let i=index+1; i<snakes_as_array.length; i++) {
-            const [other_snake_id, other_snake] = snakes_as_array[i];
+            const [_, other_snake] = snakes_as_array[i];
             const other_snake_head = other_snake.getHead();
+
+            // If colliding, they are both dead so we don't run any futile checks on the other snake later
             if(head[0] == other_snake_head[0] && head[1] == other_snake_head[1]) {
               logger.info(snake.name + " head collided with the head of " + other_snake.name);
-
-              snake.dead = true;
-              gameRefresh.entities.removed.push(snake.id);
-              logger.debug("Updating database score of snake " + snake.name);
-              this.scoreBoard.updateScore(snake.id, 1000, 1, 0);
-
-              if(!other_snake.dead) {
-                other_snake.dead = true;
-                gameRefresh.entities.removed.push(other_snake_id);
-
-                logger.debug("Updating database score of snake " + snake.name);
-                this.scoreBoard.updateScore(other_snake_id, 1000, 1, 0);
-              }
+              handlingDeath(snake);
+              handlingDeath(other_snake);
             }
           }
+
         }
       }
       
