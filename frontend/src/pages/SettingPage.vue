@@ -37,7 +37,9 @@ const snakeColors = [
 const snakeHeads = [
   { name: 'HEAD_CLASSIC', src: '/src/core/display/sprite/head3.svg' },
   { name: 'HEAD_BETA', src: '/src/core/display/sprite/head.png' },
-  { name: 'HEAD_FUN', src: '/src/core/display/sprite/head2.jpg' },
+  { name: 'HEAD_HUGOAT', src: '/src/core/display/sprite/head_hugoat.jpg' },
+  { name: 'HEAD_DARCO', src: '/src/core/display/sprite/head_darco.jpg' },
+  { name: 'HEAD_MCDALA', src: '/src/core/display/sprite/head_mcdala.jpg' },
 ] //as {name : SpriteName, src : string}[];
 
 
