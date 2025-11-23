@@ -25,14 +25,14 @@ onMounted(() => {
   const username = getCookie(CookieType.Username)
   if(username) {
     gameManager.start(bgRef.value, gameRef.value)
-    window.addEventListener('keyup', onKeyDown)
+    document.addEventListener('keypress', onKeyDown)
   } else {
     router.push(homeRoute.path)
   }
 })
 
 onUnmounted(() => {
-  window.removeEventListener('keyup', onKeyDown)
+  document.removeEventListener('keypress', onKeyDown)
 })
 
 function goToHome() {
