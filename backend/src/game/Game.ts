@@ -22,6 +22,9 @@ export class Game {
   private readonly sessionId: string;
 
   private readonly maxBonus: number;
+  private readonly bonusProbabilitySpawnApple: number;
+  
+  private readonly snakeSpawningLength: number;
 
 	constructor(size: [number, number], db: PrismaClient) {
     logger.info("Initializing a new game session...");
@@ -30,10 +33,13 @@ export class Game {
 		this.snakes = new Map<string, Snake>();
 		this.apples = new Map<string, Apple>();
     this.sessionId = GameManager.generateUUID();
+    this.snakeSpawningLength = Number(process.env.SNAKE_SPAWNING_LENGTH);
+    this.maxBonus = (this.cols * this.rows) * (Number(process.env.BONUS_PERCENTAGE_MAX)/100);
+    this.bonusProbabilitySpawnApple = Number(process.env.BONUS_PROBABILITY_SPAWN_APPLE);
     logger.info("Creating a scoreboard in base for the game session...");
     this.scoreBoard = new ScoreBoard(db);
     this.scoreBoard.createGameSession(this.sessionId);
-    this.maxBonus = (this.cols * this.rows) * (Number(process.env.BONUS_PERCENTAGE_MAX)/100);
+
     logger.info("Initialized successfully a new game on session id " + this.sessionId + " with max bonus set to " + this.maxBonus);
 	}
 
@@ -46,7 +52,7 @@ export class Game {
     const newSnake = new Snake(
       snakeId,
       name,
-      this.generateRandomSpawn(Number(process.env.SNAKE_SPAWNING_LENGTH), 100/3, 200/3),
+      this.generateRandomSpawn(this.snakeSpawningLength, 100/3, 200/3),
       process.env.SNAKE_SPAWNING_DIRECTION as Direction,
       design
     )
@@ -110,9 +116,8 @@ export class Game {
     logger.debug("Generating bonus...");
     const random = Math.random();
     if(this.snakes.size > 0 && this.apples.size < this.maxBonus) {
-      if(random <= Number(process.env.BONUS_PROBABILITY_SPAWN_APPLE)) {
-        let uuid = GameManager.generateUUID()
-        gameRefresh.entities.apples.push(this.addApple(uuid));
+      if(random <= this.bonusProbabilitySpawnApple) {
+        gameRefresh.entities.apples.push(this.addApple(GameManager.generateUUID()));
       }
     }
     logger.debug("Generated bonus");
@@ -128,18 +133,16 @@ export class Game {
     logger.debug("Checking collisions...");
 
     // # Shortcuts #
-    const handlingDeath = (snake: Snake) => {
+    const handlingDeath = (snake: Snake, score: number, kill: number, apples: number) => {
       if(!snake.dead) {
         snake.dead = true;
-        gameRefresh.entities.removed.push(snake.id);
-
         logger.debug("Updating database score of snake " + snake.name);
-        this.scoreBoard.updateScore(snake.id, 1000, 1, 0);
+        this.scoreBoard.updateScore(snake.id, score, kill, apples);
       }
     }
     const handlingEating = (snake: Snake, eaten: Entity) => {
-      this.removeApple(eaten.id);
       gameRefresh.entities.removed.push(eaten.id);
+      this.removeApple(eaten.id);
 
       logger.debug("Updating database score of snake " + snake.name);
       this.scoreBoard.updateScore(snake.id, 100, 0, 1);
@@ -148,11 +151,11 @@ export class Game {
     // #              #
     // # Requirements #
     // #              #
-    const map = new Map<string, Entity>();
     const snakes_as_array = Array.from(this.snakes);
 
+    const map = new Map<string, Entity>(); // Map without head of snakes
 		this.apples.forEach(apple => map.set(this.createCollideKey(apple.getHead()), apple));
-    this.snakes.forEach(snake => snake.cases.map((_case, index) => { if(index !== 0) map.set(this.createCollideKey(_case), snake)}));
+    this.snakes.forEach(snake => snake.getBody().map((_case) => { map.set(this.createCollideKey(_case), snake)}));
 
     // #           #
     // # Alogrithm #
@@ -163,27 +166,27 @@ export class Game {
 
       if (this.isOutOfBounds(head)) {
         logger.info(`${snake.name} hit the border (${this.cols}, ${this.rows}) at ${head}`);
-        handlingDeath(snake);
+        handlingDeath(snake, 0, 0, 0);
       } else {
 
-        const snake_head = [head];
-
         // Only checking if head collided on an apple or the body of another snake
-        this.checkCollisions(snake_head, map,
+        this.checkCollisions([head], map,
           (entityCollided) => {
             logger.debug("Snake collided with an entity");
 
-            if(entityCollided instanceof Apple) {
+            if (entityCollided instanceof Apple) {
               const eaten_apple = entityCollided as Apple;
               logger.info(snake.name + " ate an apple. Current length of " + snake.cases.length);
               handlingEating(snake, eaten_apple);
+            } 
 
-            } else if (entityCollided instanceof Snake) {
+            if (entityCollided instanceof Snake) {
               const collided_snake = entityCollided as Snake;
               logger.info(snake.name + " died colliding on " + collided_snake.name + "'s body. Last registered length of " + snake.cases.length);
-              handlingDeath(snake);
+              handlingDeath(snake, 1000, 1, 0);
+            } 
 
-            } else {
+            if ((entityCollided instanceof Snake) === false && (entityCollided instanceof Apple) === false) {
               logger.warn("Couldn't figure what snake on id " + snake.id + " and name " + snake.name + " collided. Game state on tick unstable.");
             }
           }
@@ -204,43 +207,35 @@ export class Game {
             // If colliding, they are both dead so we don't run any futile checks on the other snake later
             if(head[0] == other_snake_head[0] && head[1] == other_snake_head[1]) {
               logger.info(snake.name + " head collided with the head of " + other_snake.name);
-              handlingDeath(snake);
-              handlingDeath(other_snake);
+              handlingDeath(snake, 0, 0, 0);
+              handlingDeath(other_snake, 0, 0, 0);
             }
           }
-
         }
       }
-      
-    });
-
-    this.snakes.forEach(snake => {
       if (snake.dead) {
         this.snakes.delete(snake.id);
+        gameRefresh.entities.removed.push(snake.id);
+
+        const index = gameRefresh.entities.snakes.indexOf(snake);
+        if (index > -1) {
+          gameRefresh.entities.snakes.splice(index, 1);
+        }
       }
     });
-
     logger.debug("Checked collisions");
   }
 
   // ======================== Collisions ========================= \\
 
-  private checkCollisions(element: Entity | [number, number][], entityMap: Map<string, Entity>, onCollision: (entity: Entity) => void) {
-    const isEntity = (element as any).id;
-    const cases: [number, number][] = isEntity ? (element as Entity).cases : (element as [number, number][]);
-
+  private checkCollisions(cases: [number, number][], entityMap: Map<string, Entity>, onCollision: (entity: Entity) => void) {
     cases.forEach((_case) => {
       const key = this.createCollideKey(_case);
       const entityAtKey = entityMap.get(key);
 
-      if(entityAtKey) {
+      if (entityAtKey) {
         onCollision(entityAtKey);
-      } else {
-        if(isEntity) {
-          entityMap.set(key, (element as Entity));
-        }
-      }
-      
+      }     
     });
   }
 

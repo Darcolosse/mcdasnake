@@ -6,5 +6,6 @@ export interface Entity {
     design: [string, string];
 
     getHead(): [number, number];
+    getBody(): [number, number][];
 }
 
