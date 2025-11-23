@@ -1,14 +1,27 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue';
-import { CookieType, setCookie } from '../util/cookies';
+import { onMounted, ref, watch } from 'vue';
+import { CookieType, getCookie, setCookie } from '../util/cookies';
 import { router } from '../router/router';
 import { paramRoute, playRoute } from '../router/routes';
 
-  const usernameRef = useTemplateRef('username')
+  const username = ref<string>('')
+  
+  // Load cookie on mount
+  onMounted(() => {
+    const cookie = getCookie(CookieType.Username)
+    if (cookie) username.value = cookie
+  })
+
+  // Save cookie whenever it changes
+  watch(username, (newVal) => {
+    if (newVal) {
+      setCookie(CookieType.Username, newVal, 1)
+    }
+  })
 
   function joinGame() {
-    if(usernameRef.value?.value){
-      setCookie(CookieType.Username, usernameRef.value.value, 1)
+    if(username.value){
+      setCookie(CookieType.Username, username.value, 1)
       router.push(playRoute.path)     
     }
   }
@@ -28,9 +41,9 @@ import { paramRoute, playRoute } from '../router/routes';
       </h1>
       <img class="w-1/6" src="/icon.webp" />
       <input 
-        ref="username"
+        v-model="username"
         type="text"
-        class="w-1/5 h-1/18 min-h-10 bg-background-inverse-tertiary px-5 rounded-full border-3 border-background-brand-secondary text-center text-xl text-content-inverse-secondary focus:placeholder-transparent focus:outline-none placeholder:text-content-brand-secondary/40"
+        class="w-1/2 md:w-1/5 h-1/18 min-h-10 bg-background-inverse-tertiary px-5 rounded-full border-3 border-background-brand-secondary text-center text-xl text-content-inverse-secondary focus:placeholder-transparent focus:outline-none placeholder:text-content-brand-secondary/40"
         placeholder="Username"
         @keydown.enter="joinGame"
       />

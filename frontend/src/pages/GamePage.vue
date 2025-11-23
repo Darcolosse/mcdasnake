@@ -16,8 +16,14 @@ const gameManager = new GameManager(interfaceManager)
 interfaceManager.setGameManager(gameManager)
 
 function onKeyDown(e: KeyboardEvent) {
+  // Respawn
   if (e.key === 'r' || e.key === 'R') {
     interfaceManager.askForRespawn()
+  }
+
+  // Exit (Escape)
+  else if (e.key === 'Escape') {
+    goToHome()
   }
 }
 
@@ -25,14 +31,14 @@ onMounted(() => {
   const username = getCookie(CookieType.Username)
   if(username) {
     gameManager.start(bgRef.value, gameRef.value)
-    document.addEventListener('keypress', onKeyDown)
+    document.addEventListener('keydown', onKeyDown)
   } else {
     router.push(homeRoute.path)
   }
 })
 
 onUnmounted(() => {
-  document.removeEventListener('keypress', onKeyDown)
+  document.removeEventListener('keydown', onKeyDown)
 })
 
 function goToHome() {
@@ -44,10 +50,10 @@ function goToHome() {
 <template>
   <div class="relative w-screen h-screen flex flex-col lg:flex-row items-center justify-center xl:p-16 xl:gap-16 bg-background-inverse-primary">
     <div 
-       class="cursor-pointer absolute top-4 right-4 py-1 px-4 bg-background-inverse-secondary/60 rounded-lg font-semibold text-background-inverse-tertiary"
+       class="cursor-pointer absolute top-4 right-4 py-1 px-4 bg-background-brand-tertiary rounded-lg font-semibold text-background-inverse-tertiary"
        @click="goToHome"
       >
-      Exit
+      Back (Escape)
     </div>
     <div class="relative w-[95vmin] xl:w-auto xl:h-full aspect-square">
       <div class="absolute -top-11 -left-2 md:-top-13 xl:-top-15.5 xl:-left-15 flex items-center py-1 px-2 gap-3">
