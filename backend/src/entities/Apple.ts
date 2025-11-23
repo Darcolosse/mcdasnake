@@ -17,5 +17,9 @@ export class Apple implements Entity {
     public getHead(): [number, number] {
         return this.cases[0];
     }
+
+    public getBody(): [number, number][] {
+        return [this.getHead()];
+    }
 }
 

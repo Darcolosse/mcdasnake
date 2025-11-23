@@ -11,10 +11,14 @@ export class GameScheduler {
 
   private gameLoop!: NodeJS.Timeout;
   private tickCount!: number;
+  private gameTickRateMs: number;
+  private gameSpeedMs: number;
 
   constructor(gameManager: GameManager, game: Game) {
     this.gameManager = gameManager;
     this.game = game;
+    this.gameTickRateMs = Number(process.env.GAME_TICKRATE_MS);
+    this.gameSpeedMs = Number(process.env.GAME_SPEED_MS);
   }
 
   // ====================== Vertical layer ======================= \\
@@ -31,11 +35,10 @@ export class GameScheduler {
   // ===================== Management layer ====================== \\
 
   private onTick() {
-    this.tickCount += Number(process.env.GAME_TICKRATE_MS);
+    this.tickCount += this.gameTickRateMs;
 
     // ### Game refresh barebone ###
     const gameRefresh: GameRefreshResponseDTO = new GameRefreshResponseDTO();
-    gameRefresh.scoreBoard = this.game.getScore();
 
     // #                 #
     // # Realtime events #
@@ -57,15 +60,19 @@ export class GameScheduler {
     // #           #
     // # Game step #
     // #           #
-    if(this.tickCount % Number(process.env.GAME_SPEED_MS) == 0) {
+    if (this.tickCount % this.gameSpeedMs == 0) {
       this.onGameStep(gameRefresh);
     }
 
     // #                        #
     // # Notifying game refresh #
     // #                        #
-    if(!gameRefresh.isEmpty()) {
+    if (!gameRefresh.isEmpty()) {
+
+      gameRefresh.scoreBoard = this.game.getScore();
+
       this.gameManager.handleGameEvent(gameRefresh);
+
       for (const id of gameRefresh.entities.removed) {
         this.gameManager.handleGameEvent(new GameDeadPlayerDTO(id), id);
       }

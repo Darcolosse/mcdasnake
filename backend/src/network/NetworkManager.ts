@@ -46,7 +46,7 @@ export class NetworkManager {
 	public emit(id: string, message: DTO) {
 		const jsonMessage = JSON.stringify(message);
 		this.clients.get(id)?.send(jsonMessage);
-		logger.debug(`Sent message to ${id}: ${jsonMessage}`);
+		logger.debug(`Sent message to ${id} if id exists: ${jsonMessage}`);
 	}
 
 	private register(ws: WebSocket) {

@@ -7,28 +7,31 @@ export class Snake implements Entity {
 	public readonly cases: [number, number][];
 	public readonly name: string;
 	public direction: Direction;
-	public newDirection: Direction;
+	public newDirection: Array<Direction>;
+	public maxBufferDirection: number;
 	public dead: boolean;
 	public design: [string, string];
 
 
-	constructor(id: string, name:string, cases: [number, number][], direction: Direction, design: [string, string] = ["LIME", "HEAD_CLASSIC"]) {
+	constructor(id: string, name: string, cases: [number, number][], direction: Direction, design: [string, string] = ["LIME", "HEAD_CLASSIC"]) {
 		this.id = id;
 		this.name = name;
 		this.cases = cases;
 		this.direction = direction;
-		this.newDirection = direction;
+		this.newDirection = [direction];
+		this.maxBufferDirection = 3;
 		this.dead = false;
 		this.design = design;
 	}
 
 	public move(entities: Map<string, Entity>, gameRefresh: GameRefreshResponseDTO) {
-    	let shouldRefresh = false;
-		if (this.newDirection !== this.direction && this.checkIncorrectTurn(this.newDirection) === false) {
-			this.direction = this.newDirection;
-    		shouldRefresh = true;
+		let shouldRefresh = false;
+		if (this.newDirection.length > 0 && this.newDirection[0] !== this.direction && this.checkIncorrectTurn(this.newDirection[0]) === false) {
+			this.direction = this.newDirection[0];
+			shouldRefresh = true;
 		}
-    
+		this.newDirection.shift();
+
 		// Add head
 		let head = this.getHead();
 		switch (this.direction) {
@@ -48,38 +51,46 @@ export class Snake implements Entity {
 				for (let i = 0; i < 10; i++) {
 					this.cases.push([head[0] + i, head[1]]);
 				}
-        break;
+				break;
 		}
 
 		// Remove tail
 		head = this.getHead();
 		let headOnSomething: boolean = false;
-			for (const [_id, entity] of entities) {
-		for(const [x, y] of entity.cases) {
-			if (head[0] === x && head[1] === y) {
-			headOnSomething = true;
-			break;
+		for (const [_, entity] of entities) {
+			const otherHead = entity.getHead();
+			if (head[0] === otherHead[0] && head[1] === otherHead[1]) {
+				headOnSomething = true;
+				break;
 			}
-		}
-		if(headOnSomething) break;
-			}
-		if(!headOnSomething) {
-		this.cases.shift(); // Delete tail
-		} else {
-		shouldRefresh = true;
 		}
 
-		if(shouldRefresh) {
+		if (!headOnSomething) {
+			this.cases.shift(); // Delete tail
+		} else {
+			shouldRefresh = true;
+		}
+
+		if (shouldRefresh) {
 			gameRefresh.entities.snakes.push(this);
 		}
 	}
 
 	public setDirection(direction: Direction) {
-		this.newDirection = direction;
+		if (this.newDirection.length < this.maxBufferDirection) {
+			this.newDirection.push(direction);
+		} else {
+			this.newDirection.shift();
+			this.newDirection.push(direction);
+		}
 	}
 
 	public getHead(): [number, number] {
 		return this.cases[this.cases.length - 1];
+	}
+
+	public getBody(): [number, number][] {
+		return this.cases.slice(0, this.cases.length - 1);
 	}
 
 	private checkIncorrectTurn(newDirection: Direction): boolean {
