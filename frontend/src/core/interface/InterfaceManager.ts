@@ -1,6 +1,7 @@
 import type { Ref } from "vue";
 import type { GameManager } from "../GameManager";
 import type { GameUpdateResponseDTO } from "../network/dto/responses/GameUpdateResponse";
+import type { GameRefreshDTO } from "../network/dto/responses/GameRefresh";
 
 export class InterfaceManager {
   private gameManager!: GameManager;
@@ -36,6 +37,10 @@ export class InterfaceManager {
   }
 
   public setEntireScoreboard(dto: GameUpdateResponseDTO) {
+    this.scoreBoard.value = dto.scoreBoard
+  }
+
+  public updateScoreboard(dto: GameRefreshDTO) {
     this.scoreBoard.value = dto.scoreBoard
   }
 }

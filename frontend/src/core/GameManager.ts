@@ -83,6 +83,7 @@ export class GameManager {
       case DTOType.GameRefresh :
         console.log(eventDTO);
         this.displayManager.refreshGame(eventDTO as GameRefreshDTO);
+        this.interfaceManager.updateScoreboard(eventDTO as GameRefreshDTO)
         break;
       case DTOType.GameUpdate :
         this.interfaceManager.setEntireScoreboard(eventDTO as GameUpdateResponseDTO)
