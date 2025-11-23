@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { GameManager } from '../core/GameManager'
 import { CookieType, getCookie } from '../util/cookies'
 import { router } from '../router/router'
@@ -14,13 +14,24 @@ const interfaceManager = new InterfaceManager(respawnAuthorisation)
 const gameManager = new GameManager(interfaceManager)
 interfaceManager.setGameManager(gameManager)
 
+function onKeyDown(e: KeyboardEvent) {
+  if (e.key === 'r' || e.key === 'R') {
+    interfaceManager.askForRespawn()
+  }
+}
+
 onMounted(() => {
   const username = getCookie(CookieType.Username)
   if(username) {
     gameManager.start(bgRef.value, gameRef.value)
+    window.addEventListener('keydown', onKeyDown)
   } else {
     router.push(homeRoute.path)
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKeyDown)
 })
 
 function goToHome() {
