@@ -42,6 +42,10 @@ export class DisplayGame {
     return this.displayManager.getCtx();
   }
 
+  public getCanvas(): HTMLCanvasElement {
+    return this.displayManager.getCanvas();
+  }
+
   /**
    * @returns Renvoie la taille en pixel d'une case de jeu
    */
@@ -224,7 +228,7 @@ export class DisplayGame {
    * Update entièrement la grille de jeu
    */
   public show(): void {
-    const canvas = this.displayManager.getCanvas()
+    const canvas = this.getCanvas();
 
     if (canvas) {
       this.getCtx().clearRect(0, 0, canvas.width, canvas.height)
