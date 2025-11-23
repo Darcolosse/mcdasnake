@@ -83,31 +83,31 @@ function goToHome() {
         </canvas>
       </div>
     </div>
-    <div class="w-full h-full hidden xl:flex flex-col gap-16">
-      <div class="bg-background-neutral-primary w-full h-full rounded-3xl flex flex-col p-1">
+    <div class="w-full h-full hidden xl:flex flex-col gap-16 font-extrabold text-background-inverse-tertiary">
+      <div class="bg-background-brand-primary w-full h-full rounded-3xl flex flex-col p-1 overflow-y-auto">
 
         <div
           v-if="refScoreBoard && refScoreBoard.length > 0"
           v-for="(entry, index) in refScoreBoard"
           :key="entry[0]"
-          class="flex flex-row items-center bg-background-neutral-secondary rounded-xl p-2"
+          class="flex flex-row items-center rounded-xl gap-5 p-2"
         >
           <!-- Rank / Index -->
-          <div class="w-12 text-center font-bold text-content-brand-primary">
+          <div class="w-12 text-center py-3 bg-background-inverse-primary text-content-brand-primary rounded-xl">
             {{ index + 1 }}
           </div>
 
           <!-- Username -->
-          <div class="flex-1 font-semibold">
+          <div class="flex-1 flex justify-between items-center bg-background-neutral-primary">
             {{ entry[0] }}
+            <div class="text-right w-32 font-mono">
+              <div>Apples: {{ entry[3] }}</div>
+              <div>Score: {{ entry[1] }}</div>
+              <div>Kills: {{ entry[2] }}</div>
+            </div>
           </div>
 
           <!-- Stats -->
-          <div class="text-right w-32 font-mono">
-            <div>Score: {{ entry[1] }}</div>
-            <div>Kills: {{ entry[2] }}</div>
-            <div>Deaths: {{ entry[3] }}</div>
-          </div>
         </div>
 
         <!-- When no scoreboard yet -->
