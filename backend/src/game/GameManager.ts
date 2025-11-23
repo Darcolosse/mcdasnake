@@ -22,8 +22,8 @@ export type Buffers = typeof Buffers[keyof typeof Buffers];
 
 export class GameManager {
 	private readonly networkManager: NetworkManager;
-	private readonly game: Game;
-	private readonly gameScheduler: GameScheduler;
+	private game: Game;
+	private gameScheduler: GameScheduler;
   private readonly db: PrismaClient;
 
 	private readonly buffers = {
@@ -101,7 +101,13 @@ export class GameManager {
     })
     return popped;
 	}
-  
+
+  public autoRestartGameSession() {
+    this.game = new Game([Number(process.env.GRID_COLS), Number(process.env.GRID_ROWS)], this.db);
+    this.gameScheduler = new GameScheduler(this, this.game);
+    this.start();
+  }
+
   // =========================== Utils =========================== \\
 
   public static generateUUID(): string {

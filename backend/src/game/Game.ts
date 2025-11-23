@@ -14,6 +14,8 @@ export class Game {
 	private readonly rows: number;
 	private readonly cols: number;
 
+  private sessionDuration: number;
+
 	private snakes: Map<string, Snake>;
 	private apples: Map<string, Apple>;
 
@@ -36,6 +38,8 @@ export class Game {
     this.snakeSpawningLength = Number(process.env.SNAKE_SPAWNING_LENGTH);
     this.maxBonus = (this.cols * this.rows) * (Number(process.env.BONUS_PERCENTAGE_MAX)/100);
     this.bonusProbabilitySpawnApple = Number(process.env.BONUS_PROBABILITY_SPAWN_APPLE);
+    this.sessionDuration = Number(process.env.GAME_SESSION_DURATION_S);
+
     logger.info("Creating a scoreboard in base for the game session...");
     this.scoreBoard = new ScoreBoard(db);
     this.scoreBoard.createGameSession(this.sessionId);
@@ -100,12 +104,20 @@ export class Game {
 
   public getScore(){
     logger.debug("Scoreboard ...");
-    
     return Array.from(this.scoreBoard.getAllScores().values()).sort((a, b) => (b[1]+b[2]*10+b[3]) - (a[1]+a[2]*10+a[3])).splice(0, 10);
   }
 
   public getSnakes(): Map<string, Snake> {
     return this.snakes;
+  }
+
+  public GetGameSessionDuration(): number {
+    console.log("Getting game session duration: " + this.sessionDuration + "s");
+    return this.sessionDuration;
+  }
+
+  public GetGameSessionId(): string {
+    return this.sessionId;
   }
 
   // ### GAME EVENTS ###
