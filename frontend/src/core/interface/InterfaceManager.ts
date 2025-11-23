@@ -27,7 +27,7 @@ export class InterfaceManager {
   }
 
   public askForRespawn() {
-    if (this.respawnAuthorization) {
+    if (this.respawnAuthorization.value) {
       this.gameManager.askServerForRespawn()
     }
   }

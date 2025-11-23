@@ -8,7 +8,7 @@ import { InterfaceManager } from '../core/interface/InterfaceManager'
 
 const gameRef = ref<HTMLCanvasElement | null>(null)
 const bgRef = ref<HTMLCanvasElement | null>(null)
-const respawnAuthorisation = ref(true)
+const respawnAuthorisation = ref(false)
 
 const interfaceManager = new InterfaceManager(respawnAuthorisation)
 const gameManager = new GameManager(interfaceManager)
