@@ -9,9 +9,10 @@ import { InterfaceManager } from '../core/interface/InterfaceManager'
 const gameRef = ref<HTMLCanvasElement | null>(null)
 const bgRef = ref<HTMLCanvasElement | null>(null)
 const respawnAuthorisation = ref(false)
+const lastDeathMessageRef = ref('')
 const refScoreBoard = ref<Array<[string, number, number, number]> | null>(null)
 
-const interfaceManager = new InterfaceManager(respawnAuthorisation, refScoreBoard)
+const interfaceManager = new InterfaceManager(respawnAuthorisation, lastDeathMessageRef, refScoreBoard)
 const gameManager = new GameManager(interfaceManager)
 interfaceManager.setGameManager(gameManager)
 
@@ -66,7 +67,7 @@ function goToHome() {
           </h1>
       </div>
       <div 
-        :class="['z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 py-1 px-4 bg-background-inverse-secondary rounded-lg font-semibold text-3xl text-background-inverse-tertiary',
+        :class="['z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 py-1 px-4 bg-background-inverse-secondary rounded-lg font-semibold text-3xl text-center text-background-inverse-tertiary',
                  respawnAuthorisation ? 'absolute cursor-pointer' : 'hidden']"
         @click="interfaceManager.askForRespawn"
         >
@@ -74,6 +75,8 @@ function goToHome() {
         <span class="text-content-brand-secondary">Re</span>
         <span class="text-content-brand-primary">spawn</span>
         <span class="text-content-brand-secondary"> (r)</span>
+        <br />
+        <span class="text-lg text-content-brand-tertiary">{{ lastDeathMessageRef }}</span>
       </div>
       <div class="relative w-full h-full rounded-3xl overflow-hidden">
         <!-- Background canvas -->

@@ -4,6 +4,7 @@ import { EventManager } from "./event/EventManager";
 import type { InterfaceManager } from "./interface/InterfaceManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
 import { GameAddPlayerDTO } from "./network/dto/requests/GameAddPlayerDTO";
+import type { GameDeadPlayerResponseDTO } from "./network/dto/responses/GamePlayerDead";
 import type { GameRefreshDTO } from "./network/dto/responses/GameRefresh";
 import { GameUpdateResponseDTO } from "./network/dto/responses/GameUpdateResponse";
 import { NetworkManager } from "./network/NetworkManager";
@@ -84,7 +85,7 @@ export class GameManager {
       case DTOType.GameDeadPlayer :
         this.eventManager.clearSavedInputs()
         this.eventManager.stopListening()
-        this.interfaceManager.permitToRespawn()
+        this.interfaceManager.permitToRespawn(eventDTO as GameDeadPlayerResponseDTO)
         break;
       case DTOType.GameRefresh :
         this.displayManager.refreshGame(eventDTO as GameRefreshDTO)
