@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { GameManager } from '../core/GameManager'
-import { CookieType, getCookie } from '../util/cookies'
+import { CookieType, getCookie, setCookie } from '../util/cookies'
 import { router } from '../router/router'
 import { homeRoute } from '../router/routes'
 import { InterfaceManager } from '../core/interface/InterfaceManager'
@@ -9,9 +9,10 @@ import { InterfaceManager } from '../core/interface/InterfaceManager'
 const gameRef = ref<HTMLCanvasElement | null>(null)
 const bgRef = ref<HTMLCanvasElement | null>(null)
 const respawnAuthorisation = ref(false)
+const lastDeathMessageRef = ref('')
 const refScoreBoard = ref<Array<[string, number, number, number]> | null>(null)
 
-const interfaceManager = new InterfaceManager(respawnAuthorisation, refScoreBoard)
+const interfaceManager = new InterfaceManager(respawnAuthorisation, lastDeathMessageRef, refScoreBoard)
 const gameManager = new GameManager(interfaceManager)
 interfaceManager.setGameManager(gameManager)
 
@@ -28,8 +29,10 @@ function onKeyDown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  const antiSpamExists = getCookie(CookieType.AntispamServer)
   const username = getCookie(CookieType.Username)
-  if(username) {
+  if(!antiSpamExists && username) {
+    setCookie(CookieType.AntispamServer, "bomboclatt", 5000)
     gameManager.start(bgRef.value, gameRef.value)
     document.addEventListener('keydown', onKeyDown)
   } else {
@@ -64,7 +67,7 @@ function goToHome() {
           </h1>
       </div>
       <div 
-        :class="['z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 py-1 px-4 bg-background-inverse-secondary rounded-lg font-semibold text-3xl text-background-inverse-tertiary',
+        :class="['z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 py-1 px-4 bg-background-inverse-secondary rounded-lg font-semibold text-3xl text-center text-background-inverse-tertiary',
                  respawnAuthorisation ? 'absolute cursor-pointer' : 'hidden']"
         @click="interfaceManager.askForRespawn"
         >
@@ -72,6 +75,8 @@ function goToHome() {
         <span class="text-content-brand-secondary">Re</span>
         <span class="text-content-brand-primary">spawn</span>
         <span class="text-content-brand-secondary"> (r)</span>
+        <br />
+        <span class="text-lg text-content-brand-tertiary">{{ lastDeathMessageRef }}</span>
       </div>
       <div class="relative w-full h-full rounded-3xl overflow-hidden">
         <!-- Background canvas -->

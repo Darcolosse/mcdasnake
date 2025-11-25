@@ -8,12 +8,12 @@ import { GridHelper } from './GridHelper.ts'
 
 export class DisplayManager {
 
-  private gameManager: GameManager
-  private gridHelper: GridHelper
+  public readonly gameManager: GameManager
+  private readonly gridHelper: GridHelper
 
-  private displayConnect : DisplayConnect
-  private displayGame : DisplayGame
-  private displayGrid : DisplayGrid
+  private readonly displayConnect : DisplayConnect
+  private readonly displayGame : DisplayGame
+  private readonly displayGrid : DisplayGrid
 
   private background!: HTMLCanvasElement | null // canvas ou est affiché le jeu
   private bgCtx: CanvasRenderingContext2D | null = null // pinceau permettant d'afficher le jeu

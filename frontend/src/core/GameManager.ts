@@ -1,27 +1,31 @@
 import { SettingsAction } from "../components/SettingsAction";
 import { CookieType, getCookie, getCookiePlus } from "../util/cookies";
-import { DisplayManager } from "./display/DisplayManager"
+import { DisplayManager } from "./display/DisplayManager";
 import { EventManager } from "./event/EventManager";
 import type { InterfaceManager } from "./interface/InterfaceManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
 import { GameAddPlayerDTO } from "./network/dto/requests/GameAddPlayerDTO";
+import type { GameDeadPlayerResponseDTO } from "./network/dto/responses/GamePlayerDead";
 import type { GameRefreshDTO } from "./network/dto/responses/GameRefresh";
 import { GameUpdateResponseDTO } from "./network/dto/responses/GameUpdateResponse";
 import { NetworkManager } from "./network/NetworkManager";
+import { SoundManager, Sounds } from "./sound/SoundManager";
 
 export class GameManager {
 
-  private readonly debug : boolean = true;
+  private readonly debug : boolean = true
 
-  private readonly displayManager: DisplayManager;
-  private readonly eventManager: EventManager;
-  private readonly networkManager: NetworkManager;
-  private readonly interfaceManager: InterfaceManager;
+  private readonly displayManager: DisplayManager
+  private readonly eventManager: EventManager
+  private readonly networkManager: NetworkManager
+  private readonly interfaceManager: InterfaceManager
+  private readonly soundManager: SoundManager
 
   constructor (interfaceManager: InterfaceManager) {
     this.displayManager = new DisplayManager(this)
     this.eventManager = new EventManager(this)
     this.networkManager = new NetworkManager(this, `ws://${import.meta.env.VITE_BACKEND_IP}:${import.meta.env.VITE_BACKEND_PORT}`)
+    this.soundManager = new SoundManager(this)
     this.interfaceManager = interfaceManager
   }
 
@@ -32,10 +36,12 @@ export class GameManager {
       this.log(this, "Initializing canvas and connecting to server")
       this.displayManager.initialize(background as HTMLCanvasElement, canvas as HTMLCanvasElement)
       this.displayManager.showConnection()
-      this.networkManager.connect().then(() => {
-        this.log(this, "Sending an add request to the server after being connected")
-        this.eventManager.startListening()
-        this.askServerForRespawn()
+      this.soundManager.onReady().then(() => {
+        this.networkManager.connect().then(() => {
+          this.log(this, "Sending an add request to the server after being connected")
+          this.eventManager.startListening()
+          this.askServerForRespawn()
+        })
       })
     } else {
       this.raiseError("Canvas elements not found. Couldn't start the game.")
@@ -57,7 +63,7 @@ export class GameManager {
       design,
       ""
     ))
-    this.eventManager.startListening();
+    this.eventManager.startListening()
     this.interfaceManager.restrictRespawn()
   }
   
@@ -69,7 +75,7 @@ export class GameManager {
       case DTOType.AddPlayer :
       case DTOType.GameUpdate :
       case DTOType.SnakeTurn :
-        this.networkManager.emit(eventDTO);
+        this.networkManager.emit(eventDTO)
         break;
       default:
         this.log(this, "Handler of event not implemented.", eventDTO)
@@ -78,25 +84,25 @@ export class GameManager {
   }
 
   public handleServerEvent(eventDTO: DTO) {
-    this.log(this, "Handling an event from server");
+    this.log(this, "Handling an event from server" , eventDTO)
     switch(eventDTO.type) {
       case DTOType.GameDeadPlayer :
-        this.eventManager.clearSavedInputs();
-        this.eventManager.stopListening();
-        this.interfaceManager.permitToRespawn();
+        this.eventManager.clearSavedInputs()
+        this.eventManager.stopListening()
+        this.interfaceManager.permitToRespawn(eventDTO as GameDeadPlayerResponseDTO)
         break;
       case DTOType.GameRefresh :
-        console.log(eventDTO);
-        this.displayManager.refreshGame(eventDTO as GameRefreshDTO);
+        this.displayManager.refreshGame(eventDTO as GameRefreshDTO)
         this.interfaceManager.updateScoreboard(eventDTO as GameRefreshDTO)
         break;
       case DTOType.GameUpdate :
         this.interfaceManager.setEntireScoreboard(eventDTO as GameUpdateResponseDTO)
-        this.displayManager.updateGameLayers(eventDTO as GameUpdateResponseDTO);
-        this.displayManager.showGame();
+        this.displayManager.updateGameLayers(eventDTO as GameUpdateResponseDTO)
+        this.displayManager.showGame()
+        this.soundManager.play(Sounds.GAME_START)
         break;
       default:
-        this.log(this, "Handler of event not implemented.", eventDTO);
+        this.log(this, "Handler of event not implemented.", eventDTO)
         break;
     }
     
