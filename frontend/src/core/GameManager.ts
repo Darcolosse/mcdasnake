@@ -35,10 +35,12 @@ export class GameManager {
       this.log(this, "Initializing canvas and connecting to server")
       this.displayManager.initialize(background as HTMLCanvasElement, canvas as HTMLCanvasElement)
       this.displayManager.showConnection()
-      this.networkManager.connect().then(() => {
-        this.log(this, "Sending an add request to the server after being connected")
-        this.eventManager.startListening()
-        this.askServerForRespawn()
+      this.soundManager.onReady().then(() => {
+        this.networkManager.connect().then(() => {
+          this.log(this, "Sending an add request to the server after being connected")
+          this.eventManager.startListening()
+          this.askServerForRespawn()
+        })
       })
     } else {
       this.raiseError("Canvas elements not found. Couldn't start the game.")
