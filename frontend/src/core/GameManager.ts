@@ -79,7 +79,7 @@ export class GameManager {
   }
 
   public handleServerEvent(eventDTO: DTO) {
-    this.log(this, "Handling an event from server")
+    this.log(this, "Handling an event from server" , eventDTO)
     switch(eventDTO.type) {
       case DTOType.GameDeadPlayer :
         this.eventManager.clearSavedInputs()
@@ -87,7 +87,6 @@ export class GameManager {
         this.interfaceManager.permitToRespawn()
         break;
       case DTOType.GameRefresh :
-        console.log(eventDTO)
         this.displayManager.refreshGame(eventDTO as GameRefreshDTO)
         this.interfaceManager.updateScoreboard(eventDTO as GameRefreshDTO)
         break;
