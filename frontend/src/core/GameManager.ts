@@ -1,3 +1,4 @@
+import { SettingsAction } from "../components/SettingsAction";
 import { CookieType, getCookie, getCookiePlus } from "../util/cookies";
 import { DisplayManager } from "./display/DisplayManager"
 import { EventManager } from "./event/EventManager";
@@ -49,7 +50,8 @@ export class GameManager {
   }
 
   public askServerForRespawn() {
-    const design = getCookiePlus(CookieType.Design) as string
+    const setting = getCookiePlus(CookieType.Design) as string
+    const design = SettingsAction.getStringDesign(setting);
     this.handleClientEvent(new GameAddPlayerDTO(
       getCookie(CookieType.Username) as string,
       design,

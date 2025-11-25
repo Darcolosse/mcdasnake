@@ -23,7 +23,7 @@ export class Design {
 
     // ============================ Set ============================ \\
 
-    public setColor1(color : string) : void {
+    public setColor1(color : string | undefined) : void {
         this.color1 = color;
     }
 
@@ -46,7 +46,11 @@ export class Design {
     // ============================ Get ============================ \\
 
     public getColor1() : string | undefined{
-        return this.color1;
+        if (this.color1){
+            return this.color1;
+        }
+        return "#000000"
+        
     }
 
     public getColor2() : string | undefined{

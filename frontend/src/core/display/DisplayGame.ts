@@ -8,6 +8,7 @@ import { SpriteManager, SpriteName } from './SpriteManager.ts';
 import type { GameRefreshDTO } from '../network/dto/responses/GameRefresh.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
 import { CookieType, getCookie } from '../../util/cookies.ts';
+import { SettingsAction } from '../../components/SettingsAction.ts';
 
 type EntityType = "SNAKE" | "APPLE" | "ENTITY";
 
@@ -28,7 +29,7 @@ export class DisplayGame {
     this.spriteManager.onReady(() => this.animate());
     this.loop = this.loop.bind(this);
 
-    // graphics parameter
+    // graphism parameter
     this.graphism = this.getGraphismFromCookie();
     console.log(this.graphism);
   }
@@ -122,6 +123,7 @@ export class DisplayGame {
         switch (entityType) {
           case ("SNAKE"):
             const design = this.getEntityDesign(entity);
+            console.log(design);
             entityObject = new SnakeDisplayed(
               this,
               entityBoxes,
@@ -294,43 +296,41 @@ export class DisplayGame {
     const DEFAULT_HEAD: SpriteName = "HEAD_CLASSIC";
 
     const [design, useless] = entity.design ?? [];
-
-    // design = {
-    //   color1: selectedColor1.value?.value,
-    //   color2: selectedColor2.value?.value,
-    //   head: selectedHead.value?.name,
-    //   graphics: selectedGraphics.value,
-    // }
-    if (design){
-      const designObject = JSON.parse(design);
-      const result = new Design(
-        designObject.color1,
-        designObject.head,
-        designObject.graphics,
-      );
-      if (designObject.color2){
-        result.setColor2(designObject.color2);
+    try{
+      
+      if (design){
+        const designObject = JSON.parse(design);
+        const result = new Design(
+          designObject.color1,
+          designObject.head,
+          //designObject.graphism,
+          this.graphism
+        );
+        if (designObject.color2){
+          result.setColor2(designObject.color2);
+        }
+        if (designObject.texture){
+          result.setTexture(designObject.texture);
+        }
+        return result;
       }
-      if (designObject.texture){
-        result.setTexture(designObject.texture);
-      }
-      return result;
     }
-    else{
-      return new Design(DEFAULT_COLOR, DEFAULT_HEAD, this.graphism)
+    catch(e){
+      console.log(e);
     }
+    return new Design(DEFAULT_COLOR, DEFAULT_HEAD, this.graphism)
     
   }
 
   private getGraphismFromCookie(): Graphism {
     const DEFAULT_GRAPHISM = Graphism.NORMAL;
 
-    const designStr = getCookie(CookieType.Design);
+    const designStr = SettingsAction.getStringDesign(getCookie(CookieType.Design) as string);
     if (!designStr) return DEFAULT_GRAPHISM;
 
     try {
-      const design = JSON.parse(designStr) as { graphics?: string };
-      return (design.graphics as Graphism) ?? DEFAULT_GRAPHISM;
+      const design = JSON.parse(designStr) as { graphism?: string };
+      return (design.graphism as Graphism) ?? DEFAULT_GRAPHISM;
     } catch {
       return DEFAULT_GRAPHISM; // sécurité en cas de JSON invalide
     }
