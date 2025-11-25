@@ -5,6 +5,7 @@ import { GameUpdateSnakeDirectionDTO } from "@network/dto/requests/GameUpdateSna
 import { GameAddPlayerDTO } from "@network/dto/requests/GameAddPlayerDTO";
 import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
 import { logger } from "@/app";
+import { Death } from "@/entities/Death";
 
 export class GameScheduler {
   private readonly game: Game;
@@ -88,8 +89,8 @@ export class GameScheduler {
 
       this.gameManager.handleGameEvent(gameRefresh);
 
-      for (const id of gameRefresh.entities.removed) {
-        this.gameManager.handleGameEvent(new GameDeadPlayerDTO(id), id);
+      for (const removedEntity of gameRefresh.entities.removed) {
+        this.gameManager.handleGameEvent(removedEntity, removedEntity.deadPlayerId);
       }
     }
   }
@@ -129,7 +130,7 @@ export class GameScheduler {
 
   private onRemove(id: string, gameRefresh: GameRefreshResponseDTO) {
     this.game.removeSnake(id);
-    gameRefresh.entities.removed.push(id);
+    gameRefresh.entities.removed.push(new GameDeadPlayerDTO(id, "snake", "", "", Death.DECONNEXION));
   }
 
   public isFinished(): boolean {
