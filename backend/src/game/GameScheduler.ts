@@ -90,6 +90,7 @@ export class GameScheduler {
       this.gameManager.handleGameEvent(gameRefresh);
 
       for (const removedEntity of gameRefresh.entities.removed) {
+        console.log("Removed entity: ", removedEntity);
         this.gameManager.handleGameEvent(removedEntity, removedEntity.deadPlayerId);
       }
     }

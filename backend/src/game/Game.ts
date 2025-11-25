@@ -114,7 +114,6 @@ export class Game {
   }
 
   public GetGameSessionDuration(): number {
-    console.log("Getting game session duration: " + this.sessionDuration + "s");
     return this.sessionDuration;
   }
 
@@ -233,7 +232,7 @@ export class Game {
           }
         }
       }
-      if (snake.dead) {
+      if (snake.dead[0]) {
         this.snakes.delete(snake.id);
         gameRefresh.entities.removed.push(snake.dead[1]!);
 
@@ -252,7 +251,6 @@ export class Game {
     cases.forEach((_case) => {
       const key = this.createCollideKey(_case);
       const entityAtKey = entityMap.get(key);
-
       if (entityAtKey) {
         onCollision(entityAtKey);
       }     
