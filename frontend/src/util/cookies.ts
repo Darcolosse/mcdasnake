@@ -1,13 +1,14 @@
 export const CookieType = {
   Username: "username",
-  Design: "design"
+  Design: "design",
+  AntispamServer: "antispam",
 }
 
-export function setCookie(cookieType: string, value: string, days: number) {
+export function setCookie(cookieType: string, value: string, time: number) {
   var expires = "";
-  if (days) {
+  if (time) {
     var date = new Date();
-    date.setTime(date.getTime() + (days*24*60*60*1000));
+    date.setTime(date.getTime() + (cookieType === CookieType.AntispamServer ? time : time*24*60*60*1000));
     expires = "; expires=" + date.toUTCString();
   }
   document.cookie = cookieType + "=" + (value || "")  + expires + "; path=/";
@@ -25,7 +26,6 @@ export function getCookie(cookieType: string) {
   }
   return undefined;
 }
-
 
 export function getCookiePlus(cookieType: string) {
   let result = getCookie(cookieType);

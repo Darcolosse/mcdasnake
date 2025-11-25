@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import { GameManager } from '../core/GameManager'
-import { CookieType, getCookie } from '../util/cookies'
+import { CookieType, getCookie, setCookie } from '../util/cookies'
 import { router } from '../router/router'
 import { homeRoute } from '../router/routes'
 import { InterfaceManager } from '../core/interface/InterfaceManager'
@@ -28,8 +28,10 @@ function onKeyDown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  const antiSpamExists = getCookie(CookieType.AntispamServer)
   const username = getCookie(CookieType.Username)
-  if(username) {
+  if(!antiSpamExists && username) {
+    setCookie(CookieType.AntispamServer, "bomboclatt", 5000)
     gameManager.start(bgRef.value, gameRef.value)
     document.addEventListener('keydown', onKeyDown)
   } else {
