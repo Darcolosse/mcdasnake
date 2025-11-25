@@ -44,9 +44,10 @@ export class SettingsAction {
     // preview
     private canvas : (HTMLCanvasElement | null) = null;
     private preview : (DisplayGameSimple | null) = null;
-    private design! : Design;
+    private design : Design;
 
     constructor(){
+        this.design = new Design("white","HEAD_CLASSIC","NORMAL");
         this.loadCookieParameter();
         console.log(this.choice);
     }
@@ -69,6 +70,21 @@ export class SettingsAction {
 
     public setMode(state: ("color" | "texture")) : void{
         this.mode.value = state;
+        switch (state) {
+            case "color":
+                this.choice.COLOR1.enabled = true;
+                this.choice.COLOR2.enabled = (this.choice.COLOR2.value) ? true : false;
+                this.choice.TEXTURE.enabled = false;
+                break;
+            case "texture":
+                this.choice.TEXTURE.enabled = true;
+                this.choice.COLOR1.enabled = false;
+                this.choice.COLOR2.enabled = false;
+                
+                break;
+        }
+        this.preview?.show();
+        console.log(this.mode.value, this.choice);
     }
 
     public setCanvas(canvas: HTMLCanvasElement){
@@ -77,7 +93,7 @@ export class SettingsAction {
             this.preview = new DisplayGameSimple(this.canvas, [5,3]);
             let snakePreview = new SnakeDisplayed(this.preview, [[1,1],[2,1],[3,1]], 0, this.design, 1, 0);
             this.preview.setEntity2("preview", snakePreview);
-            this.preview.show();
+            this.drawPreview();
         }
         else{
             this.canvas = canvas;
@@ -88,7 +104,6 @@ export class SettingsAction {
     public loadCookieParameter(){
         const raw = getCookiePlus(CookieType.Design);
         let defaultValue = true;
-        this.design = new Design("white","HEAD_CLASSIC","NORMAL");
         console.log("trying load ",raw);
         if (raw) {
             try {
@@ -122,33 +137,25 @@ export class SettingsAction {
                 } else{
                     choice.element.value = "default"+numColor+"_"+color;
                 }
-                if (numColor===1) this.design.setColor1(color);
-                if (numColor===2) this.design.setColor2(color);
             }
             else{
                 choice.element.value = ("noColor" + numColor + "_");
-                if (numColor===1) this.design.setColor1(undefined);
-                if (numColor===2) this.design.setColor2(undefined);
             }
         }
         this.choice[SettingName.TEXTURE].enabled = false;
-        this.design.setTexture(undefined);
         this.drawPreview();
     }
 
     public selectHead(name: SpriteName) {
-        this.design.setHead(name);
         this.setAttribut(SettingName.HEAD, name, name, true);
         
     }
 
     public selectTexture(name: SpriteName) {
-        this.design.setTexture(name);
         this.setAttribut(SettingName.TEXTURE, name, name, true);
     }
 
     public selectGraphics(level: Graphism){
-        this.design.setGraphism(level as Graphism);
         if (level === "VERY_LOW") { // Mode couleurs (1) exclusif   
             this.removeColor2();
         }
@@ -163,7 +170,6 @@ export class SettingsAction {
 
     public removeColor2(){
         this.choice[SettingName.COLOR2].enabled = false;
-        this.design.setColor2(undefined);
         this.drawPreview();
     }
 
@@ -176,6 +182,7 @@ export class SettingsAction {
 
     public static getStringDesign(SettingCookie : string) : string {
         const settingChoice = SettingsAction.parseChoice(SettingCookie);
+        console.log(settingChoice);
         const designObject = SettingsAction.createDesignCookieObject(settingChoice);
         return JSON.stringify(designObject);
     }
@@ -261,26 +268,36 @@ export class SettingsAction {
 
 
     private updateDesign(){
-        if (this.choice[SettingName.GRAPHISM].enabled){
-            this.design.setGraphism(this.choice[SettingName.GRAPHISM].value as Graphism);
-        }
-        if (this.choice[SettingName.COLOR1].enabled){
-            this.design.setColor1(this.choice[SettingName.COLOR1].value);
-        }
-        if (this.choice[SettingName.COLOR2].enabled){
-            this.design.setColor2(this.choice[SettingName.COLOR2].value);
-        }
-        if (this.choice[SettingName.TEXTURE].enabled){
-            this.design.setTexture(this.choice[SettingName.TEXTURE].value as SpriteName);
-        }
-        if (this.choice[SettingName.HEAD].enabled){
-            this.design.setHead(this.choice[SettingName.HEAD].value as SpriteName);
-        }
+            this.design.setGraphism(
+                this.choice[SettingName.GRAPHISM].value as Graphism
+            );
+            this.design.setColor1(
+                (this.choice[SettingName.COLOR1].enabled)
+                    ? this.choice[SettingName.COLOR1].value
+                    : undefined
+            );
+            this.design.setColor2(
+                (this.choice[SettingName.COLOR2].enabled)
+                    ? this.choice[SettingName.COLOR2].value
+                    : undefined
+            );
+            this.design.setTexture(
+                (this.choice[SettingName.TEXTURE].enabled)
+                    ? this.choice[SettingName.TEXTURE].value as SpriteName
+                    : undefined
+            );
+            this.design.setHead(
+                (this.choice[SettingName.HEAD].enabled)
+                    ? this.choice[SettingName.HEAD].value as SpriteName
+                    : undefined
+            );
+            console.log("design update", this.design);
     }
 
 
     private drawPreview() {
         if (this.preview){
+            this.updateDesign();
             this.preview.show();
         }
     }

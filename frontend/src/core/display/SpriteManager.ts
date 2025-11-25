@@ -16,7 +16,7 @@ export type SpriteName = typeof SpriteName[keyof typeof SpriteName];
 export class SpriteManager {
   private static SPRITE_FOLDER = "/src/core/display/sprite/";
 
-  private readonly gameManager: GameManager;
+  private gameManager?: GameManager;
   private sprites: Map<string, HTMLImageElement> = new Map();
   private loadedCount = 0;
   private totalToLoad = 0;
@@ -25,8 +25,7 @@ export class SpriteManager {
 
   private spritesPath: Record<SpriteName, string>;
 
-  constructor(gameManager: GameManager) {
-    this.gameManager = gameManager;
+  constructor() {
     this.spritesPath = {
       [SpriteName.APPLE] : SpriteManager.SPRITE_FOLDER + "apple.png",
       [SpriteName.SCALE] : SpriteManager.SPRITE_FOLDER + "scale.jpg",
@@ -41,14 +40,18 @@ export class SpriteManager {
     this.loadAllSprites(this.spritesPath);
   }
 
+  public setGameManager(gameManager: GameManager){
+    this.gameManager = gameManager;
+  }
+
   /** Charge toutes les images du dictionnaire */
   private loadAllSprites(spritePaths: Record<string, string>): void {
-    this.gameManager.log(this, `Loading ${this.totalToLoad} sprites`);
+    this.gameManager?.log(this, `Loading ${this.totalToLoad} sprites`);
     for (const [name, path] of Object.entries(spritePaths)) {
       const img = new Image();
       img.src = path;
       img.onload = () => this.handleLoaded(name, img);
-      img.onerror = () => this.gameManager.raiseError(`Erreur de chargement du sprite "${name}" (${path})`);
+      img.onerror = () => this.gameManager?.raiseError(`Erreur de chargement du sprite "${name}" (${path})`);
     }
   }
 
@@ -59,7 +62,7 @@ export class SpriteManager {
 
     if (this.loadedCount === this.totalToLoad) {
       this.isReady = true;
-      this.gameManager.log(this, `All ${this.totalToLoad} sprites loaded.`);
+      this.gameManager?.log(this, `All ${this.totalToLoad} sprites loaded.`);
       if (this.onReadyCallback) {
         this.onReadyCallback();
         this.onReadyCallback = undefined; // évite les doubles appels

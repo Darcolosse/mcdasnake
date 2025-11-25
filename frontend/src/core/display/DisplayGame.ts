@@ -25,7 +25,8 @@ export class DisplayGame {
 
   constructor(displayManager: DisplayManager) {
     this.displayManager = displayManager;
-    this.spriteManager = new SpriteManager(this.displayManager.gameManager);
+    this.spriteManager = new SpriteManager();
+    if (displayManager) {this.spriteManager.setGameManager(displayManager.gameManager)}
     this.spriteManager.onReady(() => this.animate());
     this.loop = this.loop.bind(this);
 

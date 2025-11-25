@@ -161,7 +161,7 @@ onMounted(() => {
     </div>
 
       <!-- Texture selection -->
-      <div v-if="settingManager.getMode() === 'texture' && settingManager.isEnabled('HEAD')" class="flex flex-col gap-2">
+      <div v-if="settingManager.getMode() === 'texture' " class="flex flex-col gap-2">
       <div v-if="settingManager.isEnabled('TEXTURE')" class="flex flex-col gap-2">
         <h3 class="text-xl text-content-brand-secondary">Textures</h3>
         <div class="flex flex-wrap justify-center gap-6">
