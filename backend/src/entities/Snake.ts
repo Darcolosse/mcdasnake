@@ -1,3 +1,4 @@
+import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
 import { Direction } from "@entities/Direction";
 import { Entity } from "@entities/Entity"
 import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshResponseDTO";
@@ -9,7 +10,7 @@ export class Snake implements Entity {
 	public direction: Direction;
 	public newDirection: Array<Direction>;
 	public maxBufferDirection: number;
-	public dead: boolean;
+	public dead: [boolean, GameDeadPlayerDTO | undefined];
 	public design: [string, string];
 
 
@@ -20,7 +21,7 @@ export class Snake implements Entity {
 		this.direction = direction;
 		this.newDirection = [direction];
 		this.maxBufferDirection = 3;
-		this.dead = false;
+		this.dead = [false, undefined];
 		this.design = design;
 	}
 
