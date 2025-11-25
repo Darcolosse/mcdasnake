@@ -94,6 +94,7 @@ onMounted(() => {
             :style="{ borderColor: settingManager.getElement('COLOR1') === 'custom1_' ? 'var(--color-lime-100)' : 'var(--color-sand-100)', background: settingManager.getValue('CUSTOMCOLOR1') }"
             @click="() => {
               customColorInput1?.click();
+              settingManager.changeColor(1, settingManager.getValue('CUSTOMCOLOR1'), true);
             }"
           >+</div>
           <input
@@ -131,7 +132,7 @@ onMounted(() => {
             :class="'default2_'+color.value === settingManager.getElement('COLOR2')
               ? 'border-4 bg-background-brand-primary '
               : 'border-2 bg-background-inverse-primary hover:bg-background-brand-primary/30'"
-            :style="{ borderColor: color.value === settingManager.getElement('COLOR2') ? 'var(--color-lime-100)' : 'var(--color-sand-100)', background: color.value }"
+            :style="{ borderColor: 'default2_'+color.value === settingManager.getElement('COLOR2') ? 'var(--color-lime-100)' : 'var(--color-sand-100)', background: color.value }"
             @click="settingManager.changeColor(2, color.value, false)"
 
           ></div>
@@ -144,6 +145,7 @@ onMounted(() => {
             :style="{ borderColor: settingManager.getElement('COLOR2') === 'custom2_' ? 'var(--color-lime-100)' : 'var(--color-sand-100)', background: settingManager.getValue('CUSTOMCOLOR2') }"
             @click="() => {
                 customColorInput2?.click();
+                settingManager.changeColor(2, settingManager.getValue('CUSTOMCOLOR2'), true);
               }"
           >+</div>
           <input
@@ -161,6 +163,7 @@ onMounted(() => {
     </div>
 
       <!-- Texture selection -->
+       <!--&& settingManager.isEnabled('HEAD')-->
       <div v-if="settingManager.getMode() === 'texture' " class="flex flex-col gap-2">
       <div v-if="settingManager.isEnabled('TEXTURE')" class="flex flex-col gap-2">
         <h3 class="text-xl text-content-brand-secondary">Textures</h3>

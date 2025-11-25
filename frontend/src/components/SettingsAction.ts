@@ -83,7 +83,13 @@ export class SettingsAction {
                 
                 break;
         }
-        this.preview?.show();
+        if (this.preview){
+            this.drawPreview();
+        }
+        else{
+            console.log("no preview avalaible");
+        }
+        
         console.log(this.mode.value, this.choice);
     }
 
