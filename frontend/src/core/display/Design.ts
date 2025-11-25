@@ -9,24 +9,34 @@ export const Graphism = {
 
 export class Design {
 
-    private color: string;
+    private color1: string | undefined;
+    private color2: string | undefined;
     private graphism: Graphism;
-    private head!: SpriteName;
+    private head!: SpriteName | undefined;
+    private texture!: SpriteName | undefined;
 
-    constructor(color: string, head : SpriteName, graphism : Graphism){
-        this.color = color;
+    constructor(color1: string, head : SpriteName, graphism : Graphism){
+        this.color1 = color1;
         this.head = head;
         this.graphism = graphism;
     }
 
     // ============================ Set ============================ \\
 
-    public setColor(color : string) : void {
-        this.color = color;
+    public setColor1(color : string) : void {
+        this.color1 = color;
     }
 
-    public setHead(head : SpriteName) : void {
+    public setColor2(color : string | undefined) : void {
+        this.color2 = color;
+    }
+
+    public setHead(head : SpriteName | undefined) : void {
         this.head = head;
+    }
+
+    public setTexture(texture : SpriteName| undefined) : void {
+        this.texture = texture;
     }
 
     public setGraphism(graphism : Graphism) : void {
@@ -35,11 +45,19 @@ export class Design {
 
     // ============================ Get ============================ \\
 
-    public getColor() : string{
-        return this.color
+    public getColor1() : string | undefined{
+        return this.color1;
     }
 
-    public getHead() : SpriteName{
+    public getColor2() : string | undefined{
+        return this.color2;
+    }
+
+    public getTexture() : SpriteName | undefined{
+        return this.texture;
+    }
+
+    public getHead() : SpriteName | undefined{
         return this.head;
     }
 

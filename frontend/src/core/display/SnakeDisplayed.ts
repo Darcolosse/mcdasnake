@@ -1,6 +1,7 @@
 import { Graphism, type Design } from './Design.ts';
 import { DisplayGame} from './DisplayGame.ts';
 import { EntityDisplayed } from './EntityDisplayed.ts';
+import type { SpriteName } from './SpriteManager.ts';
 
 type BoxSide = "TOP" | "RIGHT" | "BOTTOM" | "LEFT" | "UNKNOW";
 type BoxType = "QUEUE" | "BODY" | "HEAD" | "ALONE";
@@ -86,152 +87,226 @@ export class SnakeDisplayed extends EntityDisplayed {
 
   protected drawNormalGraphism(): void {
     if (this.boxes.length >= 2) {
-      this.drawBody("black", 0.9);
-      this.drawBody(this.design.getColor(), 0.8);
+      let ctx = this.setCtx({
+        size:0.9,
+        color1: "black",
+        color2: "black",
+        shapeCap: "round",
+        shapeJoin: "round",
+      });
+      if (ctx) {this.drawBody(ctx)};
+      ctx = this.setCtx({
+        size:0.8,
+        shapeCap: "round",
+        shapeJoin: "round",
+      });
+      if (ctx) {this.drawBody(ctx)};
       this.drawHead();
     }
   }
 
   protected drawLowGraphism(): void {
-    const ctx = this.display.getCtx();
-        const boxSize = this.display.getBoxSize();
-        ctx.fillStyle = this.design.getColor();
+    const ctx = this.setCtx();
+    const boxSize = this.display.getBoxSize();
 
-        let boxChange = this.getboxChange();
-        boxChange.forEach(box => {
-            this.animateBox(ctx, boxSize, box);
-        });
-        this.setFullAnimation(false);
+    let boxChange = this.getboxChange();
+    if (ctx){
+      boxChange.forEach(box => {
+        this.animateBox(ctx, boxSize, box);
+      });
+    }
+    
+    this.setFullAnimation(false);
   }
 
   // ============================ Methodes utile pour Affichage (Normal) ============================ \\
-
-  private drawBody(color: string, size : number) {
+  private setCtx(
+    {
+      size = 1,
+      color1 = this.design.getColor1(),
+      color2 = this.design.getColor2(),
+      texture = this.design.getTexture(),
+      shapeCap = undefined,
+      shapeJoin = undefined,
+    }: {
+      size?: number,
+      color1?: string,
+      color2?: string,
+      texture?: SpriteName,
+      shapeCap?: CanvasLineCap,
+      shapeJoin?: CanvasLineJoin,
+    } = {})
+    :CanvasRenderingContext2D | undefined
+    {
+    
     const ctx = this.display.getCtx();
     const boxSize = this.display.getBoxSize();
-    const startPoint = this.getMovedPoint(0);
-    const endPoint = this.getMovedPoint(this.boxes.length - 2);
-
+    
     if (ctx) {
       ctx.lineWidth = boxSize[0] * size;
-      ctx.lineJoin = "round";
-      ctx.lineCap = "round";
-      ctx.strokeStyle = color;
-
-      // texture
-      // const scale = this.display.getSprite("SCALE");
-      // if (scale){
-      //   const pattern = ctx.createPattern(scale, 'repeat');
-      //   if (pattern){
-      //     ctx.strokeStyle = pattern;
-      //   }
-      // }
-
-      // dégradé
-      // if (startPoint && endPoint){
-      //   const grad = ctx.createLinearGradient(startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
-      //   grad.addColorStop(0, this.design.getColor());
-      //   grad.addColorStop(1, "lime"); 
-      //   ctx.strokeStyle = grad;
-      // }
-
-      ctx.beginPath();
-      if (startPoint) {
-        ctx.moveTo(startPoint[0], startPoint[1]);
+      if (shapeJoin){
+        ctx.lineJoin = shapeJoin;
       }
-      for (let i = 1; i < this.boxes.length - 1; i++) {
-        const currentBox = this.boxes[i];
-        if (currentBox) {
-          const currentPoint = this.getMiddlePoint(currentBox);
-          ctx.lineTo(currentPoint[0], currentPoint[1]);
+      if (shapeCap){
+        ctx.lineCap = shapeCap;
+      }
+      
+      if (texture){
+        const scale = this.display.getSprite(texture);
+        if (scale){
+          const pattern = ctx.createPattern(scale, 'repeat');
+          if (pattern){
+            ctx.strokeStyle = pattern;
+            ctx.fillStyle = pattern;
+          }
         }
       }
-      if (endPoint) {
-        ctx.lineTo(endPoint[0], endPoint[1]);
+      else if (color1){
+        if (color2){
+          const startPoint = this.getMovedPoint(0);
+          const endPoint = this.getMovedPoint(this.boxes.length - 2);
+          if (startPoint && endPoint){
+            const grad = ctx.createLinearGradient(startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
+            grad.addColorStop(0, color1);
+            grad.addColorStop(1, color2);
+            ctx.strokeStyle = grad;
+            ctx.fillStyle = grad;
+          }
+        }
+        else{
+          ctx.strokeStyle = color1;
+          ctx.fillStyle = color1;
+        }
       }
-      ctx.stroke();
+      else{
+        ctx.strokeStyle = "black";
+        ctx.fillStyle = "black"
+      }
     }
+    return ctx;
   }
+
+  private drawBody(ctx : CanvasRenderingContext2D){
+      const startPoint = this.getMovedPoint(0);
+      const endPoint = this.getMovedPoint(this.boxes.length - 2);
+      if (ctx){
+        ctx.beginPath();
+        if (startPoint) {
+          ctx.moveTo(startPoint[0], startPoint[1]);
+        }
+        for (let i = 1; i < this.boxes.length - 1; i++) {
+          const currentBox = this.boxes[i];
+          if (currentBox) {
+            const currentPoint = this.getMiddlePoint(currentBox);
+            ctx.lineTo(currentPoint[0], currentPoint[1]);
+          }
+        }
+        if (endPoint) {
+          ctx.lineTo(endPoint[0], endPoint[1]);
+        }
+        ctx.stroke();
+      }
+    }
 
   private drawHead() {
     const ctx = this.display.getCtx();
     const boxSize = this.display.getBoxSize();
     const headName = this.design.getHead();
-    const head = this.display.getSprite(headName);
-    const headSize = 1;
-    const lastPoint = this.getMovedPoint(this.boxes.length-2, false, headSize);
-    const direction = this.vectorToRadian(this.getDirection(this.boxes.length-1));// - (Math.PI/2);
-    if (head && lastPoint) {
-      this.drawRotatedImage(ctx, head, lastPoint, [boxSize[0]*headSize,boxSize[1]*headSize], direction);
+    if (headName){
+      const head = this.display.getSprite(headName);
+      const headSize = 1;
+      const lastPoint = this.getMovedPoint(this.boxes.length-2, false, headSize);
+      const direction = this.vectorToRadian(this.getDirection(this.boxes.length-1));// - (Math.PI/2);
+      if (head && lastPoint) {
+        this.drawRotatedImage(ctx, head, lastPoint, [boxSize[0]*headSize,boxSize[1]*headSize], direction);
+      }
     }
+    
   }
 
   // ============================ Methodes utile pour Affichage (Low) ============================ \\
 
-  private animateBox(ctx: CanvasRenderingContext2D, boxSize: [number, number], box : [number, number]){
-        const boxInfo = this.getBoxInfo(box);
-        if (!boxInfo){
-            ctx.fillRect(
-              Math.ceil(box[0]*boxSize[0]), Math.ceil(box[1]*boxSize[1]),
-              Math.ceil(boxSize[0]), Math.ceil(boxSize[1])
-            );
-            return;
-        }
-        // calcul de la direction
-        let direction: BoxSide;
-        switch (boxInfo.type) {
-            case "QUEUE":
-                direction = boxInfo.lastSide;
-                break;
-            case "HEAD":
-                direction = boxInfo.firstSide;
-                break;
-            default:
-                direction = "UNKNOW";
-                break;
-        }
-        // calcul du rapport
-        let ratio = this.getRatio();
-        if ((direction === "RIGHT" || direction === "BOTTOM") && boxInfo.type === "HEAD"){
-            ratio = 1 - ratio;
-        }
-        if ((direction === "LEFT" || direction === "TOP") && boxInfo.type === "QUEUE"){
-            ratio = 1 - ratio;
-        }
-        // dessin
-        switch (direction) {
-            case "LEFT":
-                ctx.fillRect(
-                  Math.ceil(box[0]*boxSize[0]), Math.ceil(box[1]*boxSize[1]),
-                  Math.ceil(boxSize[0]*ratio), Math.ceil(boxSize[1])
-                );
-                break;
-            case "TOP":
-                ctx.fillRect(
-                  Math.ceil(box[0]*boxSize[0]), Math.ceil(box[1]*boxSize[1]),
-                  Math.ceil(boxSize[0]), Math.ceil(boxSize[1]*ratio)
-                );
-                break;
-            case "RIGHT":
-                ctx.fillRect(
-                  Math.ceil((box[0]+ratio)*boxSize[0]), Math.ceil(box[1]*boxSize[1]),
-                  Math.ceil((1-ratio)*boxSize[0]), Math.ceil(boxSize[1])
-                );
-                break;
-            case "BOTTOM":
-                ctx.fillRect(
-                  Math.ceil(box[0]*boxSize[0]), Math.ceil((box[1]+ratio)*boxSize[1]),
-                  Math.ceil(boxSize[0]), Math.ceil((1-ratio)*boxSize[1])
-                );
-                break;
-            default:
-                ctx.fillRect(
-                  Math.ceil(box[0]*boxSize[0]), Math.ceil(box[1]*boxSize[1]),
-                  Math.ceil(boxSize[0]), Math.ceil(boxSize[1])
-                );
-                break;
-        }
+  private animateBox(
+    ctx: CanvasRenderingContext2D,
+    boxSize: [number, number],
+    box: [number, number]
+) {
+    const boxInfo = this.getBoxInfo(box);
+
+    const x = Math.ceil(box[0] * boxSize[0]);
+    const y = Math.ceil(box[1] * boxSize[1]);
+    const w = Math.ceil(boxSize[0]);
+    const h = Math.ceil(boxSize[1]);
+
+    // Cas simple : aucun boxInfo => on dessine juste avec le style déjà défini
+    if (!boxInfo) {
+        ctx.fillRect(x, y, w, h);
+        return;
     }
+
+    // --- Calcul direction ---
+    let direction: BoxSide;
+
+    switch (boxInfo.type) {
+        case "QUEUE": direction = boxInfo.lastSide; break;
+        case "HEAD":  direction = boxInfo.firstSide; break;
+        default:      direction = "UNKNOW"; break;
+    }
+
+    // --- Ratio ---
+    let ratio = this.getRatio();
+
+    if ((direction === "RIGHT" || direction === "BOTTOM") && boxInfo.type === "HEAD") {
+        ratio = 1 - ratio;
+    }
+    if ((direction === "LEFT" || direction === "TOP") && boxInfo.type === "QUEUE") {
+        ratio = 1 - ratio;
+    }
+
+    // --- Dessin : seulement fillRect avec styles du ctx déjà préparé ---
+    switch (direction) {
+        case "LEFT":
+            ctx.fillRect(
+                x,
+                y,
+                Math.ceil(w * ratio),
+                h
+            );
+            break;
+
+        case "TOP":
+            ctx.fillRect(
+                x,
+                y,
+                w,
+                Math.ceil(h * ratio)
+            );
+            break;
+
+        case "RIGHT":
+            ctx.fillRect(
+                Math.ceil(x + w * ratio),
+                y,
+                Math.ceil(w * (1 - ratio)),
+                h
+            );
+            break;
+
+        case "BOTTOM":
+            ctx.fillRect(
+                x,
+                Math.ceil(y + h * ratio),
+                w,
+                Math.ceil(h * (1 - ratio))
+            );
+            break;
+
+        default:
+            ctx.fillRect(x, y, w, h);
+            break;
+    }
+}
+
 
     private getBoxInfo(box: [number, number]) : (BoxInfo | undefined){
             return this.boxesInfo.get(SnakeDisplayed.getKeyBoxInfo(box));
