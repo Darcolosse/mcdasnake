@@ -8,6 +8,8 @@ import { GameUpdateResponseDTO } from "@network/dto/responses/GameUpdateResponse
 import { PrismaClient } from '@prisma/client';
 import { ScoreBoard } from "@game/ScoreBoard";
 import { logger } from "@/app";
+import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
+import { Death } from "@/entities/Death";
 
 
 export class Game {
@@ -112,7 +114,6 @@ export class Game {
   }
 
   public GetGameSessionDuration(): number {
-    console.log("Getting game session duration: " + this.sessionDuration + "s");
     return this.sessionDuration;
   }
 
@@ -143,14 +144,15 @@ export class Game {
     logger.debug("Checking collisions...");
 
     // # Shortcuts #
-    const handlingDeath = (snake: Snake) => {
-      if(!snake.dead) {
-        snake.dead = true;
+    const handlingDeath = (snake: Snake, otherSnake: Snake|undefined, reason: string) => {
+      if(!snake.dead[0]) {
+        snake.dead[0] = true;
+        snake.dead[1] = new GameDeadPlayerDTO(snake.id, "snake", otherSnake?.id ??  "", "snake", reason);
         logger.debug("Updating database score of snake " + snake.name);
       }
     }
     const handlingEating = (snake: Snake, eaten: Entity) => {
-      gameRefresh.entities.removed.push(eaten.id);
+      gameRefresh.entities.removed.push(new GameDeadPlayerDTO(eaten.id, "apple", snake.id, "snake", Death.APPLE_COLLISION));
       this.removeApple(eaten.id);
 
       logger.debug("Updating database score of snake " + snake.name);
@@ -175,7 +177,7 @@ export class Game {
 
       if (this.isOutOfBounds(head)) {
         logger.info(`${snake.name} hit the border (${this.cols}, ${this.rows}) at ${head}`);
-        handlingDeath(snake);
+        handlingDeath(snake, undefined, Death.BORDER);
       } else {
 
         // Only checking if head collided on an apple or the body of another snake
@@ -192,7 +194,12 @@ export class Game {
             if (entityCollided instanceof Snake) {
               const collided_snake = entityCollided as Snake;
               logger.info(snake.name + " died colliding on " + collided_snake.name + "'s body. Last registered length of " + snake.cases.length);
-              handlingDeath(snake);
+              
+              if (snake.id === collided_snake.id) {
+                handlingDeath(snake, undefined, Death.SELF_COLLISION);
+              } else {
+                handlingDeath(snake, collided_snake, Death.SNAKE_COLLISION);
+              }
               if (collided_snake.id !== snake.id) {
                 this.scoreBoard.updateScore(collided_snake.id, 1000, 1, 0);
               }
@@ -219,15 +226,15 @@ export class Game {
             // If colliding, they are both dead so we don't run any futile checks on the other snake later
             if(head[0] == other_snake_head[0] && head[1] == other_snake_head[1]) {
               logger.info(snake.name + " head collided with the head of " + other_snake.name);
-              handlingDeath(snake);
-              handlingDeath(other_snake);
+              handlingDeath(snake, other_snake, Death.SNAKE_COLLISION);
+              handlingDeath(other_snake, snake, Death.SNAKE_COLLISION);
             }
           }
         }
       }
-      if (snake.dead) {
+      if (snake.dead[0]) {
         this.snakes.delete(snake.id);
-        gameRefresh.entities.removed.push(snake.id);
+        gameRefresh.entities.removed.push(snake.dead[1]!);
 
         const index = gameRefresh.entities.snakes.indexOf(snake);
         if (index > -1) {
@@ -244,7 +251,6 @@ export class Game {
     cases.forEach((_case) => {
       const key = this.createCollideKey(_case);
       const entityAtKey = entityMap.get(key);
-
       if (entityAtKey) {
         onCollision(entityAtKey);
       }     

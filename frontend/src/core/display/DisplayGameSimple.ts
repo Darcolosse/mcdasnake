@@ -30,6 +30,14 @@ export class DisplayGameSimple extends DisplayGame{
     ];
   }
 
+  /**
+   * @returns Renvoie la taille en pixel d'une case de jeu
+   */
+  public setCanvas(canvas: HTMLCanvasElement): void {
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+  }
+
   // ========================= Override ============================ \\
 
   public getCtx(): CanvasRenderingContext2D {
