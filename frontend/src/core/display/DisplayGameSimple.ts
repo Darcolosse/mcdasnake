@@ -51,7 +51,8 @@ export class DisplayGameSimple extends DisplayGame{
   // ========================= Other ============================ \\
 
   public setEntity2(id: string, entity: EntityDisplayed): void {
-    this.setEntity(id, entity);
+    this.setNewEntity(id, entity);
+    console.log(this.entities);
   }
 
 }
