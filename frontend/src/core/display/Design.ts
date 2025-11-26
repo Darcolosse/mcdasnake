@@ -4,7 +4,8 @@ export type Graphism = (typeof Graphism)[keyof typeof Graphism];
 export const Graphism = {
   VERY_LOW:"VERY_LOW",
   LOW:"LOW",
-  NORMAL:"NORMAL"
+  NORMAL:"NORMAL",
+  MULTI:"MULTI"
 } as const;
 
 export class Design {

@@ -4,7 +4,6 @@ import { Design, Graphism } from '../core/display/Design';
 import { SnakeDisplayed } from '../core/display/SnakeDisplayed';
 import { CookieType, getCookiePlus, setCookie } from '../util/cookies';
 import type { SpriteName } from '../core/display/SpriteManager';
-import { reactive } from 'vue'
 
 export interface colorInterface{
     name:string,
@@ -31,6 +30,8 @@ export const SettingName = {
   TEXTURE:"TEXTURE",
   HEAD:"HEAD",
 } as const;
+
+
 export type SettingName = typeof SettingName[keyof typeof SettingName];
 
 export class SettingsAction {
@@ -49,7 +50,6 @@ export class SettingsAction {
     constructor(){
         this.design = new Design("white","HEAD_CLASSIC","NORMAL");
         this.loadCookieParameter();
-        console.log(this.choice);
     }
 
     public getMode() : string{
@@ -89,8 +89,6 @@ export class SettingsAction {
         else{
             console.log("no preview avalaible");
         }
-        
-        console.log(this.mode.value, this.choice);
     }
 
     public setCanvas(canvas: HTMLCanvasElement){
@@ -110,11 +108,9 @@ export class SettingsAction {
     public loadCookieParameter(){
         const raw = getCookiePlus(CookieType.Design);
         let defaultValue = true;
-        console.log("trying load ",raw);
         if (raw) {
             try {
                 this.choice = SettingsAction.parseChoice(raw);
-                console.log("load finish ",this.choice);
                 defaultValue = false;
                 this.updateDesign();
                 
@@ -180,7 +176,6 @@ export class SettingsAction {
     }
 
     public applyChanges() {
-        console.log('Applied settings:', this.stringifyChoice());
         setCookie(CookieType.Design, this.stringifyChoice(), 1)
     }
 
@@ -188,7 +183,6 @@ export class SettingsAction {
 
     public static getStringDesign(SettingCookie : string) : string {
         const settingChoice = SettingsAction.parseChoice(SettingCookie);
-        console.log(settingChoice);
         const designObject = SettingsAction.createDesignCookieObject(settingChoice);
         return JSON.stringify(designObject);
     }
@@ -297,7 +291,6 @@ export class SettingsAction {
                     ? this.choice[SettingName.HEAD].value as SpriteName
                     : undefined
             );
-            console.log("design update", this.design);
     }
 
 
