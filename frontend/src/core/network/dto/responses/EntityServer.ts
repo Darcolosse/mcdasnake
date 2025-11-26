@@ -1,14 +1,16 @@
+import type { GameDeadPlayerResponseDTO } from "./GamePlayerDead";
+
 export interface EntityServer {
   id: string;
   name: string;
   boxes: [number,number][];
-  design: [string, string];
+  design: string;
 }
 
 export interface EntitiesRefresh{
   snakes : EntityServer[],
   apples : EntityServer[],
-  removed : string[]
+  removed : GameDeadPlayerResponseDTO[]
 }
 
 export interface EntitiesUpdate{

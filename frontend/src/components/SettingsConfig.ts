@@ -35,4 +35,4 @@ export const textures = [
   { name: 'SCALE2', src: '/src/core/display/sprite/scale2.jpg' },
 ]
 
-export const graphicsLevels = ["VERY_LOW", "LOW", "NORMAL"];
+export const graphicsLevels = ["VERY_LOW", "LOW", "NORMAL", "MULTI"];

@@ -60,8 +60,7 @@ export class GameManager {
     const design = SettingsAction.getStringDesign(setting);
     this.handleClientEvent(new GameAddPlayerDTO(
       getCookie(CookieType.Username) as string,
-      design,
-      ""
+      design
     ))
     this.eventManager.startListening()
     this.interfaceManager.restrictRespawn()

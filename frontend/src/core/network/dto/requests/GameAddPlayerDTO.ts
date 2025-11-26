@@ -4,10 +4,10 @@ export class GameAddPlayerDTO implements DTO {
   type = DTOType.AddPlayer;
 
   public name: string;
-  public design: [string, string];
+  public design: string;
 
-  constructor(name: string, color: string, headSprite: string) {
+  constructor(name: string, design: string) {
     this.name = name;
-    this.design = [color, headSprite];
+    this.design = design;
   }
 }

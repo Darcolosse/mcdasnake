@@ -9,6 +9,7 @@ import type { GameRefreshDTO } from '../network/dto/responses/GameRefresh.ts';
 import { SnakeDisplayed } from './SnakeDisplayed.ts';
 import { CookieType, getCookie } from '../../util/cookies.ts';
 import { SettingsAction } from '../../components/SettingsAction.ts';
+import type { GameDeadPlayerResponseDTO } from '../network/dto/responses/GamePlayerDead.ts';
 
 type EntityType = "SNAKE" | "APPLE" | "ENTITY";
 
@@ -99,7 +100,13 @@ export class DisplayGame {
     }
     
     if ("removed" in dto.entities){
-      this.removeEntities(dto.entities.removed);
+      const entitiesRemoved = dto.entities.removed;
+      entitiesRemoved.forEach(entityRemoved => {
+        console.log("try to remove", entityRemoved.deadPlayerId);
+        console.log(entityRemoved);
+        this.removeEntity(entityRemoved.deadPlayerId);
+      });
+      //this.removeEntities(dto.entities.removed);
     }
 
     this.setEntities("SNAKE", snakes);
@@ -159,11 +166,13 @@ export class DisplayGame {
     });
   }
 
-  private removeEntities(ids: string[]){
-    ids.forEach(id => {
-      this.removeEntity(id);
-    });
-  }
+  // private removeEntities(entityRemoved: GameDeadPlayerResponseDTO[]){
+  //   newids = entityRemoved.playerId;
+
+  //   ids.forEach(id => {
+  //     this.removeEntity(id);
+  //   });
+  // }
 
   private removeEntity(id: string){
     const oldEntity = this.entities.get(id);
@@ -296,7 +305,7 @@ export class DisplayGame {
     const DEFAULT_COLOR = "lightblue";
     const DEFAULT_HEAD: SpriteName = "HEAD_CLASSIC";
 
-    const [design, useless] = entity.design ?? [];
+    const design  = entity.design ?? "";
     try{
       
       if (design){
