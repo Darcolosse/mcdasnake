@@ -23,36 +23,41 @@ export class SnakeEvent {
 
   private threshold: number = 100;
   private start : [number, number] = [0, 0];
+
+  private boundEventInput: (e: KeyboardEvent) => void;
+  private boundEventOutput: (e: KeyboardEvent) => void;
+  private boundEventTouchstart: (e: TouchEvent) => void;
+  private boundEventTouchmove: (e: TouchEvent) => void;
   
   constructor(eventManager: EventManager){
     this.eventManager = eventManager
     this.lastDirection = null
+
+    
+    this.boundEventInput = this.eventInput.bind(this);
+    this.boundEventOutput = this.eventOutput.bind(this);
+    this.boundEventTouchstart = this.eventTouchstart.bind(this);
+    this.boundEventTouchmove = this.eventTouchmove.bind(this);
   }
 
   // ============================ Pullic methods ============================ \\
 
-  public listen() : void {
-    // keyboard
-    document.addEventListener('keydown', this.eventInput.bind(this));
-    document.addEventListener('keyup', this.eventOutput.bind(this));
+  public listen(): void {
+    document.addEventListener('keydown', this.boundEventInput);
+    document.addEventListener('keyup', this.boundEventOutput);
+    document.addEventListener('touchstart', this.boundEventTouchstart);
+    document.addEventListener('touchmove', this.boundEventTouchmove, { passive: false });
+  }
 
-    // mobile
-    document.addEventListener('touchstart', this.eventTouchstart.bind(this));
-    document.addEventListener('touchmove', this.eventTouchmove.bind(this), { passive: false });
+  public stopListening(): void {
+    document.removeEventListener('keydown', this.boundEventInput);
+    document.removeEventListener('keyup', this.boundEventOutput);
+    document.removeEventListener('touchstart', this.boundEventTouchstart);
+    document.removeEventListener('touchmove', this.boundEventTouchmove);
   }
 
   public clearSavedInputs() {
     this.lastDirection = null
-  }
-
-  public stopListening() : void {
-    // keyboard
-    document.removeEventListener('keydown', this.eventInput);
-    document.removeEventListener('keyup', this.eventOutput);
-
-    // mobile
-    document.removeEventListener('touchstart', this.eventTouchstart);
-    document.removeEventListener('touchmove', this.eventTouchmove);
   }
 
   // ============================ Call Mediator ============================ \\
