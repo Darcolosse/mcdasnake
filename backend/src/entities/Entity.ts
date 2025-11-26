@@ -1,13 +1,15 @@
 import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
 
+//export type Position = [x: number, y: number];
+
 export interface Entity {
-    id: string;
+    readonly id: string;
+    readonly name: string;
+    readonly design: string;
+
     cases: [number, number][];
-    name: string;
-    dead: [boolean, GameDeadPlayerDTO | undefined];
-    design: [string, string];
+    deathState: GameDeadPlayerDTO | null;
 
     getHead(): [number, number];
     getBody(): [number, number][];
 }
-

@@ -5,24 +5,27 @@ import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshRespon
 
 export class Snake implements Entity {
 	public readonly id: string;
-	public readonly cases: [number, number][];
 	public readonly name: string;
+	public readonly design: string;
+
+	public cases: [number, number][];
+	public deathState: GameDeadPlayerDTO | null;
+
 	public direction: Direction;
 	public newDirection: Array<Direction>;
 	public maxBufferDirection: number;
-	public dead: [boolean, GameDeadPlayerDTO | undefined];
-	public design: [string, string];
 
-
-	constructor(id: string, name: string, cases: [number, number][], direction: Direction, design: [string, string] = ["LIME", "HEAD_CLASSIC"]) {
+	constructor(id: string, name: string, cases: [number, number][], direction: Direction, design: string = "LIME") {
 		this.id = id;
 		this.name = name;
+		this.design = design;
+
 		this.cases = cases;
+		this.deathState = null;
+
 		this.direction = direction;
 		this.newDirection = [direction];
 		this.maxBufferDirection = 3;
-		this.dead = [false, undefined];
-		this.design = design;
 	}
 
 	public move(entities: Map<string, Entity>, gameRefresh: GameRefreshResponseDTO) {

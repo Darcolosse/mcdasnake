@@ -8,12 +8,14 @@ export class GameDeadPlayerResponseDTO implements DTO {
     readonly killerId: string;
     readonly typeKiller: string;
     readonly reason: string;
+    readonly deathMessage: string;
 
-    constructor(deadPlayerId: string, typeDeadPlayer: string, killerId: string, typeKiller: string, reason: string = "YOU ARE DEAD.") {
-        this.deadPlayerId = deadPlayerId;
-        this.typeDeadPlayer = typeDeadPlayer;
-        this.killerId = killerId;
-        this.typeKiller = typeKiller;
-        this.reason = reason;
+    constructor(json: any) {
+        this.deadPlayerId = json.deadPlayerId;
+        this.typeDeadPlayer = json.typeDeadPlayer;
+        this.killerId = json.killerId;
+        this.typeKiller = json.typeKiller;
+        this.reason = json.reason;
+        this.deathMessage = json.deathMessage;
     }
 }
