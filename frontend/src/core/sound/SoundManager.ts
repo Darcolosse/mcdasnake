@@ -49,18 +49,14 @@ export class SoundManager {
   }
 
   public play(sound: Sounds) {
-    console.log(sound)
     const audio = this.audioInstances.get(sound)
     const lastTimePlayed = this.antiDuplicateSounds.get(sound)
-    console.log(audio, lastTimePlayed)
     if(!audio || !lastTimePlayed) return
 
     const now = performance.now()
     const tooSoon = (now - lastTimePlayed) < audio.duration * 1000
-    console.log(now, now - lastTimePlayed, tooSoon, audio.duration * 1000)
     if(tooSoon) return
 
-    console.log("Is gonna play")
     this.antiDuplicateSounds.set(sound, now)
     audio.currentTime = 0
     audio.play()

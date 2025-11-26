@@ -27,13 +27,27 @@ export class NetworkManager {
     })
   }
 
-  public disconnect() {
-    if(!this.socket) {
-      this.gameManager.raiseError("Tried to disconnect from the game with a non initialized socket.");
-      return;
-    } 
-    this.gameManager.log(this, `Closing websocket connection to ${this.websocketURL}`)
-    this.socket.close()
+  public disconnect(): Promise<void> {
+    return new Promise((resolve) => {
+      const socket = this.socket; // Store reference locally
+
+      if(!socket) {
+          this.gameManager?.raiseError("Tried to disconnect from the game with a non initialized socket.")
+          resolve()
+          return;
+      } 
+
+      this.gameManager.log(this, `Closing websocket connection to ${this.websocketURL}`)
+
+      // Wait for the close event on the local reference
+      socket.addEventListener('close', () => {
+          this.gameManager.log(this, "Websocket connection confirmed closed.");
+          resolve();
+      }, { once: true });
+      
+      // Initiate the close process
+      socket.close(); 
+    })
   }
 
   public emit(message: DTO) {

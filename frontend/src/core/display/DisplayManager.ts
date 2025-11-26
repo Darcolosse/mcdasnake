@@ -64,6 +64,7 @@ export class DisplayManager {
   public destroy() {
     this.gameManager.log(this, "Cleaning")
     this.background = this.bgCtx = this.canvas = this.ctx = null
+    this.displayGame.stopLoop()
   }
 
   // =========================== Show ============================ \\

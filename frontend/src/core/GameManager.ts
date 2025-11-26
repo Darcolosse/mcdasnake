@@ -48,11 +48,12 @@ export class GameManager {
     }
   }
 
-  public close() {
+  public async close() {
     this.log(this, "Closing")
     this.eventManager.stopListening()
     this.displayManager.destroy()
-    this.networkManager.disconnect()
+    await this.networkManager.disconnect()
+    this.log(this, "Close complete")
   }
 
   public askServerForRespawn() {

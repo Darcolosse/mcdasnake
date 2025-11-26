@@ -12,9 +12,8 @@ const respawnAuthorisation = ref(false)
 const lastDeathMessageRef = ref('')
 const refScoreBoard = ref<Array<[string, number, number, number]> | null>(null)
 
-const interfaceManager = new InterfaceManager(respawnAuthorisation, lastDeathMessageRef, refScoreBoard)
-const gameManager = new GameManager(interfaceManager)
-interfaceManager.setGameManager(gameManager)
+let interfaceManager: InterfaceManager
+let gameManager: GameManager
 
 function onKeyDown(e: KeyboardEvent) {
   // Respawn
@@ -29,6 +28,10 @@ function onKeyDown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  interfaceManager = new InterfaceManager(respawnAuthorisation, lastDeathMessageRef, refScoreBoard)
+  gameManager = new GameManager(interfaceManager)
+  interfaceManager.setGameManager(gameManager)
+
   const antiSpamExists = getCookie(CookieType.AntispamServer)
   const username = getCookie(CookieType.Username)
   if(!antiSpamExists && username) {
@@ -44,7 +47,11 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onKeyDown)
 })
 
-function goToHome() {
+async function goToHome() {
+  if (gameManager) {
+    document.removeEventListener('keydown', onKeyDown)
+    await gameManager.close()
+  }
   router.push(homeRoute.path);
 }
 
