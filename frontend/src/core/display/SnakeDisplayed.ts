@@ -32,7 +32,7 @@ export class SnakeDisplayed extends EntityDisplayed {
           zindex,
           animationTime,
         );
-        this.boxesInfo = new Map();;
+        this.boxesInfo = new Map();
         this.setDesign(design);
       }
 
@@ -54,18 +54,12 @@ export class SnakeDisplayed extends EntityDisplayed {
   public setGraphism(graphism : Graphism){
     if (graphism === Graphism.LOW){
       this.boxesInfo.clear();
-      for(let i=0; i<this.boxes.length; i++){
-            const current = this.boxes[i];
-            if (current !== undefined){
-                this.initBoxInfo(current);
-            }
-        }
+      this.initBoxesInfo();
     }
   }
 
   public animate(time: number = this.lastAnimation): void {
     this.updateModel(time);
-    this.updateAnimationTime(time);
     const graphism = this.design.getGraphism();
         switch (graphism) {
             case Graphism.VERY_LOW:
@@ -114,10 +108,16 @@ export class SnakeDisplayed extends EntityDisplayed {
     if (ctx){
       boxChange.forEach(box => {
         this.animateBox(ctx, boxSize, box);
+        this.display.removeModifiedBox(box);
       });
     }
     
     this.setFullAnimation(false);
+  }
+
+  public setBoxes(boxes: [number, number][]){
+    super.setBoxes(boxes);
+    this.initBoxesInfo();
   }
 
   // ============================ Methodes utile pour Affichage (Normal) ============================ \\
@@ -165,23 +165,22 @@ export class SnakeDisplayed extends EntityDisplayed {
         if (color2){
           const startPoint = this.getMovedPoint(0);
           const endPoint = this.getMovedPoint(this.boxes.length - 2);
-          if (startPoint && endPoint){
+          if (startPoint && endPoint && (startPoint[0] !== endPoint[0] || startPoint[1] !== endPoint[1])){
             const grad = ctx.createLinearGradient(startPoint[0], startPoint[1], endPoint[0], endPoint[1]);
             grad.addColorStop(0, color1);
             grad.addColorStop(1, color2);
             ctx.strokeStyle = grad;
             ctx.fillStyle = grad;
+            return ctx;
           }
         }
-        else{
-          ctx.strokeStyle = color1;
-          ctx.fillStyle = color1;
-        }
+        ctx.strokeStyle = color1;
+        ctx.fillStyle = color1;
+        return ctx;
       }
-      else{
-        ctx.strokeStyle = "black";
-        ctx.fillStyle = "black"
-      }
+      ctx.strokeStyle = "black";
+      ctx.fillStyle = "black"
+      return ctx;
     }
     return ctx;
   }
@@ -233,10 +232,10 @@ export class SnakeDisplayed extends EntityDisplayed {
 ) {
     const boxInfo = this.getBoxInfo(box);
 
-    const x = Math.ceil(box[0] * boxSize[0]);
-    const y = Math.ceil(box[1] * boxSize[1]);
-    const w = Math.ceil(boxSize[0]);
-    const h = Math.ceil(boxSize[1]);
+    const x = box[0] * boxSize[0];
+    const y = box[1] * boxSize[1];
+    const w = boxSize[0];
+    const h = boxSize[1];
 
     // Cas simple : aucun boxInfo => on dessine juste avec le style déjà défini
     if (!boxInfo) {
@@ -266,39 +265,20 @@ export class SnakeDisplayed extends EntityDisplayed {
     // --- Dessin : seulement fillRect avec styles du ctx déjà préparé ---
     switch (direction) {
         case "LEFT":
-            ctx.fillRect(
-                x,
-                y,
-                Math.ceil(w * ratio),
-                h
-            );
+            ctx.fillRect(x, y, w * ratio, h);
             break;
 
         case "TOP":
-            ctx.fillRect(
-                x,
-                y,
-                w,
-                Math.ceil(h * ratio)
-            );
+            ctx.fillRect(x, y, w, h * ratio);
             break;
 
         case "RIGHT":
             ctx.fillRect(
-                Math.ceil(x + w * ratio),
-                y,
-                Math.ceil(w * (1 - ratio)),
-                h
-            );
+                x + w * ratio, y, w * (1 - ratio), h);
             break;
 
         case "BOTTOM":
-            ctx.fillRect(
-                x,
-                Math.ceil(y + h * ratio),
-                w,
-                Math.ceil(h * (1 - ratio))
-            );
+            ctx.fillRect(x, y + h * ratio,w,h * (1 - ratio));
             break;
 
         default:
@@ -328,6 +308,15 @@ export class SnakeDisplayed extends EntityDisplayed {
             const key = SnakeDisplayed.getKeyBoxInfo(box);
             boxInfo[attribut] = value;
             this.boxesInfo.set(key, boxInfo);
+        }
+
+        private initBoxesInfo(){
+          for(let i=0; i<this.boxes.length; i++){
+            const current = this.boxes[i];
+            if (current !== undefined){
+                this.initBoxInfo(current);
+            }
+          }
         }
     
     
@@ -416,16 +405,6 @@ export class SnakeDisplayed extends EntityDisplayed {
             return dirs[SnakeDisplayed.getKeyBoxInfo(vector)] ?? "UNKNOW";
         }
     
-        private static sideToVector (lastSide: BoxSide): [number, number] {
-            switch (lastSide) {
-                case "TOP": return [0,-1];
-                case "BOTTOM": return [0,1];
-                case "LEFT": return [-1,0];
-                case "RIGHT": return [1,0];
-                default: return [0,0];
-            }
-        }
-    
         private indexOfBox(box : [number, number]) : number{
             return this.boxes.findIndex(b => b[0] === box[0] && b[1] === box[1]);
         }
@@ -488,7 +467,6 @@ export class SnakeDisplayed extends EntityDisplayed {
         this.setAttributBoxInfo(newTail, "type", newType);
       }
     } 
-
     //return changement
     return boxChange;
   }

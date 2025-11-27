@@ -1,3 +1,5 @@
+import { SettingsAction } from "../components/SettingsAction";
+
 export const CookieType = {
   Username: "username",
   Design: "design",
@@ -41,12 +43,7 @@ export function getDefaultValue(cookieType: string) {
         return "newPlayer";
 
     case "design":
-      const design = {
-        color: 'rgb(255, 128, 135)',
-        head: 'HEAD_CLASSIC',
-        graphics: 'NORMAL',
-      }
-      return JSON.stringify(design);
+      return SettingsAction.getCookie();
   
     default:
       break;
