@@ -1,4 +1,4 @@
-import { Entity } from "@entities/Entity";
+import { Entity, EntityType } from "@entities/Entity";
 import { Snake } from "@entities/Snake";
 import { Apple } from "@entities/Apple";
 import { Direction } from "@entities/Direction";
@@ -151,14 +151,14 @@ export class Game {
     // # Shortcuts #
     const handlingDeath = (snake: Snake, otherSnake: Snake|undefined, reason: string, deathMessage: string="") => {
       if(!snake.deathState) {
-        let type = "snake";
-        if (reason === Death.BORDER) {type = "border";}
-        snake.deathState = new GameDeadPlayerDTO(snake.id, type, otherSnake?.id ??  "", "snake", reason, deathMessage);
+        let type: EntityType = EntityType.SNAKE;
+        if (reason === Death.BORDER) {type = EntityType.BORDER;}
+        snake.deathState = new GameDeadPlayerDTO(snake.id, snake.type, otherSnake?.id ??  "", type, reason, deathMessage);
         logger.debug("Updating database score of snake " + snake.name);
       }
     }
     const handlingEating = (snake: Snake, eaten: Entity) => {
-      gameRefresh.entities.removed.push(new GameDeadPlayerDTO(eaten.id, "apple", snake.id, "snake", Death.APPLE_COLLISION, `${snake.name} ate an apple!`));
+      gameRefresh.entities.removed.push(new GameDeadPlayerDTO(eaten.id, eaten.type, snake.id, snake.type, Death.APPLE_COLLISION, `${snake.name} ate an apple!`));
       this.removeApple(eaten.id);
 
       logger.debug("Updating database score of snake " + snake.name);
