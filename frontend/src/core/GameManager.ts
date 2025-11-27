@@ -58,6 +58,7 @@ export class GameManager {
 
   public askServerForRespawn() {
     const setting = getCookiePlus(CookieType.Design) as string
+    console.log("cookieplus", setting)
     const design = SettingsAction.getStringDesign(setting);
     this.handleClientEvent(new GameAddPlayerDTO(
       getCookie(CookieType.Username) as string,
@@ -91,10 +92,12 @@ export class GameManager {
         this.eventManager.clearSavedInputs()
         this.eventManager.stopListening()
         this.interfaceManager.permitToRespawn(eventDTO as GameDeadPlayerResponseDTO)
+        this.soundManager.play(Sounds.DEAD)
         break;
       case DTOType.GameRefresh :
         this.displayManager.refreshGame(eventDTO as GameRefreshDTO)
         this.interfaceManager.updateScoreboard(eventDTO as GameRefreshDTO)
+        this.soundManager.onScenario(eventDTO as GameRefreshDTO)
         break;
       case DTOType.GameUpdate :
         this.interfaceManager.setEntireScoreboard(eventDTO as GameUpdateResponseDTO)

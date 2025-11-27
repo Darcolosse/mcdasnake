@@ -1,8 +1,14 @@
 import type { GameManager } from "../GameManager"
+import type { GameRefreshDTO } from "../network/dto/responses/GameRefresh"
+import type { EntityType } from "../display/DisplayGame"
 
 export const Sounds = {
   APPLE: "apple.mp3",
   GAME_START: "start_game.mp3",
+  GAME_END: "end_game.mp3",
+  DEAD: "dead.mp3",
+  SOMEONE_DIE: "someone_die.mp3",
+  SPAWN: "spawn.mp3",
 }
 
 export type Sounds = typeof Sounds[keyof typeof Sounds]
@@ -60,6 +66,23 @@ export class SoundManager {
     this.antiDuplicateSounds.set(sound, now)
     audio.currentTime = 0
     audio.play()
+  }
+
+  public onScenario(dto: GameRefreshDTO) {
+    dto.entities.snakes.forEach(_ => {
+    })
+    dto.entities.removed.forEach(deadDto => {
+      console.log(deadDto)
+      switch(deadDto.typeDeadPlayer as EntityType) {
+        case "SNAKE":
+          this.play(Sounds.SOMEONE_DIE)
+          break;
+        case "APPLE":
+          console.log("ICIIIIIIIIIIIIII")
+          this.play(Sounds.SPAWN)
+          break;
+      }
+    })
   }
 
 }

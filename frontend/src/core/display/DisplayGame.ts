@@ -10,7 +10,7 @@ import { SnakeDisplayed } from './SnakeDisplayed.ts';
 import { CookieType, getCookie } from '../../util/cookies.ts';
 import { SettingsAction } from '../../components/SettingsAction.ts';
 
-type EntityType = "SNAKE" | "APPLE" | "ENTITY";
+export type EntityType = "SNAKE" | "APPLE" | "ENTITY";
 
 export class DisplayGame {
 
@@ -99,7 +99,7 @@ export class DisplayGame {
     }
     
     if ("removed" in dto.entities){
-      this.removeEntities(dto.entities.removed);
+      this.removeEntities(dto.entities.removed.map((dto) => dto.entityId));
     }
 
     this.setEntities("SNAKE", snakes);
@@ -161,6 +161,7 @@ export class DisplayGame {
 
   private removeEntities(ids: string[]){
     ids.forEach(id => {
+      console.log("removing", id)
       this.removeEntity(id);
     });
   }

@@ -110,7 +110,7 @@ async function goToHome() {
         <div
           v-if="refScoreBoard && refScoreBoard.length > 0"
           v-for="(entry, index) in refScoreBoard"
-          :key="entry[0]"
+          :key="index"
           class="flex flex-row items-center rounded-xl gap-5 p-2"
         >
           <!-- Rank / Index -->

@@ -1,3 +1,5 @@
+import { GameDeadPlayerResponseDTO } from "./GamePlayerDead";
+
 export interface EntityServer {
   id: string;
   name: string;
@@ -8,7 +10,7 @@ export interface EntityServer {
 export interface EntitiesRefresh{
   snakes : EntityServer[],
   apples : EntityServer[],
-  removed : string[]
+  removed : GameDeadPlayerResponseDTO[]
 }
 
 export interface EntitiesUpdate{
@@ -20,7 +22,7 @@ export function EntitiesRefreshLoader(entities: any) : EntitiesRefresh{
   return {
     snakes: EntitiesLoader(entities.snakes),
     apples: EntitiesLoader(entities.apples),
-    removed: entities.removed
+    removed: entities.removed.map((json: any) => new GameDeadPlayerResponseDTO(json))
   }
 }
 

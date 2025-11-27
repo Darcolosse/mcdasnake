@@ -3,11 +3,17 @@ import { DTOType, type DTO } from "../DTO";
 export class GameDeadPlayerResponseDTO implements DTO {
   type = DTOType.GameDeadPlayer;
 
-  readonly playerId: string;
+  readonly entityId: string;
   readonly reason: string;
+  readonly typeDeadPlayer: string;
+  readonly killerId: string;
+  readonly typeKiller: string;
 
   constructor(json: any) {
-    this.playerId = json.playerId;
+    this.entityId = json.deadPlayerId;
     this.reason = json.reason;
+    this.typeDeadPlayer = json.typeDeadPlayer;
+    this.killerId = json.killerId;
+    this.typeKiller = json.typeKiller;
   }
 }
