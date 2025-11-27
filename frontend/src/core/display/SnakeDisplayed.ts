@@ -79,8 +79,9 @@ export class SnakeDisplayed extends EntityDisplayed {
             case Graphism.NORMAL:
                 this.drawNormalGraphism();
                 break;
-        
+            
             default:
+                this.drawNormalGraphism();
                 break;
         }
   }
@@ -141,7 +142,6 @@ export class SnakeDisplayed extends EntityDisplayed {
     
     const ctx = this.display.getCtx();
     const boxSize = this.display.getBoxSize();
-    
     if (ctx) {
       ctx.lineWidth = boxSize[0] * size;
       if (shapeJoin){

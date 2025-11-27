@@ -32,7 +32,6 @@ export class DisplayGame {
 
     // graphism parameter
     this.graphism = this.getGraphismFromCookie();
-    console.log(this.graphism);
   }
 
   // ============================ Get ============================ \\
@@ -92,7 +91,6 @@ export class DisplayGame {
   public refresh(dto : GameRefreshDTO | GameUpdateResponseDTO){
     const snakes = dto.entities.snakes;
     const apples = dto.entities.apples;
-    console.log(apples)
 
     if ("speed" in dto){
       this.gameSpeed = dto.speed;
@@ -120,41 +118,29 @@ export class DisplayGame {
       //const entityName = entity.name;
 
       if (entityID && entityBoxes) {
-        let entityObject: EntityDisplayed;
+
+        let entitySpeed = this.gameSpeed;
+        let design = undefined;
+        let zindex = 0;
+
         switch (entityType) {
           case ("SNAKE"):
-            const design = this.getEntityDesign(entity);
-            console.log(design);
-            entityObject = new SnakeDisplayed(
-              this,
-              entityBoxes,
-              this.gameSpeed,
-              design,
-              1
-            );
+            design = this.getEntityDesign(entity);
+            zindex = 1;
             break;
           case ("APPLE"):
-            entityObject = new AppleDisplayed(
-              this,
-              entityBoxes,
-              1000,
-              new Design("red", SpriteName.APPLE, this.graphism),
-              0,
-            );
+            entitySpeed = 1000;
+            design = new Design("red", SpriteName.APPLE, this.graphism);
             break;
-
           default:
-            console.log("default")
-            entityObject = new EntityDisplayed(
-              this,
-              entityBoxes,
-              1000,
-              new Design("black", SpriteName.HEAD_CLASSIC, this.graphism),
-              -1,
-            );
+              entitySpeed = 1000;
+              design = new Design("black", SpriteName.HEAD_CLASSIC, this.graphism);
+              zindex = -1;
             break;
         }
-        this.setEntity(entityID, entityObject);
+        //this.updateEntity(entityID, entityType, entityBoxes, entitySpeed, design, zindex);
+        const entityObj = this.createEntity(entityType, entityBoxes, entitySpeed, design, zindex);
+        this.setNewEntity(entityID,entityObj);
       }
     });
   }
@@ -177,13 +163,51 @@ export class DisplayGame {
     }
   }
 
-  /**
-   * @param id identifié de l'entité à ajouter / ou  à modifier
-   * @param entity objet représentant l'entité
-   */
-  protected setEntity(id: string, entity: EntityDisplayed): void {
+  private createEntity(
+    entityType: EntityType,
+    entityBoxes : [number, number][],
+    gameSpeed : number,
+    design : Design,
+    zindex : number,
+  ) : EntityDisplayed {
+    switch (entityType) {
+      case ("SNAKE"):
+        return new SnakeDisplayed(this, entityBoxes, gameSpeed, design, zindex);
+      case ("APPLE"):
+        return new AppleDisplayed(this, entityBoxes, gameSpeed, design, zindex);
+      default:
+        return new EntityDisplayed(this, entityBoxes, gameSpeed, design, zindex);
+    }
+  }
+
+  private updateEntity(
+    id: string,
+    entityType: EntityType,
+    entityBoxes : [number, number][],
+    gameSpeed : number,
+    design : Design,
+    zindex : number,
+  ) {
     const oldEntity = this.entities.get(id) as EntityDisplayed;
-    if (oldEntity) {
+    if (oldEntity){
+      oldEntity.setDesign(design);
+      oldEntity.setBoxes(entityBoxes);
+      oldEntity.setSpeed(gameSpeed);
+      oldEntity.setZindex(zindex);
+      oldEntity.setAnimationTime(0);
+      oldEntity.setFullAnimation(true);
+      this.removeFromZindex(id);
+      this.insertInZindex(id, zindex);
+      return;
+    }
+    const entity = this.createEntity(entityType, entityBoxes, gameSpeed, design, zindex);
+    this.setNewEntity(id,entity);
+    return;
+  }
+
+  protected setNewEntity(id: string, entity: EntityDisplayed): void {
+    const oldEntity = this.entities.get(id) as EntityDisplayed;
+    if (oldEntity){
       oldEntity.clear();
       this.removeFromZindex(id);
     }
@@ -233,11 +257,10 @@ export class DisplayGame {
    */
   public show(): void {
     const canvas = this.getCanvas();
-
     if (canvas) {
       this.getCtx().clearRect(0, 0, canvas.width, canvas.height)
       for (const id of this.zindex) {
-        const entity = this.entities.get(id)
+        const entity = this.entities.get(id);
         entity?.setFullAnimation(true)
         entity?.animate(Date.now())
       }
@@ -281,7 +304,7 @@ export class DisplayGame {
    * La boucle de jeu
    */
   private loop() {
-    if (this.graphism === "NORMAL"){
+    if (this.graphism === "NORMAL" || this.graphism === "MULTI"){
       this.show();
     }
     else{
@@ -297,7 +320,7 @@ export class DisplayGame {
     const DEFAULT_COLOR = "lightblue";
     const DEFAULT_HEAD: SpriteName = "HEAD_CLASSIC";
 
-    const [design, useless] = entity.design ?? [];
+    const design  = entity.design ?? "";
     try{
       
       if (design){
@@ -306,7 +329,7 @@ export class DisplayGame {
           designObject.color1,
           designObject.head,
           //designObject.graphism,
-          this.graphism
+          (this.graphism==="MULTI") ? designObject.graphism : this.graphism,
         );
         if (designObject.color2){
           result.setColor2(designObject.color2);

@@ -51,6 +51,36 @@ export class EntityDisplayed{
         this.design = design;
     }
 
+    public setBoxes(boxes: [number, number][]) {
+    // Effacer uniquement les cases qui ne sont plus présentes
+    // const oldSet = new Set(this.boxes.map(b => `${b[0]},${b[1]}`));
+    // const newSet = new Set(boxes.map(b => `${b[0]},${b[1]}`));
+
+    
+    // for (const pos of oldSet) {
+    //     if (!newSet.has(pos)) {
+    //         const box = pos.split(',').map(Number) as [number, number];
+    //         this.display.clearBox(box);
+    //     }
+    // }
+
+    this.clear();
+    this.boxes = boxes;
+}
+
+
+    public setSpeed(speed : number){
+        this.speedAnimation = speed;
+    }
+
+    public setAnimationTime(animationTime: number){
+        this.animationTime = animationTime;
+    }
+    
+    public setZindex(zindex: number){
+        this.zindex = zindex;
+    }
+
     // ============================ Get ============================ \\
 
     public getZindex(): number {
@@ -114,6 +144,7 @@ export class EntityDisplayed{
                 break;
         
             default:
+                this.drawNormalGraphism();
                 break;
         }
 
@@ -124,7 +155,9 @@ export class EntityDisplayed{
         const boxSize = this.display.getBoxSize();
         ctx.fillStyle = this.design.getColor1() as string;
         const boxChange = this.getboxChange();
+        if (boxChange.length > 0) console.log(boxChange);
         boxChange.forEach(box => {
+            console.log(ctx.strokeStyle);
             ctx.fillRect(
                 Math.ceil(box[0]*boxSize[0]),
                 Math.ceil(box[1]*boxSize[1]),

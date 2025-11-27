@@ -107,6 +107,7 @@ export class GameScheduler {
 
   private startGameSessionTimer() {
     this.timeLeft -= 1;
+    this.game.setGameSessionDuration(this.timeLeft);
     if (this.timeLeft <= 0) {
       this.stopGameSession();
     }

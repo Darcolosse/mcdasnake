@@ -74,6 +74,7 @@ export class GameManager {
 		switch (eventDTO.type) {
 			case DTOType.AddPlayer:
         this.buffers.CONNECTION_BUFFER.push(event);
+        console.log('Game state :', this.game.getState());
 				this.networkManager.emit(id, this.game.getState());
         logger.debug('Pushed event in connection buffer');
 				break;

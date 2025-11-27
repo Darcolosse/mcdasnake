@@ -26,7 +26,7 @@ export class InterfaceManager {
   }
 
   public permitToRespawn(dto: GameDeadPlayerResponseDTO) {
-    this.lastDeathMessageRef.value = dto.reason
+    this.lastDeathMessageRef.value = dto.deathMessage
     this.respawnAuthorization.value = true
   }
 

@@ -13,8 +13,10 @@ export class ScoreBoard {
         this.createGameSessionScoreboard(sessionId);
     }
 
-
     public createScore(playerId: string, playerName: string, sessionId: string, score: number = 0, kills: number = 0, apples: number = 0): void {
+        if (this.scores.has(playerId)) {
+            return;
+        }
         const currentScore = this.scores.get(playerId) || [0, 0, 0, 0];
         this.scores.set(playerId, [playerName, currentScore[1] + score, currentScore[2] + kills, currentScore[3] + apples]);
         this.addSnakeScoreBoard(playerId, playerName, sessionId, score, kills, apples);
