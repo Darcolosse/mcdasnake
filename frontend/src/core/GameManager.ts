@@ -21,6 +21,8 @@ export class GameManager {
   private readonly interfaceManager: InterfaceManager
   private readonly soundManager: SoundManager
 
+  private timeBetweenGames?: number
+
   constructor (interfaceManager: InterfaceManager) {
     this.displayManager = new DisplayManager(this)
     this.eventManager = new EventManager(this)
@@ -48,23 +50,23 @@ export class GameManager {
     }
   }
 
+  public suspend() {
+    this.eventManager.stopListening()
+    this.interfaceManager.onEndGame()
+    if(this.timeBetweenGames) setTimeout(this.resume.bind(this), this.timeBetweenGames)
+  }
+
+  private resume() {
+    this.interfaceManager.onGameRestart()
+    this.askServerForRespawn()
+  }
+
   public async close() {
     this.log(this, "Closing")
     this.eventManager.stopListening()
     this.displayManager.destroy()
     await this.networkManager.disconnect()
     this.log(this, "Close complete")
-  }
-
-  public askServerForRespawn() {
-    const setting = getCookiePlus(CookieType.Design) as string
-    const design = SettingsAction.getStringDesign(setting);
-    this.handleClientEvent(new GameAddPlayerDTO(
-      getCookie(CookieType.Username) as string,
-      design
-    ))
-    this.eventManager.startListening()
-    this.interfaceManager.restrictRespawn()
   }
   
   // ===================== Management layer ====================== \\
@@ -98,7 +100,9 @@ export class GameManager {
         this.soundManager.onScenario(eventDTO as GameRefreshDTO)
         break;
       case DTOType.GameUpdate :
+        this.timeBetweenGames = (eventDTO as GameUpdateResponseDTO).timeBetweenGames
         this.interfaceManager.setEntireScoreboard(eventDTO as GameUpdateResponseDTO)
+        this.interfaceManager.setTimerEnd(eventDTO as GameUpdateResponseDTO)
         this.displayManager.updateGameLayers(eventDTO as GameUpdateResponseDTO)
         this.displayManager.showGame()
         this.soundManager.play(Sounds.GAME_START)
@@ -108,6 +112,17 @@ export class GameManager {
         break;
     }
     
+  }
+
+  public askServerForRespawn() {
+    const setting = getCookiePlus(CookieType.Design) as string
+    const design = SettingsAction.getStringDesign(setting);
+    this.handleClientEvent(new GameAddPlayerDTO(
+      getCookie(CookieType.Username) as string,
+      design
+    ))
+    this.eventManager.startListening()
+    this.interfaceManager.restrictRespawn()
   }
 
   public log(responsible: object, ...data: any[]){

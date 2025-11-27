@@ -97,7 +97,8 @@ export class Game {
       [this.cols, this.rows], 
       Number(process.env.GAME_SPEED_MS),
       this.getScore(),
-      Date.now() + (this.GetGameSessionDuration() * 1000)
+      Date.now() + (this.GetGameSessionDuration() * 1000),
+      Number(process.env.GAME_RESTART_DELAY_S),
     )
 	}
 

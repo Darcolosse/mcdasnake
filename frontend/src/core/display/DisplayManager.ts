@@ -27,6 +27,8 @@ export class DisplayManager {
     this.displayConnect = new DisplayConnect(this)
     this.displayGame = new DisplayGame(this)
     this.displayGrid = new DisplayGrid(this)
+    window.addEventListener('resize', this.handleResize.bind(this))
+    window.addEventListener('orientationchange', this.handleResize.bind(this))
   }
 
   // ======================== Life Cycle ========================= \\
@@ -36,8 +38,6 @@ export class DisplayManager {
     this.setBackground(background)
     this.setCanvas(canvas)
     this.synchronizeCanvasToCSS()
-    window.addEventListener('resize', this.handleResize.bind(this))
-    window.addEventListener('orientationchange', this.handleResize.bind(this))
   }
 
   public clearBackgroundCanvas(){
@@ -63,8 +63,8 @@ export class DisplayManager {
 
   public destroy() {
     this.gameManager.log(this, "Cleaning")
-    this.background = this.bgCtx = this.canvas = this.ctx = null
     this.displayGame.stopLoop()
+    this.background = this.bgCtx = this.canvas = this.ctx = null
   }
 
   // =========================== Show ============================ \\
@@ -134,7 +134,6 @@ export class DisplayManager {
   
   private synchronizeCanvasToCSS() {
     if(!this.background || !this.bgCtx || !this.canvas || !this.ctx) {
-      this.gameManager.raiseError("Tried synchronize canvas' scale to css realtime scale on a non initialized canvas.")
       return
     }
     this.gameManager.log(this, "Synchronizing canvas to CSS realtime pixels")
