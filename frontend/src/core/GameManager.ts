@@ -58,7 +58,6 @@ export class GameManager {
 
   public askServerForRespawn() {
     const setting = getCookiePlus(CookieType.Design) as string
-    console.log("cookieplus", setting)
     const design = SettingsAction.getStringDesign(setting);
     this.handleClientEvent(new GameAddPlayerDTO(
       getCookie(CookieType.Username) as string,

@@ -8,11 +8,13 @@ export class GameUpdateResponseDTO implements DTO {
   public gridSize: [number, number];
   public entities: EntitiesUpdate;
   public scoreBoard: Array<[string, number, number, number]>;
+  public dateEndGame: Date;
 
   constructor(json: any) {
     this.speed = json.speed as number;
     this.gridSize = json.gridSize as [number, number];
     this.entities = EntitiesUpdateLoader(json.entities);
     this.scoreBoard = json.scoreBoard;
+    this.dateEndGame = new Date(json.dateEndGame)
   }
 }
