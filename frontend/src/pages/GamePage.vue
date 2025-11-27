@@ -9,7 +9,7 @@ import { InterfaceManager } from '../core/interface/InterfaceManager'
 const gameRef = ref<HTMLCanvasElement | null>(null)
 const bgRef = ref<HTMLCanvasElement | null>(null)
 const respawnAuthorisation = ref(false)
-const gameRunningRef = ref(true)
+const gameRunningRef = ref(false)
 const lastDeathMessageRef = ref('')
 const timerRef = ref('')
 const refScoreBoard = ref<Array<[string, number, number, number]> | null>(null)
@@ -30,7 +30,7 @@ function onKeyDown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
-  interfaceManager = new InterfaceManager(respawnAuthorisation, lastDeathMessageRef, refScoreBoard, timerRef)
+  interfaceManager = new InterfaceManager(respawnAuthorisation, lastDeathMessageRef, refScoreBoard, timerRef, gameRunningRef)
   gameManager = new GameManager(interfaceManager)
   interfaceManager.setGameManager(gameManager)
 

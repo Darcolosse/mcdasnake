@@ -11,16 +11,19 @@ export class InterfaceManager {
   private lastDeathMessageRef: Ref<string>
   private timerRef: Ref<string>
   private targetDate: Date
+  private gameRunningRef: Ref<Boolean> 
 
-  constructor(respawnAuthorization: Ref<Boolean>, lastDeathMessageRef: Ref<string> , scoreBoard: Ref<Array<[string, number, number, number]> | null>, timerRef: Ref<string>)  {
+  constructor(respawnAuthorization: Ref<Boolean>, lastDeathMessageRef: Ref<string> , scoreBoard: Ref<Array<[string, number, number, number]> | null>, timerRef: Ref<string>, gameRunningRef: Ref<Boolean>)  {
     this.respawnAuthorization = respawnAuthorization
     this.lastDeathMessageRef = lastDeathMessageRef
     this.scoreBoard = scoreBoard
     this.targetDate = new Date(Date.now())
     this.timerRef = timerRef
+    this.gameRunningRef = gameRunningRef
 
     // Default
     this.respawnAuthorization.value = false
+    this.gameRunningRef.value = false
     
     setInterval(this.updateTimer.bind(this), 1000)
   }
@@ -63,7 +66,6 @@ export class InterfaceManager {
     const now = Date.now()
 
     if(!this.targetDate || !this.timerRef || this.targetDate.getTime() < now) return
-
 
     const diff = this.targetDate.getTime() - now
   
