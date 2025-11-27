@@ -7,20 +7,20 @@ export class Apple implements Entity {
 	public readonly design: string;
 	public readonly type: EntityType;
 
-	public cases: [number, number][];
+	public positions: [number, number][];
 	public deathState: GameDeadPlayerDTO | null;
 
-	constructor(id: string, cases: [number, number][]) {
+	constructor(id: string, positions: [number, number][]) {
 		this.id = id;
 		this.design = "";
 		this.type = EntityType.APPLE;
 
-		this.cases = cases;
+		this.positions = positions;
 		this.deathState = null;
 	}
 
 	public getHead(): [number, number] {
-		return this.cases[0];
+		return this.positions[0];
 	}
 
 	public getBody(): [number, number][] {

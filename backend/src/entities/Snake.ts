@@ -1,7 +1,14 @@
 import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
-import { Direction } from "@entities/Direction";
 import { Entity, EntityType } from "@entities/Entity"
 import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshResponseDTO";
+
+export type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+export const Direction = {
+    UP: 'UP',
+    DOWN: 'DOWN',
+    LEFT: 'LEFT',
+    RIGHT: 'RIGHT'
+} as const;
 
 export class Snake implements Entity {
 	public readonly id: string;
@@ -9,20 +16,20 @@ export class Snake implements Entity {
 	public readonly design: string;
 	public readonly type: EntityType;
 
-	public cases: [number, number][];
+	public positions: [number, number][];
 	public deathState: GameDeadPlayerDTO | null;
 
 	public direction: Direction;
 	public newDirection: Array<Direction>;
 	public maxBufferDirection: number;
 
-	constructor(id: string, name: string, cases: [number, number][], direction: Direction, design: string = "LIME") {
+	constructor(id: string, name: string, positions: [number, number][], direction: Direction, design: string = "LIME") {
 		this.id = id;
 		this.name = name;
 		this.design = design;
 		this.type = EntityType.SNAKE;
 
-		this.cases = cases;
+		this.positions = positions;
 		this.deathState = null;
 
 		this.direction = direction;
@@ -42,20 +49,20 @@ export class Snake implements Entity {
 		let head = this.getHead();
 		switch (this.direction) {
 			case Direction.UP:
-				this.cases.push([head[0], head[1] - 1]);
+				this.positions.push([head[0], head[1] - 1]);
 				break;
 			case Direction.DOWN:
-				this.cases.push([head[0], head[1] + 1]);
+				this.positions.push([head[0], head[1] + 1]);
 				break;
 			case Direction.RIGHT:
-				this.cases.push([head[0] + 1, head[1]]);
+				this.positions.push([head[0] + 1, head[1]]);
 				break;
 			case Direction.LEFT:
-				this.cases.push([head[0] - 1, head[1]]);
+				this.positions.push([head[0] - 1, head[1]]);
 				break;
 			default:
 				for (let i = 0; i < 10; i++) {
-					this.cases.push([head[0] + i, head[1]]);
+					this.positions.push([head[0] + i, head[1]]);
 				}
 				break;
 		}
@@ -72,7 +79,7 @@ export class Snake implements Entity {
 		}
 
 		if (!headOnSomething) {
-			this.cases.shift(); // Delete tail
+			this.positions.shift(); // Delete tail
 		} else {
 			shouldRefresh = true;
 		}
@@ -92,11 +99,11 @@ export class Snake implements Entity {
 	}
 
 	public getHead(): [number, number] {
-		return this.cases[this.cases.length - 1];
+		return this.positions[this.positions.length - 1];
 	}
 
 	public getBody(): [number, number][] {
-		return this.cases.slice(0, this.cases.length - 1);
+		return this.positions.slice(0, this.positions.length - 1);
 	}
 
 	private checkIncorrectTurn(newDirection: Direction): boolean {

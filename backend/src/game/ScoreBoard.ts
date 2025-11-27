@@ -13,8 +13,8 @@ export class ScoreBoard {
         this.createGameSessionScoreboard(sessionId);
     }
 
-    public createScore(playerId: string, playerName: string, sessionId: string, score: number = 0, kills: number = 0, apples: number = 0): void {
-        if (this.scores.has(playerId)) {
+    public async createScore(playerId: string, playerName: string, sessionId: string, score: number = 0, kills: number = 0, apples: number = 0): Promise<void> {
+        if (await this.getSnakeScoreBoard(playerId)) {
             return;
         }
         const currentScore = this.scores.get(playerId) || [0, 0, 0, 0];
@@ -39,6 +39,12 @@ export class ScoreBoard {
 
     public getScore(playerId: string): [string, number, number, number] | undefined {
         return this.scores.get(playerId);
+    }
+
+    private async getSnakeScoreBoard(playerId: string) {
+        return await this.db.scoreBoard.findUnique({
+            where: { id: playerId }
+        });
     }
 
     private async addSnakeScoreBoard(playerId: string, playerName: string, gameSessionId: string, score: number = 0, kills: number = 0, apples: number = 0) {
