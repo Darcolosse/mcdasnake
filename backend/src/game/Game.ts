@@ -1,7 +1,6 @@
-import { Entity } from "@entities/Entity";
-import { Snake } from "@entities/Snake";
+import { Entity, EntityType } from "@entities/Entity";
+import { Snake, Direction } from "@entities/Snake";
 import { Apple } from "@entities/Apple";
-import { Direction } from "@entities/Direction";
 import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshResponseDTO";
 import { GameManager } from "@game/GameManager";
 import { GameUpdateResponseDTO } from "@network/dto/responses/GameUpdateResponseDTO";
@@ -62,7 +61,7 @@ export class Game {
       process.env.SNAKE_SPAWNING_DIRECTION as Direction,
       design
     )
-    logger.info("Spawing a snake on " + newSnake.cases + " for player " + name);
+    logger.info("Spawing a snake on " + newSnake.positions + " for player " + name);
     logger.info("Creating an empty score in the scoreboard for the player '" + name + "'...");
 		this.snakes.set(snakeId, newSnake);
 
@@ -97,7 +96,8 @@ export class Game {
       [this.cols, this.rows], 
       Number(process.env.GAME_SPEED_MS),
       this.getScore(),
-      Date.now() + (this.GetGameSessionDuration() * 1000)
+      Date.now() + (this.GetGameSessionDuration() * 1000),
+      Number(process.env.GAME_RESTART_DELAY_S),
     )
 	}
 
@@ -151,14 +151,14 @@ export class Game {
     // # Shortcuts #
     const handlingDeath = (snake: Snake, otherSnake: Snake|undefined, reason: string, deathMessage: string="") => {
       if(!snake.deathState) {
-        let type = "snake";
-        if (reason === Death.BORDER) {type = "border";}
-        snake.deathState = new GameDeadPlayerDTO(snake.id, type, otherSnake?.id ??  "", "snake", reason, deathMessage);
+        let type: EntityType = EntityType.SNAKE;
+        if (reason === Death.BORDER) {type = EntityType.BORDER;}
+        snake.deathState = new GameDeadPlayerDTO(snake.id, snake.type, otherSnake?.id ??  "", type, reason, deathMessage);
         logger.debug("Updating database score of snake " + snake.name);
       }
     }
     const handlingEating = (snake: Snake, eaten: Entity) => {
-      gameRefresh.entities.removed.push(new GameDeadPlayerDTO(eaten.id, "apple", snake.id, "snake", Death.APPLE_COLLISION, `${snake.name} ate an apple!`));
+      gameRefresh.entities.removed.push(new GameDeadPlayerDTO(eaten.id, eaten.type, snake.id, snake.type, Death.APPLE_COLLISION, `${snake.name} ate an apple!`));
       this.removeApple(eaten.id);
 
       logger.debug("Updating database score of snake " + snake.name);
@@ -193,13 +193,13 @@ export class Game {
 
             if (entityCollided instanceof Apple) {
               const eaten_apple = entityCollided as Apple;
-              logger.info(snake.name + " ate an apple. Current length of " + snake.cases.length);
+              logger.info(snake.name + " ate an apple. Current length of " + snake.positions.length);
               handlingEating(snake, eaten_apple);
             } 
 
             if (entityCollided instanceof Snake) {
               const collided_snake = entityCollided as Snake;
-              logger.info(snake.name + " died colliding on " + collided_snake.name + "'s body. Last registered length of " + snake.cases.length);
+              logger.info(snake.name + " died colliding on " + collided_snake.name + "'s body. Last registered length of " + snake.positions.length);
               
               if (snake.id === collided_snake.id) {
                 handlingDeath(snake, undefined, Death.SELF_COLLISION, `You collided with yourself!`);
@@ -271,7 +271,7 @@ export class Game {
   private buildMap(includeApples: boolean, includeSnakes: boolean) : Map<string, Entity> {
     const map = new Map<string, Entity>();
     if(includeApples) this.apples.forEach(apple => map.set(this.createCollideKey(apple.getHead()), apple));
-    if(includeSnakes) this.snakes.forEach(snake => snake.cases.forEach(_case => map.set(this.createCollideKey(_case), snake)))
+    if(includeSnakes) this.snakes.forEach(snake => snake.positions.forEach(_case => map.set(this.createCollideKey(_case), snake)))
     return map
   }
 
@@ -316,7 +316,7 @@ export class Game {
 	private addApple(id: string): Apple {
     logger.debug("Adding a new apple in game");
     const newApple = new Apple(id, this.generateRandomSpawn(1));
-    logger.info("Spawing an apple on " + newApple.cases[0]);
+    logger.info("Spawing an apple on " + newApple.positions[0]);
 		this.apples.set(id, newApple);
     return newApple;
 	}

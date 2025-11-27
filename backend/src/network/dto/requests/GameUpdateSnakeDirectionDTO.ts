@@ -1,5 +1,5 @@
-import { Direction } from "@entities/Direction";
 import { DTOType, type DTO } from "@network/dto/DTO";
+import { Direction } from "@entities/Snake";
 
 export class GameUpdateSnakeDirectionDTO implements DTO {
   type = DTOType.SnakeTurn;

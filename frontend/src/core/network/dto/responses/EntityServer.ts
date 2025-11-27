@@ -1,4 +1,4 @@
-import type { GameDeadPlayerResponseDTO } from "./GamePlayerDead";
+import { GameDeadPlayerResponseDTO } from "./GamePlayerDead";
 
 export interface EntityServer {
   id: string;
@@ -22,7 +22,7 @@ export function EntitiesRefreshLoader(entities: any) : EntitiesRefresh{
   return {
     snakes: EntitiesLoader(entities.snakes),
     apples: EntitiesLoader(entities.apples),
-    removed: entities.removed
+    removed: entities.removed.map((json: any) => new GameDeadPlayerResponseDTO(json))
   }
 }
 
@@ -41,5 +41,5 @@ function EntitiesLoader(entities: any) : EntityServer[]{
 }
 
 function EntityLoader(entity: any): EntityServer {
-  return { id: entity.id, boxes: entity.cases, name: entity.name, design: entity.design, } as EntityServer
+  return { id: entity.id, boxes: entity.positions, name: entity.name, design: entity.design, } as EntityServer
 } 

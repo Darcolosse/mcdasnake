@@ -1,8 +1,14 @@
 import type { GameManager } from "../GameManager"
+import type { GameRefreshDTO } from "../network/dto/responses/GameRefresh"
+import type { EntityType } from "../display/DisplayGame"
 
 export const Sounds = {
   APPLE: "apple.mp3",
   GAME_START: "start_game.mp3",
+  GAME_END: "end_game.mp3",
+  DEAD: "dead.mp3",
+  SOMEONE_DIE: "someone_die.mp3",
+  SPAWN: "spawn.mp3",
 }
 
 export type Sounds = typeof Sounds[keyof typeof Sounds]
@@ -12,17 +18,23 @@ export class SoundManager {
 
   private readonly gameManager: GameManager
   private readonly audioInstances : Map<string, HTMLAudioElement>
-  private readonly antiDuplicateSounds : Map<string, number>
+  private roundRobinApple;
+  private applePoolMax;
 
   constructor(gameManager: GameManager) {
     this.gameManager = gameManager
+    this.roundRobinApple = 0
+    this.applePoolMax = 10
 
     this.gameManager.log(this, "Loading sounds")
     this.audioInstances = new Map()
-    this.antiDuplicateSounds = new Map()
     Object.entries(Sounds).forEach(([_ , filename]) => {
       this.audioInstances.set(filename, new Audio(this.SOUND_FOLDER + filename))
-      this.antiDuplicateSounds.set(filename, -performance.timeOrigin)
+      if(filename == Sounds.APPLE) {
+        for(let i=0; i<this.applePoolMax; i++) {
+          this.audioInstances.set(filename + i, new Audio(this.SOUND_FOLDER + filename))
+        }
+      }
     })
   }
 
@@ -49,17 +61,31 @@ export class SoundManager {
   }
 
   public play(sound: Sounds) {
-    const audio = this.audioInstances.get(sound)
-    const lastTimePlayed = this.antiDuplicateSounds.get(sound)
-    if(!audio || !lastTimePlayed) return
+    let audio = this.audioInstances.get(sound);
+    if(sound == Sounds.APPLE) {
+      if(this.roundRobinApple != 0) {
+        audio = this.audioInstances.get(sound + this.roundRobinApple);
+      }
+      this.roundRobinApple = (this.roundRobinApple + 1) % this.applePoolMax
+    }
 
-    const now = performance.now()
-    const tooSoon = (now - lastTimePlayed) < audio.duration * 1000
-    if(tooSoon) return
+    if(!audio) return
 
-    this.antiDuplicateSounds.set(sound, now)
     audio.currentTime = 0
     audio.play()
+  }
+
+  public onScenario(dto: GameRefreshDTO) {
+    dto.entities.removed.forEach(deadDto => {
+      switch(deadDto.typeDeadPlayer as EntityType) {
+        case "SNAKE":
+          this.play(Sounds.SOMEONE_DIE)
+          break;
+        case "APPLE":
+          this.play(Sounds.APPLE)
+          break;
+      }
+    })
   }
 
 }
