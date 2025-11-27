@@ -9,7 +9,9 @@ import { InterfaceManager } from '../core/interface/InterfaceManager'
 const gameRef = ref<HTMLCanvasElement | null>(null)
 const bgRef = ref<HTMLCanvasElement | null>(null)
 const respawnAuthorisation = ref(false)
+const gameRunningRef = ref(false)
 const lastDeathMessageRef = ref('')
+const timerRef = ref('')
 const refScoreBoard = ref<Array<[string, number, number, number]> | null>(null)
 
 let interfaceManager: InterfaceManager
@@ -28,7 +30,7 @@ function onKeyDown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
-  interfaceManager = new InterfaceManager(respawnAuthorisation, lastDeathMessageRef, refScoreBoard)
+  interfaceManager = new InterfaceManager(respawnAuthorisation, lastDeathMessageRef, refScoreBoard, timerRef, gameRunningRef)
   gameManager = new GameManager(interfaceManager)
   interfaceManager.setGameManager(gameManager)
 
@@ -74,7 +76,7 @@ async function goToHome() {
           </h1>
       </div>
       <div 
-        :class="['z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 py-1 px-4 bg-background-inverse-secondary rounded-lg font-semibold text-3xl text-center text-background-inverse-tertiary',
+        :class="['z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 py-1 px-4 bg-background-inverse-secondary rounded-lg font-semibold text-2xl lg:text-3xl text-center text-background-inverse-tertiary',
                  respawnAuthorisation ? 'absolute cursor-pointer' : 'hidden']"
         @click="interfaceManager.askForRespawn"
         >
@@ -84,6 +86,16 @@ async function goToHome() {
         <span class="text-content-brand-secondary"> (r)</span>
         <br />
         <span class="text-lg text-content-brand-tertiary">{{ lastDeathMessageRef }}</span>
+      </div>
+      <div 
+        :class="['z-50 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 py-1 px-4 bg-background-inverse-secondary rounded-lg font-semibold text-2xl text-center text-background-inverse-tertiary',
+                 gameRunningRef ? 'absolute cursor-pointer' : 'hidden']"
+        >
+        <span class="text-content-brand-primary">Game is</span>
+        <span class="text-content-brand-secondary"> restarting </span>
+        <span class="text-content-brand-primary">!</span>
+        <br />
+        <span class="text-xs text-content-brand-tertiary">Reconnection is automatic!</span>
       </div>
       <div class="relative w-full h-full rounded-3xl overflow-hidden">
         <!-- Background canvas -->
@@ -100,6 +112,9 @@ async function goToHome() {
           class="absolute inset-0 w-full h-full block z-30">
         </canvas>
       </div>
+      <div class="absolute -bottom-12 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 font-semibold text-content-brand-secondary grid place-items-center rounded-xl bg-background-inverse-secondary">
+        {{ timerRef }}
+      </div>
     </div>
     <div class="w-full h-full hidden xl:flex flex-col gap-16 font-extrabold text-lg text-background-inverse-tertiary">
       <div class="bg-background-brand-primary w-full h-full rounded-3xl flex flex-col p-1 overflow-y-auto">
@@ -110,7 +125,7 @@ async function goToHome() {
         <div
           v-if="refScoreBoard && refScoreBoard.length > 0"
           v-for="(entry, index) in refScoreBoard"
-          :key="entry[0]"
+          :key="index"
           class="flex flex-row items-center rounded-xl gap-5 p-2"
         >
           <!-- Rank / Index -->
