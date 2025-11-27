@@ -1,12 +1,13 @@
 import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
 import { Direction } from "@entities/Direction";
-import { Entity } from "@entities/Entity"
+import { Entity, EntityType } from "@entities/Entity"
 import { GameRefreshResponseDTO } from "@network/dto/responses/GameRefreshResponseDTO";
 
 export class Snake implements Entity {
 	public readonly id: string;
 	public readonly name: string;
 	public readonly design: string;
+	public readonly type: EntityType;
 
 	public cases: [number, number][];
 	public deathState: GameDeadPlayerDTO | null;
@@ -19,6 +20,7 @@ export class Snake implements Entity {
 		this.id = id;
 		this.name = name;
 		this.design = design;
+		this.type = EntityType.SNAKE;
 
 		this.cases = cases;
 		this.deathState = null;

@@ -6,6 +6,7 @@ import { GameAddPlayerDTO } from "@network/dto/requests/GameAddPlayerDTO";
 import { GameDeadPlayerDTO } from "@/network/dto/responses/GameDeadPlayerDTO";
 import { logger } from "@/app";
 import { Death } from "@/entities/Death";
+import { EntityType } from "@/entities/Entity";
 
 export class GameScheduler {
   private readonly game: Game;
@@ -132,7 +133,7 @@ export class GameScheduler {
 
   private onRemove(id: string, gameRefresh: GameRefreshResponseDTO) {
     this.game.removeSnake(id);
-    gameRefresh.entities.removed.push(new GameDeadPlayerDTO(id, "snake", "", "", Death.DECONNEXION));
+    gameRefresh.entities.removed.push(new GameDeadPlayerDTO(id, EntityType.SNAKE, "", EntityType.NOTDEFINED, Death.DECONNEXION));
   }
 
   public isFinished(): boolean {
