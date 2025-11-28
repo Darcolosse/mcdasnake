@@ -18,7 +18,7 @@ model ScoreBoard {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
-  @@id([userName, gameSessionId])
+  @@id([id, gameSessionId])
 }
 
 model GameSession {
