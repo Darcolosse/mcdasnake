@@ -52,21 +52,17 @@ export class EntityDisplayed{
     }
 
     public setBoxes(boxes: [number, number][]) {
-    // Effacer uniquement les cases qui ne sont plus présentes
-    // const oldSet = new Set(this.boxes.map(b => `${b[0]},${b[1]}`));
-    // const newSet = new Set(boxes.map(b => `${b[0]},${b[1]}`));
-
-    
-    // for (const pos of oldSet) {
-    //     if (!newSet.has(pos)) {
-    //         const box = pos.split(',').map(Number) as [number, number];
-    //         this.display.clearBox(box);
-    //     }
-    // }
-
-    this.clear();
-    this.boxes = boxes;
-}
+        // Effacer uniquement les cases qui ne sont plus présentes
+        const oldSet = new Set(this.boxes.map(b => `${b[0]},${b[1]}`));
+        const newSet = new Set(boxes.map(b => `${b[0]},${b[1]}`));
+        for (const pos of oldSet) {
+            if (!newSet.has(pos)) {
+                const box = pos.split(',').map(Number) as [number, number];
+                this.display.clearBox(box);
+            }
+        }
+        this.boxes = boxes;
+    }
 
 
     public setSpeed(speed : number){
@@ -114,13 +110,10 @@ export class EntityDisplayed{
     }
 
     /**
-     * Fait disparaitre les cases de l'entité qui ont changé.
+     * Fait disparaitre les cases de l'entité qui ont changé. (par default rien ne change)
      */
     public clearChange(time = this.animationTime as number): void{
         this.updateAnimationTime(time);
-        // this.boxes.forEach(box => {
-        //     this.display.clearBox(box);
-        // });
     }
 
     /**
@@ -155,15 +148,14 @@ export class EntityDisplayed{
         const boxSize = this.display.getBoxSize();
         ctx.fillStyle = this.design.getColor1() as string;
         const boxChange = this.getboxChange();
-        if (boxChange.length > 0) console.log(boxChange);
         boxChange.forEach(box => {
-            console.log(ctx.strokeStyle);
             ctx.fillRect(
-                Math.ceil(box[0]*boxSize[0]),
-                Math.ceil(box[1]*boxSize[1]),
-                Math.ceil(boxSize[0]),
-                Math.ceil(boxSize[1])
-            );
+                    Math.ceil(box[0]*boxSize[0]),
+                    Math.ceil(box[1]*boxSize[1]),
+                    Math.ceil(boxSize[0]),
+                    Math.ceil(boxSize[1])
+                );
+            this.display.removeModifiedBox(box);          
         });
         this.setFullAnimation(false);
     }

@@ -17,7 +17,8 @@ export class DisplayGame {
   private displayManager: DisplayManager;
   protected entities: Map<string, EntityDisplayed> = new Map(); // liste des entités présente dans le jeu
   protected zindex: string[] = [];
-  private modifiedboxes: Set<string> = new Set(); // liste des cases changé lors d'une animation  (ex: "3,6")
+  private modifiedboxesNew: Set<string> = new Set();
+  private modifiedBoxPrevious: Set<string> = new Set();
   private inLoop: boolean = false;
   private spriteManager: SpriteManager;
   private gameSpeed : number = 500;
@@ -70,7 +71,15 @@ export class DisplayGame {
    * @returns si la case à été effacé ou non
    */
   public existeModifiedBox(coordinate: number[]): boolean {
-    return this.modifiedboxes.has(coordinate.join(","));
+    return this.existeModifiedBoxNew(coordinate) || this.existeModifiedBoxPrevious(coordinate);
+  }
+
+  private existeModifiedBoxNew(coordinate: number[]): boolean {
+    return this.modifiedboxesNew.has(coordinate.join(","));
+  }
+
+  private existeModifiedBoxPrevious(coordinate: number[]): boolean {
+    return this.modifiedBoxPrevious.has(coordinate.join(","));
   }
 
   public startLoop() : void{
@@ -138,9 +147,9 @@ export class DisplayGame {
               zindex = -1;
             break;
         }
-        //this.updateEntity(entityID, entityType, entityBoxes, entitySpeed, design, zindex);
-        const entityObj = this.createEntity(entityType, entityBoxes, entitySpeed, design, zindex);
-        this.setNewEntity(entityID,entityObj);
+        this.updateEntity(entityID, entityType, entityBoxes, entitySpeed, design, zindex);
+        // const entityObj = this.createEntity(entityType, entityBoxes, entitySpeed, design, zindex);
+        // this.setNewEntity(entityID,entityObj);
       }
     });
   }
@@ -158,8 +167,6 @@ export class DisplayGame {
       this.removeFromZindex(id)
       oldEntity.clear()
       this.entities.delete(id)
-    } else {
-      console.log("unknow entity " + id);
     }
   }
 
@@ -241,7 +248,7 @@ export class DisplayGame {
    * Efface une case de la grille de jeu
    */
   public clearBox(coordinate: [number, number]): void {
-    if (!this.existeModifiedBox(coordinate)) {
+    if (!this.existeModifiedBoxNew(coordinate)) {
       this.getCtx().clearRect(
         coordinate[0] * this.getBoxSize()[0],
         coordinate[1] * this.getBoxSize()[1],
@@ -250,6 +257,10 @@ export class DisplayGame {
       );
       this.addModifiedbox(coordinate);
     }
+  }
+
+  public removeModifiedBox(coordinate: [number, number]): void {
+    this.modifiedboxesNew.delete(coordinate.join(","));
   }
 
   /**
@@ -271,14 +282,13 @@ export class DisplayGame {
    * Update les partie qui ont changé sur la grille de jeu
    */
   public animate(): void {
-    this.clearModifiedboxes()
+    this.changeModifiedboxes();
     for (const id of this.zindex) {
       this.entities.get(id)?.clearChange(Date.now())
     }
     for (const id of this.zindex) {
       this.entities.get(id)?.animate()
     }
-    this.clearModifiedboxes()
   };
 
   // ============================ Methodes privées de case modifié ============================ \\
@@ -288,14 +298,15 @@ export class DisplayGame {
    * @param coordinate coordonnée de la case effacée
    */
   private addModifiedbox(coordinate: number[]): void {
-    this.modifiedboxes.add(coordinate.join(","));
+    this.modifiedboxesNew.add(coordinate.join(","));
   }
 
   /**
    * reset l'attribut modifiedboxes, pour indiquer qu'ancune case n'a été effacé
    */
-  private clearModifiedboxes(): void {
-    this.modifiedboxes = new Set();
+  private changeModifiedboxes(): void {
+    this.modifiedBoxPrevious = new Set(this.modifiedboxesNew);
+    this.modifiedboxesNew = new Set();
   }
 
   // ============================ other private methodes ============================ \\
@@ -341,7 +352,6 @@ export class DisplayGame {
       }
     }
     catch(e){
-      console.log(e);
     }
     return new Design(DEFAULT_COLOR, DEFAULT_HEAD, this.graphism)
     

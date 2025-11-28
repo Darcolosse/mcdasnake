@@ -176,7 +176,7 @@ export class SettingsAction {
     }
 
     public applyChanges() {
-        setCookie(CookieType.Design, this.stringifyChoice(), 1)
+        setCookie(CookieType.Design, SettingsAction.stringifyChoice(this.choice), 1)
     }
 
     // ============================ STATIC =========================== \\
@@ -187,7 +187,12 @@ export class SettingsAction {
         return JSON.stringify(designObject);
     }
 
-    // ============================ PRIVATE =========================== \\
+    public static getCookie() : string{
+        const choice = SettingsAction.getDefaultChoice();
+        return SettingsAction.stringifyChoice(choice);
+    }
+
+    // ============================ PRIVATE STATIC =========================== \\
 
     private static getDefaultChoice() : Record<SettingName, settingChoice>{
         return {
@@ -201,18 +206,10 @@ export class SettingsAction {
         };
     }
 
-    private setAttribut(settingName: SettingName, value : string, newSet : string, enabled : boolean){
-        const choice = this.choice[settingName];
-        choice.value = value;
-        choice.element.value = newSet;
-        choice.enabled = enabled;
-        this.drawPreview();
-    }
-
-    private stringifyChoice(): string {
+    private static stringifyChoice(choice : Record<SettingName, settingChoice>): string {
         const clean: Record<string, { value: string; enabled: boolean; element: string }> = {};
-        for (const key in this.choice) {
-            const c = this.choice[key as SettingName];
+        for (const key in choice) {
+            const c = choice[key as SettingName];
             clean[key] = {
                 value: c.value,
                 enabled: c.enabled,
@@ -242,9 +239,6 @@ export class SettingsAction {
         }
     }
 
-
-
-
     private static createDesignCookieObject(settingChoice: Record<SettingName, settingChoice>) : object {
         const obj: Record<string, string> = {};
         if (settingChoice[SettingName.GRAPHISM].enabled) {
@@ -265,7 +259,7 @@ export class SettingsAction {
         return obj;
     }
 
-
+    // ============================ PRIVATE =========================== \\
 
     private updateDesign(){
             this.design.setGraphism(
@@ -293,6 +287,13 @@ export class SettingsAction {
             );
     }
 
+    private setAttribut(settingName: SettingName, value : string, newSet : string, enabled : boolean){
+        const choice = this.choice[settingName];
+        choice.value = value;
+        choice.element.value = newSet;
+        choice.enabled = enabled;
+        this.drawPreview();
+    }
 
     private drawPreview() {
         if (this.preview){
