@@ -24,6 +24,7 @@ export class API {
     this.baseRoute();
     this.healthRoute();
     this.scoreboardRoutes();
+    this.topScoresRoute();
     this.userNameScoreboardRoute();
     this.scoreboardByIdRoute();
     logger.debug("API Routes registered");
@@ -46,26 +47,53 @@ export class API {
   }
 
   private scoreboardRoutes() {
-      this.app.get('/scoreboard', async (_req, res) => {
-        logger.debug("Retrieving scoreboard from database");
-        const scoreboard = await this.prisma.scoreBoard.findMany({});
-        res.send(scoreboard);
-        logger.debug("Sending response for general scoreboard request");
+    this.app.get('/scoreboard', async (req, res) => {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+
+      logger.debug("Retrieving scoreboard from database");
+      const scoreboard = await this.prisma.scoreBoard.findMany({
+        take: limit,
+        orderBy: {
+          score: 'desc',
+        },
       });
+      res.send(scoreboard);
+      logger.debug("Sending response for general scoreboard request");
+    });
   }
 
   private userNameScoreboardRoute() {
     this.app.get('/scoreboard/:userName', async (req, res) => {
       const name = req.params.userName;
-      logger.debug("Retrieving username based scoreboard from database");
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+
+      logger.debug(`Retrieving scoreboard for username "${name}" from database`);
       const scoreboard = await this.prisma.scoreBoard.findMany({
-        where:
-        {
+        where: {
           userName: { contains: name }
         },
+        take: limit,
+        orderBy: {
+          score: 'desc',
+        },
       });
+
       res.send(scoreboard);
-      logger.debug("Sending response for username based scoreboard request");
+      logger.debug(`Sending response for username "${name}" based scoreboard request`);
+    });
+  }
+
+  private topScoresRoute() {
+    this.app.get('/scoreboard/top', async (_req, res) => {
+      logger.debug("Retrieving top 10 scores from database");
+      const topScores = await this.prisma.scoreBoard.findMany({
+        take: 10,
+        orderBy: {
+          score: 'desc',
+        },
+      });
+      res.send(topScores);
+      logger.debug("Sending response for top 10 scores request");
     });
   }
 
