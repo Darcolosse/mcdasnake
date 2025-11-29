@@ -4,10 +4,14 @@ import { DisplayManager } from "./display/DisplayManager";
 import { EventManager } from "./event/EventManager";
 import type { InterfaceManager } from "./interface/InterfaceManager";
 import { DTOType, type DTO } from "./network/dto/DTO";
+<<<<<<< Updated upstream
 import { GameAddPlayerDTO } from "./network/dto/requests/GameAddPlayerDTO";
 import type { GameDeadPlayerResponseDTO } from "./network/dto/responses/GamePlayerDead";
 import type { GameRefreshDTO } from "./network/dto/responses/GameRefresh";
 import { GameUpdateResponseDTO } from "./network/dto/responses/GameUpdateResponse";
+=======
+import { GameUpdateRequestDTO } from "./network/dto/requests/GameUpdateRequest";
+>>>>>>> Stashed changes
 import { NetworkManager } from "./network/NetworkManager";
 import { SoundManager, Sounds } from "./sound/SoundManager";
 
@@ -33,6 +37,7 @@ export class GameManager {
 
   // ====================== Vertical layer ======================= \\
 
+<<<<<<< Updated upstream
   public start(background : HTMLCanvasElement | null, canvas : HTMLCanvasElement | null) {
     if(background && canvas) {
       this.log(this, "Initializing canvas and connecting to server")
@@ -45,6 +50,18 @@ export class GameManager {
           this.askServerForRespawn()
         })
       })
+=======
+  public start(canvas : HTMLCanvasElement | null) {
+    if(canvas) {
+      this.displayManager.initialize(canvas as HTMLCanvasElement)
+
+      this.networkManager.connect().then(() => {
+        this.eventManager.startListening()
+        this.networkManager.emit(new GameUpdateRequestDTO())
+      })
+
+      this.displayManager.showConnection()
+>>>>>>> Stashed changes
     } else {
       this.raiseError("Canvas elements not found. Couldn't start the game.")
     }

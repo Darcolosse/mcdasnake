@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { GameManager } from '../GameManager.ts'
 import type { GameRefreshDTO } from '../network/dto/responses/GameRefresh.ts'
 import type { GameUpdateResponseDTO } from '../network/dto/responses/GameUpdateResponse.ts'
@@ -10,6 +11,27 @@ export class DisplayManager {
 
   public readonly gameManager: GameManager
   private readonly gridHelper: GridHelper
+=======
+import { GameManager } from '../GameManager.ts';
+import { EntityDisplayed } from './EntityDisplayed.ts';
+import { Design } from './Design.ts';
+import { SnakeDisplayed } from './SnakeDisplayed.ts';
+import { DisplayConnect } from './DisplayConnect.ts';
+
+export type EntityType = "SNAKE" | "APPLE" | "ENTITY";
+
+// interface utilisé pour les entités données par le serveur
+export interface EntityServer {
+  id: number;
+  boxes: [[number,number]];
+  type: EntityType
+}
+
+export class DisplayManager {
+
+  private gameManager: GameManager;
+  private displayConnect : DisplayConnect;
+>>>>>>> Stashed changes
 
   private readonly displayConnect : DisplayConnect
   private readonly displayGame : DisplayGame
@@ -23,12 +45,17 @@ export class DisplayManager {
 
   constructor(gameManager: GameManager) {
     this.gameManager = gameManager
+<<<<<<< Updated upstream
     this.gridHelper = new GridHelper(this)
     this.displayConnect = new DisplayConnect(this)
     this.displayGame = new DisplayGame(this)
     this.displayGrid = new DisplayGrid(this)
     window.addEventListener('resize', this.handleResize.bind(this))
     window.addEventListener('orientationchange', this.handleResize.bind(this))
+=======
+    this.displayConnect = new DisplayConnect(this)
+    this.loop = this.loop.bind(this); // bind obligatoire
+>>>>>>> Stashed changes
   }
 
   // ======================== Life Cycle ========================= \\
@@ -83,6 +110,12 @@ export class DisplayManager {
     this.displayConnect.show()
   }
 
+  // =========================== Show ============================ \\
+
+  public showConnection() {
+    this.displayConnect.show()
+  }
+
   // ============================ Set ============================ \\
 
   public setBackground(background: HTMLCanvasElement): void {
@@ -106,9 +139,32 @@ export class DisplayManager {
     return this.canvas as HTMLCanvasElement
   }
 
+<<<<<<< Updated upstream
   public getCtx(): CanvasRenderingContext2D {
     this.raiseErrorOnCond(!this.ctx, "Tried getting the background context without it being initialized first.")
     return this.ctx as CanvasRenderingContext2D
+=======
+  /**
+   * @returns renvoie le canvas pour avoir des mesures
+   */
+  public getCanvas(): HTMLCanvasElement | undefined {
+    if (!this.canvas) {
+      this.gameManager.raiseError("Tried getting a canvas from DisplayManager without the canvas initialized.");
+      return undefined
+    }
+    return this.canvas
+  }
+
+  /**
+   * @returns renvoie le pinceau permettant d'afficher des éléments sur la grille
+   */
+  public getCtx(): CanvasRenderingContext2D {
+    if (!this.ctx) {
+      this.gameManager.raiseError("ContsetEntitiesexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.");
+      throw new Error("ContsetEntitiesexte 2D non initialisé. Assurez-vous d'appeler setCanvas avant.");
+    }
+    return this.ctx
+>>>>>>> Stashed changes
   }
 
   public getBackground(): HTMLCanvasElement {
