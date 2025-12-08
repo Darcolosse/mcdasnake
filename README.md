@@ -23,6 +23,16 @@ This project is a multiplayer Snake game implemented with Node.js, Express and P
 
 ## How to run ?
 
+### Run all
+You just need to have docker-compose
+```bash
+docker compose up --build 
+```
+In detatch mode 
+```bash
+docker compose up --build -d 
+```
+
 #### Backend (Node)
 1. Open a terminal and navigate to the backend folder:
 ```bash
@@ -46,7 +56,7 @@ docker build \
     --build-arg API_IP=0.0.0.0 \
     --build-arg BACKEND_PORT=5001 \
     --build-arg API_PORT=5002 \
-    -t mcdasnake .
+    -t mcdasnake_backend .
 ```
 2. Run a container with persistent volumes for the database and logs:
 ```bash
@@ -54,7 +64,42 @@ docker run -d \
     -p 5001:5001 -p 5002:5002 \
     -v mcdasnake_database:/app/prisma \
     -v mcdasnake_logs:/app/logs \
-    mcdasnake
+    mcdasnake_backend
+```
+
+
+#### Frontend (Node)
+1. Open a terminal and navigate to the backend folder:
+```bash
+cd ./frontend
+```
+2. Install dependencies, create database and compile typscript:
+```bash
+npm run prestart
+```
+3. Start the backend server:
+```bash
+npm run start
+```
+
+
+#### Frontend (Docker)
+1. Build the Docker image. Adjust build args and ports as needed:
+```bash
+docker build \
+    --build-arg VITE_FRONTEND_IP=0.0.0.0 \
+    --build-arg VITE_BACKEND_IP=localhost \
+    --build-arg VITE_FRONTEND_PORT=5000 \
+    --build-arg VITE_BACKEND_PORT=5001 \
+    -t mcdasnake_frontend .
+```
+
+2. Run a container with persistent volumes for the database and logs:
+```bash
+docker run -d \
+    -p 5000:5000 \
+    -v mcdasnake_logs:/app/logs \
+    mcdasnake_frontend
 ```
 
 

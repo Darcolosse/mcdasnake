@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "prestart": "npm install && tsc && vue-tsc -b && vite build",
+    "start": "vite preview",
+    "dev": "vite"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",

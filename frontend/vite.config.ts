@@ -11,4 +11,8 @@ export default defineConfig({
     host: process.env.VITE_FRONTEND_IP,
     port: Number(process.env.VITE_FRONTEND_PORT),
   },
+  preview: {
+    host: process.env.VITE_FRONTEND_IP,
+    port: Number(process.env.VITE_FRONTEND_PORT),
+  },
 })

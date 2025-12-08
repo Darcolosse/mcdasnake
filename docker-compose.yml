@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
+      - "${API_PORT}:${API_PORT}"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/prisma:/app/prisma
+      - ./backend/logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "${VITE_FRONTEND_PORT}:${VITE_FRONTEND_PORT}"
+    env_file:
+      - ./frontend/.env
+    environment:
+      - VITE_BACKEND_IP=${VITE_BACKEND_IP}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

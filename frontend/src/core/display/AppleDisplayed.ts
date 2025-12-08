@@ -45,12 +45,12 @@ export class AppleDisplayed extends EntityDisplayed{
             ];
     }
 
-    private getCornerPoint(box : [number, number]) : [number, number]{
-        const boxSize = this.display.getBoxSize();
-        return [
-            box[0] * boxSize[0],
-            box[1] * boxSize[1],
-        ];
-    }
+    //private getCornerPoint(box : [number, number]) : [number, number]{
+    //    const boxSize = this.display.getBoxSize();
+    //    return [
+    //        box[0] * boxSize[0],
+    //        box[1] * boxSize[1],
+    //    ];
+    //}
     
 }
