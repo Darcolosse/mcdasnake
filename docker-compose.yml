@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   backend:
     build:
@@ -9,8 +11,8 @@ services:
     env_file:
       - ./backend/.env
     volumes:
-      - ./backend/prisma:/app/prisma
-      - ./backend/logs:/app/logs
+      - mcdasnake_db:/app/prisma
+      - mcdasnake_logs:/app/logs
     restart: unless-stopped
     networks:
       - app-network
@@ -34,3 +36,7 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  mcdasnake_db:
+  mcdasnake_logs:
