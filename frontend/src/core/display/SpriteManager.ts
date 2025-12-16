@@ -14,7 +14,7 @@ export type SpriteName = typeof SpriteName[keyof typeof SpriteName];
 
 
 export class SpriteManager {
-  private static SPRITE_FOLDER = "/src/core/display/sprite/";
+  private static SPRITE_FOLDER = "sprites/";
 
   private gameManager?: GameManager;
   private sprites: Map<string, HTMLImageElement> = new Map();

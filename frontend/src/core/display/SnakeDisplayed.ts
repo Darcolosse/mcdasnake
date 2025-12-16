@@ -158,6 +158,7 @@ export class SnakeDisplayed extends EntityDisplayed {
           if (pattern){
             ctx.strokeStyle = pattern;
             ctx.fillStyle = pattern;
+            return ctx;
           }
         }
       }

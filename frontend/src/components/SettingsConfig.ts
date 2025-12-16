@@ -23,16 +23,16 @@ export const snakeColors = [
 ];
 
 export const snakeHeads = [
-  { name: 'HEAD_CLASSIC', src: '/src/core/display/sprite/head3.svg' },
-  { name: 'HEAD_BETA', src: '/src/core/display/sprite/head.png' },
-  { name: 'HEAD_HUGOAT', src: '/src/core/display/sprite/head_hugoat.jpg' },
-  { name: 'HEAD_DARCO', src: '/src/core/display/sprite/head_darco.jpg' },
-  { name: 'HEAD_MCDALA', src: '/src/core/display/sprite/head_mcdala.jpg' },
+  { name: 'HEAD_CLASSIC', src: 'sprites/head3.svg' },
+  { name: 'HEAD_BETA', src: 'sprites/head.png' },
+  { name: 'HEAD_HUGOAT', src: 'sprites/head_hugoat.jpg' },
+  { name: 'HEAD_DARCO', src: 'sprites/head_darco.jpg' },
+  { name: 'HEAD_MCDALA', src: 'sprites/head_mcdala.jpg' },
 ]
 
 export const textures = [
-  { name: 'SCALE', src: '/src/core/display/sprite/scale.jpg' },
-  { name: 'SCALE2', src: '/src/core/display/sprite/scale2.jpg' },
+  { name: 'SCALE', src: 'sprites/scale.jpg' },
+  { name: 'SCALE2', src: 'sprites/scale2.jpg' },
 ]
 
 export const graphicsLevels = ["VERY_LOW", "LOW", "NORMAL", "MULTI"];

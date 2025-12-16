@@ -138,7 +138,7 @@ async function goToHome() {
             {{ entry[0] }}
             <div class="flex justify-end gap-4">
               <div class="flex justify-center items-center rounded-xl bg-background-brand-secondary gap-2 py-2 px-4">
-                <img class="h-7" src="../core/display/sprite/apple.png" />
+                <img class="h-7" src="/public/sprites/apple.png" />
                 {{ entry[3] }}
               </div>
               <div class="flex justify-center items-center rounded-xl bg-background-brand-tertiary gap-2 py-2 px-4">
