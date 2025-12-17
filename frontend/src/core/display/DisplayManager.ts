@@ -50,6 +50,12 @@ export class DisplayManager {
     this.clearCanvas(this.canvas, this.ctx)
   }
 
+  public clearGameEntities(){
+    if(this.displayGame) {
+      this.displayGame.clearAll()
+    }
+  }
+
   public refreshGame(dto : GameRefreshDTO) {
     this.gameManager.log(this, "Refreshing game with new information")
     this.displayGame.refresh(dto)

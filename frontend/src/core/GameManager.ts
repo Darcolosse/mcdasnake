@@ -58,6 +58,7 @@ export class GameManager {
 
   private resume() {
     this.interfaceManager.onGameRestart()
+    this.displayManager.clearGameEntities()
     this.askServerForRespawn()
   }
 

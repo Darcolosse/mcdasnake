@@ -1,5 +1,7 @@
 import { GameManager } from "../GameManager"
 import { DTOType, type DTO } from "./dto/DTO"
+import { GamePing } from "./dto/requests/GamePing"
+import { GamePingResponse } from "./dto/responses/GamePingResponse"
 import { GameDeadPlayerResponseDTO } from "./dto/responses/GamePlayerDead"
 import { GameRefreshDTO } from "./dto/responses/GameRefresh"
 import { GameUpdateResponseDTO } from "./dto/responses/GameUpdateResponse"
@@ -10,11 +12,17 @@ export class NetworkManager {
 
   private readonly gameManager: GameManager
   private socket: WebSocket | undefined
+  private lastSentPingTime: number
+  private isLastPingReceived: boolean
+  private pingInterval: number
 
   constructor(gameManager: GameManager, websocketURL: string) {
     this.websocketURL = websocketURL
     this.gameManager = gameManager
     this.socket = undefined
+    this.lastSentPingTime = Date.now()
+    this.pingInterval = 0
+    this.isLastPingReceived = true
   }
 
   // ====================== Vertical layer ======================= \\
@@ -73,6 +81,13 @@ export class NetworkManager {
     this.socket.addEventListener('open', _ => {
       this.gameManager.log(this, "Connection established")
       openHandler()
+      this.pingInterval = setInterval(() => {
+        if(this.isLastPingReceived) {
+          this.lastSentPingTime = Date.now()
+          this.isLastPingReceived = false
+          this.emit(new GamePing())
+        }
+      }, 1000)
     });
 
     // #                                 #
@@ -86,6 +101,13 @@ export class NetworkManager {
           case DTOType.GameDeadPlayer: this.gameManager.handleServerEvent(new GameDeadPlayerResponseDTO(json)); break
           case DTOType.GameRefresh: this.gameManager.handleServerEvent(new GameRefreshDTO(json)); break
           case DTOType.GameUpdate: this.gameManager.handleServerEvent(new GameUpdateResponseDTO(json)); break
+          case DTOType.GamePing:
+            this.isLastPingReceived = true
+            const gamePing = new GamePingResponse(json)
+            this.gameManager.log(this, `Sent: ${this.lastSentPingTime}`);
+            this.gameManager.log(this, `Received: ${gamePing.time}`);
+            this.gameManager.log(this, `RTT: ${gamePing.time - this.lastSentPingTime}ms`);
+            break
           default:
             this.gameManager.log(this, "Handler of event not implemented", event)
         }
@@ -98,7 +120,8 @@ export class NetworkManager {
     // # The server closed connection of client #
     // #                                        #
     this.socket.addEventListener('close', event => {
-      this.gameManager.raiseError("WebSocket connection closed:", event);
+      this.gameManager.raiseError("WebSocket connection closed:", event)
+      clearInterval(this.pingInterval)
     });
 
     // #               #
@@ -106,6 +129,7 @@ export class NetworkManager {
     // #               #
     this.socket.addEventListener('error', error => {
       this.gameManager.raiseError("WebSocket error:", error)
+      clearInterval(this.pingInterval)
     });
   }
 

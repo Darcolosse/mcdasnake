@@ -65,6 +65,12 @@ export class DisplayGame {
 
   // ============================ Methodes publiques ============================ \\
 
+  public clearAll(){
+    this.zindex.forEach(entityId => {
+      this.removeEntity(entityId);
+    });
+  }
+
   /**
    * Vérifie si une case à été effacé pendant l'animation
    * @param coordinate Coordonnée de la case à vérifier
