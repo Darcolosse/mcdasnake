@@ -10,4 +10,5 @@ export const DTOType = {
   GameRefresh: 'GameRefresh',
   GameScoreBoard: 'GameScoreBoard',
   GameDeadPlayer: 'GameDeadPlayer',
+  GamePing: 'GamePing',
 }

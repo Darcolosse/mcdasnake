@@ -5,6 +5,7 @@ import { DTOType, type DTO } from "@network/dto/DTO";
 import { GameUpdateDTO } from "@/network/dto/requests/GameUpdateDTO";
 import { GameAddPlayerDTO } from "@network/dto/requests/GameAddPlayerDTO";
 import { GameUpdateSnakeDirectionDTO } from "@network/dto/requests/GameUpdateSnakeDirectionDTO";
+import { GamePingDTO } from '@network/dto/requests/GamePingDTO';
 
 import { WebSocket } from "ws";
 import { GameRemovePlayerDTO } from "./dto/requests/GameRemovePlayerDTO";
@@ -88,6 +89,10 @@ export class NetworkManager {
 							this.gameManager.handleClientEvent(new GameUpdateSnakeDirectionDTO(json), clientId);
 						});
 						break;
+					case DTOType.GamePing:
+						this.executeOnFound(ws, (clientId: string) => {
+							this.gameManager.handleClientEvent(new GamePingDTO(), clientId);
+						});
 				}
 			} catch (error) {
 				logger.warn("Couldn't read a suspicious or malformed received websocket event", error)

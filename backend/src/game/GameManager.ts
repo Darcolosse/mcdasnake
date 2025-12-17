@@ -5,6 +5,7 @@ import { randomUUID } from "crypto";
 import { GameScheduler } from "@game/GameScheduler";
 import { PrismaClient } from '@prisma/client';
 import { logger } from "@/app";
+import { GamePingResponseDTO } from '@network/dto/responses/GamePingResponseDTO';
 
 
 export interface Event {
@@ -90,6 +91,10 @@ export class GameManager {
         this.buffers.DECONNECTION_BUFFER.push(event);
         logger.debug('Pushed event in deconnection buffer');
 				break;
+      case DTOType.GamePing:
+        this.networkManager.emit(id, new GamePingResponseDTO(Date.now()));
+        logger.debug("Ping response for ", id);
+        break;
 			default:
 				logger.warn("Client " + id + " sent to server a suspicious websocket:", eventDTO.type);
 		}
