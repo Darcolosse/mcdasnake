@@ -102,12 +102,7 @@ export class NetworkManager {
           case DTOType.GameRefresh: this.gameManager.handleServerEvent(new GameRefreshDTO(json)); break
           case DTOType.GameUpdate: this.gameManager.handleServerEvent(new GameUpdateResponseDTO(json)); break
           case DTOType.GamePing:
-            const gamePing = new GamePingResponse(json)
-            const now = Date.now()
-            const fromClientToServer = gamePing.time - this.lastSentPingTime
-            const fromServerToClient = now - gamePing.time
-            const RTT = now - this.lastSentPingTime
-            this.gameManager.log(this, `RTT: ${RTT}ms (C->S ${fromClientToServer}ms, S->C ${fromServerToClient}ms)`);
+            this.gameManager.log(this, `RTT: ${Date.now() - this.lastSentPingTime}ms`);
             this.isLastPingReceived = true
             break
           default:
