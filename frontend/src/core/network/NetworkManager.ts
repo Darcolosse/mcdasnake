@@ -1,7 +1,6 @@
 import { GameManager } from "../GameManager"
 import { DTOType, type DTO } from "./dto/DTO"
 import { GamePing } from "./dto/requests/GamePing"
-import { GamePingResponse } from "./dto/responses/GamePingResponse"
 import { GameDeadPlayerResponseDTO } from "./dto/responses/GamePlayerDead"
 import { GameRefreshDTO } from "./dto/responses/GameRefresh"
 import { GameUpdateResponseDTO } from "./dto/responses/GameUpdateResponse"
