@@ -14,7 +14,7 @@ export class GameScheduler {
 
   private gameLoop!: NodeJS.Timeout;
   private tickCount!: number;
-  private gameTickRateMs: number;
+  private gameTickRateMs!: number;
   private gameSpeedMs: number;
   private gameDuration!: NodeJS.Timeout;
   private timeLeft: number;
@@ -24,8 +24,13 @@ export class GameScheduler {
   constructor(gameManager: GameManager, game: Game) {
     this.gameManager = gameManager;
     this.game = game;
-    this.gameTickRateMs = Number(process.env.GAME_TICKRATE_MS);
     this.gameSpeedMs = Number(process.env.GAME_SPEED_MS);
+    for(const rateTry of [5,3,2,1]) {
+      if(this.gameSpeedMs % rateTry === 0) {
+        this.gameTickRateMs = this.gameSpeedMs / rateTry;
+        break;
+      }
+    }
     this.timeLeft = this.game.GetGameSessionDuration();
     this.restartTimeBeforeRestart = Number(process.env.GAME_RESTART_DELAY_S);
   }
@@ -34,7 +39,7 @@ export class GameScheduler {
 
   public start() {
     this.tickCount = 0;
-    this.gameLoop = setInterval(this.onTick.bind(this), Number(process.env.GAME_TICKRATE_MS));
+    this.gameLoop = setInterval(this.onTick.bind(this), this.gameTickRateMs);
     this.gameDuration = setInterval(this.startGameSessionTimer.bind(this), 1000);
   }
 
