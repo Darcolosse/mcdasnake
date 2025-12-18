@@ -66,9 +66,10 @@ export class DisplayGame {
   // ============================ Methodes publiques ============================ \\
 
   public clearAll(){
-    this.zindex.forEach(entityId => {
-      this.removeEntity(entityId);
-    });
+    while (this.zindex.length > 0){
+      const entityId = this.zindex[0];
+      if (entityId) {this.removeEntity(entityId);}
+    }
   }
 
   /**
